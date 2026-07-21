@@ -183,10 +183,9 @@ input:focus,select:focus{border-color:var(--gold);}
       <div style="min-width:0;">
         <button class="screen-title" id="cust-title" style="font-size:1.45em;padding:0;" onclick="openCustomerMenu()"></button>
         <div id="cust-balance" style="font-weight:700;margin-top:2px;"></div>
+        <button id="cust-olddebt" style="display:none;margin-top:6px;background:var(--rbg);border:1.5px solid var(--red);border-radius:8px;padding:0.5em 0.8em;color:var(--red);font-weight:700;font-size:0.9em;" onclick="openOldDebt()"></button>
       </div>
-      <div class="top-actions">
-        <button class="btn-settled-list" onclick="askBillSettled()">Settled</button>
-      </div>
+
     </div>
     <div class="tabs">
       <button class="tab active" id="tab-add" onclick="setCustTab('add')">Add</button>
@@ -208,6 +207,7 @@ input:focus,select:focus{border-color:var(--gold);}
     </div>
   </div>
   <div class="foot">
+    <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.57em;" onclick="askBillSettled()">Settled</button>
     <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="backFromCustomer()">Back</button>
   </div>
 </div>
@@ -251,7 +251,6 @@ input:focus,select:focus{border-color:var(--gold);}
   </div>
   <div class="body-scroll" id="rep-body"></div>
   <div class="foot">
-    <button class="btn-full" style="background:var(--bg3);border-color:var(--border2);color:var(--text2);margin-bottom:0.57em;" onclick="printReport()">Print / PDF</button>
     <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="goHome()">Back</button>
   </div>
 </div>
@@ -371,6 +370,21 @@ input:focus,select:focus{border-color:var(--gold);}
   </div>
 </div>
 
+<div class="modal-bg" id="m-olddebt">
+  <div class="modal">
+    <div class="modal-title">Old written-off debt</div>
+    <div style="text-align:center;color:var(--text2);" id="od-name"></div>
+    <div style="text-align:center;color:var(--red);font-size:1.45em;font-weight:700;margin:4px 0 6px;" id="od-amount"></div>
+    <div class="hint" style="text-align:center;margin-bottom:1em;">Paying this is recorded as income today. The original loss stays on the day it happened.</div>
+    <div class="btn-row" style="margin-bottom:0.6em;">
+      <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="payOldDebt('cash')">Cash</button>
+      <button class="btn-full" style="background:var(--bbg);border-color:var(--blue);color:var(--blue);" onclick="payOldDebt('card')">Card</button>
+    </div>
+    <button class="btn-full" style="margin-bottom:0.6em;" onclick="openOldDebtSplit()">Part payment / split</button>
+    <button class="btn-modal-cancel" onclick="closeModal('m-olddebt')">Cancel</button>
+  </div>
+</div>
+
 <div class="modal-bg" id="m-known">
   <div class="modal">
     <div class="modal-title">Known name</div>
@@ -423,7 +437,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.02.00';
+var APP_VERSION = '2.03.00';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -541,6 +555,18 @@ function balanceOf(st,id){
   }
   return b;
 }
+/* A write-off zeroes the tab but is not forgotten: if the customer comes back
+   we still know what was lost, and any later payment is booked as income on the
+   day it is actually paid rather than rewriting the original loss. */
+function writtenOffOf(st,id){
+  var w=0;
+  st.transactions.forEach(function(t){
+    if(t.customerId!==id) return;
+    if(t.type==='writeoff') w+=t.amount;
+    else if(t.type==='recovery') w-=t.amount;
+  });
+  return w>0.001?w:0;
+}
 function balClass(b){ return b<-0.001?'debt':(b>0.001?'credit':'zero'); }
 function balText(b){
   if(b<-0.001) return '\u2212'+f(Math.abs(b))+EUR;
@@ -611,7 +637,7 @@ function renderHome(){
   var bd=todayBarDate(), cash=0, card=0;
   st.transactions.forEach(function(t){
     if(txBarDate(t)!==bd) return;
-    if(t.type==='pay'){ if(t.method==='card') card+=t.amount; else cash+=t.amount; }
+    if(t.type==='pay'||t.type==='recovery'){ if(t.method==='card') card+=t.amount; else cash+=t.amount; }
   });
   var owed=0;
   st.customers.forEach(function(c){ var b=balanceOf(st,c.id); if(b<0) owed+=Math.abs(b); });
@@ -784,9 +810,13 @@ function openCustomer(id){
 }
 function backFromCustomer(){ cart={}; if(cameFromTables) openTables(); else goHome(); }
 function renderCustBalance(){
-  var b=balanceOf(getState(),activeCustomerId), el=document.getElementById('cust-balance');
+  var st=getState();
+  var b=balanceOf(st,activeCustomerId), el=document.getElementById('cust-balance');
   el.textContent=balText(b);
   el.style.color = b<-0.001?'var(--red)':(b>0.001?'var(--green)':'var(--text3)');
+  var w=writtenOffOf(st,activeCustomerId), ob=document.getElementById('cust-olddebt');
+  if(w>0){ ob.style.display=''; ob.textContent='Old debt '+f(w)+EUR+' \u2014 tap to collect'; }
+  else ob.style.display='none';
 }
 function setCustTab(t){
   custTab=t;
@@ -925,6 +955,7 @@ function txHTML(t){
   if(t.type==='debt'){ cls='debt'; label='Purchase'; }
   else if(t.type==='writeoff'){ cls='debt'; label='Written off (loss)'; }
   else if(t.type==='credit'){ cls='credit'; label='Credit added'; }
+  else if(t.type==='recovery'){ cls=(t.method==='card')?'card':'pay'; label='Old debt collected ('+(t.method==='card'?'card':'cash')+')'; }
   else if(t.type==='pay'){ cls=(t.method==='card')?'card':'pay'; label=(t.method==='card'?'Card':'Cash')+' payment'; }
   var items = (t.items && t.items.length)
     ? '<div class="tx-items">'+t.items.map(function(i){ return esc(i.name)+' \u00D7'+i.qty+' \u2014 '+f(i.price*i.qty)+EUR; }).join('<br>')+'</div>'
@@ -978,6 +1009,40 @@ function finishSettle(st,c){
   saveState(st);
   if(c.permanent) openTables(); else goHome();
   return {balance:bal};
+}
+
+/* ---------- OLD DEBT ---------- */
+function openOldDebt(){
+  var st=getState(), c=findCustomer(st,activeCustomerId);
+  if(!c) return;
+  var w=writtenOffOf(st,c.id);
+  if(w<=0) return;
+  document.getElementById('od-name').textContent=c.name;
+  document.getElementById('od-amount').textContent=f(w)+EUR;
+  openModal('m-olddebt');
+}
+function recordRecovery(cash,card){
+  var st=getState(), c=findCustomer(st,activeCustomerId);
+  if(!c) return;
+  var base=Date.now();
+  if(cash>0) pushTx(st,{ts:base,customerId:c.id,customerName:c.name,type:'recovery',method:'cash',amount:cash,note:'Old debt collected'});
+  if(card>0) pushTx(st,{ts:base+1,customerId:c.id,customerName:c.name,type:'recovery',method:'card',amount:card,note:'Old debt collected'});
+  if(!saveState(st)) return;
+  renderCustBalance();
+  if(custTab==='hist') renderHistory();
+  toast('Old debt collected','ok');
+}
+function payOldDebt(method){
+  var st=getState(), w=writtenOffOf(st,activeCustomerId);
+  if(w<=0){ closeModal('m-olddebt'); return; }
+  closeModal('m-olddebt');
+  recordRecovery(method==='cash'?w:0, method==='card'?w:0);
+}
+function openOldDebtSplit(){
+  var st=getState(), w=writtenOffOf(st,activeCustomerId);
+  if(w<=0) return;
+  closeModal('m-olddebt');
+  openSplit(w,function(cash,card){ recordRecovery(cash,card); });
 }
 
 /* ---------- SPLIT (shared by settle + walk-in) ---------- */
@@ -1289,7 +1354,7 @@ function setRepTab(t){
 function sumRange(txs){
   var cash=0,card=0,loss=0,tab=0;
   txs.forEach(function(t){
-    if(t.type==='pay'){ if(t.method==='card') card+=t.amount; else cash+=t.amount; }
+    if(t.type==='pay'||t.type==='recovery'){ if(t.method==='card') card+=t.amount; else cash+=t.amount; }
     else if(t.type==='writeoff') loss+=t.amount;
     else if(t.type==='debt') tab+=t.amount;
   });

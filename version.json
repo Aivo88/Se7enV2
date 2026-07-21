@@ -1,5 +1,5 @@
 {
-  "version": "2.02.00",
-  "cache": "se7env2-v10",
-  "notes": "Back button moved to a fixed bar at the bottom of every screen, as in V1."
+  "version": "2.03.00",
+  "cache": "se7env2-v11",
+  "notes": "Settled moved to the bottom bar; written-off debt is remembered and can be collected later as income; Print/PDF removed from History."
 }
