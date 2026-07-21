@@ -1,5 +1,5 @@
 {
-  "version": "2.00.20",
-  "cache": "se7env2-v22",
-  "notes": "Decimal comma is converted to a dot while typing; currency symbol is configurable and a language page is in place."
+  "version": "2.00.21",
+  "cache": "se7env2-v23",
+  "notes": "Bundled Pub logo is the default header; typing your own text or uploading an image replaces it."
 }

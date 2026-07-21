@@ -1,7 +1,7 @@
 // SE7EN V2 service worker
 // Bump CACHE on every release.
-const CACHE = 'se7env2-v22';
-const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
+const CACHE = 'se7env2-v23';
+const ASSETS = ['./', './index.html', './manifest.json', './header-default.png', './icon-192.png', './icon-512.png'];
 
 // cache:'reload' is essential: without it the browser may serve these files
 // from its own HTTP cache (GitHub Pages sets max-age), so a freshly installed

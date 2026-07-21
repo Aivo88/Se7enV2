@@ -502,7 +502,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.00.20';
+var APP_VERSION = '2.00.21';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -694,10 +694,19 @@ function applyAppearance(){
   document.documentElement.style.setProperty('--cols', s.cols);
   renderHeader();
 }
+/* Three states: a picture the owner uploaded, their own text, or the bundled
+   default image. The default is a file in the repo rather than stored data, so
+   it costs nothing in localStorage and never ends up inside a backup. */
 function renderHeader(){
   var s=getState().settings, el=document.getElementById('hdr-slot');
-  if(s.headerImage) el.innerHTML='<img id="hdr-img" src="'+s.headerImage+'" alt="">';
-  else el.innerHTML='<div class="screen-title">'+esc(s.headerText||'Pub')+'</div>';
+  if(s.headerImage){
+    el.innerHTML='<img id="hdr-img" src="'+s.headerImage+'" alt="">';
+  } else if(s.headerText && s.headerText!=='Pub'){
+    el.innerHTML='<div class="screen-title">'+esc(s.headerText)+'</div>';
+  } else {
+    el.innerHTML='<img id="hdr-img" src="header-default.png" alt="Pub" '+
+      'onerror="this.parentNode.innerHTML=\'<div class=&quot;screen-title&quot;>Pub</div>\'">';
+  }
 }
 
 /* ---------- HOME ---------- */
@@ -1850,7 +1859,8 @@ function renderSetPage(){
       '<div class="card-box"><div class="label">Image</div>'+
       '<button class="btn-full" style="margin-bottom:0.5em;" onclick="pickHeaderImage()">Choose image from device</button>'+
       (s.headerImage?'<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);" onclick="clearHeaderImage()">Remove image</button>':'')+
-      '<div class="hint">An image replaces the text. Large photos are scaled down automatically before saving.</div></div>';
+      '<div class="hint">An image replaces the text. Large photos are scaled down automatically before saving. '+
+      'With no image and the text left as Pub, the built-in logo is shown.</div></div>';
   } else if(setPage==='look'){
     title='Appearance';
     h='<div class="card-box"><div class="label">Text size \u2014 '+Math.round(s.fontScale*100)+'%</div>'+
