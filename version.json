@@ -1,5 +1,5 @@
 {
-  "version": "2.00.18",
-  "cache": "se7env2-v20",
-  "notes": "Group name is used exactly as typed; no singular form is guessed from it."
+  "version": "2.00.20",
+  "cache": "se7env2-v22",
+  "notes": "Decimal comma is converted to a dot while typing; currency symbol is configurable and a language page is in place."
 }

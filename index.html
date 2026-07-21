@@ -502,11 +502,12 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.00.18';
+var APP_VERSION = '2.00.20';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
-var EUR = ' \u20AC';
+var EUR = ' \u20AC';   // rewritten from settings on load and on change
+function applyCurrency(st){ EUR=' '+((st.settings && st.settings.currency) || '\u20AC'); }
 var TABLE_DEFS = [
   {id:'__table1__',name:'Table 1'},{id:'__table2__',name:'Table 2'},
   {id:'__table3__',name:'Table 3'},{id:'__table4__',name:'Table 4'},
@@ -517,7 +518,7 @@ var TABLE_DEFS = [
 function blank(){
   return { customers:[], transactions:[], products:[], categories:[UNCAT],
     settings:{dayEnd:2,fontScale:1,cols:3,headerText:'Pub',headerImage:null,
-      tablesLabel:'Tables',tablesHidden:false},
+      tablesLabel:'Tables',tablesHidden:false,currency:'\u20AC',lang:'en'},
     _tablesSeeded:false };
 }
 function getState(){
@@ -537,6 +538,8 @@ function getState(){
       if(typeof s.cols!=='number') s.cols=3;
       if(typeof s.headerText!=='string') s.headerText='Pub';
       if(typeof s.tablesLabel!=='string') s.tablesLabel='Tables';
+      if(typeof s.currency!=='string' || !s.currency) s.currency='\u20AC';
+      if(typeof s.lang!=='string') s.lang='en';
       if(typeof s.tablesHidden!=='boolean') s.tablesHidden=false;
       if(typeof s.headerImage==='undefined') s.headerImage=null;
       return st;
@@ -564,7 +567,21 @@ function storageBytes(){ try{ return (localStorage.getItem(KEY)||'').length*2; }
 function f(n){ return Number(n).toFixed(2); }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function uid(p){ return p+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
-function parseAmt(v){ return parseFloat(String(v).replace(',','.')); }
+function parseAmt(v){
+  return parseFloat(String(v).replace(/\s/g,'').replace(/,/g,'.'));
+}
+/* Decimal comma is the norm on a Finnish or Spanish keyboard, so it is turned
+   into a dot in the field itself rather than silently behind the scenes. */
+function normaliseAmountInput(e){
+  var el=e.target;
+  if(!el || el.tagName!=='INPUT') return;
+  if(el.getAttribute('inputmode')!=='decimal') return;
+  if(el.value.indexOf(',')===-1) return;
+  var pos=el.selectionStart;
+  el.value=el.value.replace(/,/g,'.');
+  try{ el.setSelectionRange(pos,pos); }catch(err){}
+}
+document.addEventListener('input',normaliseAmountInput,true);
 function pad2(n){ return ('0'+n).slice(-2); }
 function show(id){
   var ss=document.querySelectorAll('.screen');
@@ -578,10 +595,14 @@ function toast(m,t){
   e.textContent=m; e.className='toast show '+(t||'');
   clearTimeout(e._t); e._t=setTimeout(function(){ e.className='toast'; },2500);
 }
-function showConfirm(title,body,onOk){
+function showConfirm(title,body,onOk,okLabel,okStyle){
   document.getElementById('cf-title').textContent=title;
   document.getElementById('cf-body').textContent=body;
-  document.getElementById('cf-ok').onclick=function(){ closeModal('m-confirm'); onOk(); };
+  var btn=document.getElementById('cf-ok');
+  btn.textContent=okLabel||'Confirm';
+  btn.setAttribute('style', okStyle ||
+    'background:var(--rbg);border-color:var(--red);color:var(--red);margin-bottom:0.6em;');
+  btn.onclick=function(){ closeModal('m-confirm'); onOk(); };
   openModal('m-confirm');
 }
 function askText(title,val,onOk){
@@ -667,7 +688,8 @@ function ensureTables(){
 
 /* ---------- APPEARANCE / HEADER ---------- */
 function applyAppearance(){
-  var s=getState().settings;
+  var st=getState(), s=st.settings;
+  applyCurrency(st);
   document.body.style.fontSize=(16*s.fontScale)+'px';
   document.documentElement.style.setProperty('--cols', s.cols);
   renderHeader();
@@ -749,11 +771,22 @@ function isPerson(st,id){
   return !(c && c.permanent);
 }
 
-function askNewCustomer(){
-  askText('New customer','',function(name){
+function askNewCustomer(prefill){
+  askText('New customer',prefill||'',function(name){
     var st=getState(), i;
+    /* Two people called Dave on the same night would be impossible to tell
+       apart later, so the name has to be made unique up front. */
     for(i=0;i<st.customers.length;i++){
-      if(st.customers[i].name.toLowerCase()===name.toLowerCase()){ openCustomer(st.customers[i].id); return; }
+      if(st.customers[i].name.toLowerCase()===name.toLowerCase()){
+        var where = st.customers[i].permanent ? ' in '+tablesLabel(st) : ' with an open tab';
+        showConfirm('Name already in use',
+          'There is already a '+st.customers[i].name+where+
+          '. Give this one a name you can tell apart, for example '+name+' B.',
+          function(){ askNewCustomer(name+' '); },
+          'Change name',
+          'background:var(--bg3);border-color:var(--gold);color:var(--gold2);margin-bottom:0.6em;');
+        return;
+      }
     }
     var match=null, known=knownCustomers(st);
     for(i=0;i<known.length;i++){
@@ -1797,6 +1830,7 @@ function renderSettings(){
     menuRow('Header', s.headerImage?'Image':(s.headerText||'Pub'), "openSetPage('header')")+
     menuRow('Appearance','Text size '+Math.round(s.fontScale*100)+'% \u00B7 '+s.cols+' cards per row', "openSetPage('look')")+
     menuRow('Bar day','Ends at '+pad2(s.dayEnd)+':00', "openSetPage('day')")+
+    menuRow('Currency &amp; language', s.currency+' \u00B7 English', "openSetPage('region')")+
     menuRow('Categories &amp; products', st.products.length+' product'+(st.products.length===1?'':'s'), 'openCategories()')+
     menuRow(esc(tablesLabel(st)), getTables(st).length+' entr'+(getTables(st).length===1?'y':'ies')+
       (s.tablesHidden?' \u00B7 hidden':''), 'openTablesManage()')+
@@ -1832,6 +1866,15 @@ function renderSetPage(){
     h='<div class="card-box"><div class="label">Bar day ends at</div>'+
       '<select onchange="setDayEnd(this.value)">'+hours+'</select>'+
       '<div class="hint">Sales before this hour count towards the previous day. Each transaction stores its bar day when created, so changing this only affects new entries \u2014 past reports stay as they were.</div></div>';
+  } else if(setPage==='region'){
+    title='Currency & language';
+    h='<div class="card-box"><div class="label">Currency symbol</div>'+
+      '<div class="field"><input type="text" id="set-currency" value="'+esc(s.currency)+'" placeholder="\u20AC" maxlength="4"></div>'+
+      '<button class="btn-full" onclick="saveCurrency()">Save</button>'+
+      '<div class="hint">Shown after every amount. Anything short works \u2014 \u20AC, $, kr, z\u0142.</div></div>'+
+      '<div class="card-box"><div class="label">Language</div>'+
+      '<select id="set-lang" onchange="saveLang(this.value)"><option value="en" selected>English</option></select>'+
+      '<div class="hint">Only English for now. More languages will appear here.</div></div>';
   } else if(setPage==='cash'){
     title='Cash flow';
     h='<div class="card-box">'+
@@ -1919,6 +1962,17 @@ document.getElementById('hdr-file').addEventListener('change',function(e){
   reader.readAsDataURL(file);
   e.target.value='';
 });
+function saveCurrency(){
+  var v=document.getElementById('set-currency').value.trim()||'\u20AC';
+  var st=getState();
+  st.settings.currency=v;
+  if(saveState(st)){ applyCurrency(st); renderSetPage(); renderSettings(); toast('Currency set to '+v,'ok'); }
+}
+function saveLang(v){
+  var st=getState();
+  st.settings.lang=v;
+  saveState(st);
+}
 function setDayEnd(v){
   var st=getState(); st.settings.dayEnd=parseInt(v,10);
   if(saveState(st)) toast('Bar day ends '+pad2(st.settings.dayEnd)+':00','ok');
