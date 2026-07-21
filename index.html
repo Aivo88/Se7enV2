@@ -375,7 +375,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.0.2';
+var APP_VERSION = '2.0.3';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -905,8 +905,9 @@ function walkinPay(method){
   });
   closeModal('m-wipay');
   if(!saveState(st)) return;
-  cart={}; renderProds('wi-prod-grid'); renderWiCart();
+  cart={};
   toast('Walk-in '+method+' recorded','ok');
+  goHome();
 }
 function openWalkinSplit(){
   var total=cartTotal(), items=cartItems();
@@ -924,8 +925,9 @@ function openWalkinSplit(){
         amount:card,items:first?items:null,note:'Walk-in split'});
     }
     if(!saveState(st)) return;
-    cart={}; renderProds('wi-prod-grid'); renderWiCart();
+    cart={};
     toast('Walk-in split recorded','ok');
+    goHome();
   });
 }
 

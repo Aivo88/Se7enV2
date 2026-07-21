@@ -1,7 +1,7 @@
 // SE7EN V2 service worker
 // Bump CACHE on every release. The new SW builds its cache during install()
 // BEFORE old caches are deleted, so the app is never left without one.
-const CACHE = 'se7env2-v4';
+const CACHE = 'se7env2-v5';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
