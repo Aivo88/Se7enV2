@@ -498,10 +498,11 @@ input:focus,select:focus{border-color:var(--gold);}
 <div class="toast" id="toast"></div>
 <div id="printarea"></div>
 <input type="file" id="hdr-file" accept="image/*" style="display:none;">
+<input type="file" id="restore-file" accept=".json,application/json" style="display:none;">
 
 <script>
 "use strict";
-var APP_VERSION = '2.00.14';
+var APP_VERSION = '2.00.16';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -1807,13 +1808,39 @@ function renderSetPage(){
       '<button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="checkUpdate()">Check for updates</button>'+
       '<div id="upd-status" class="hint" style="text-align:center;"></div></div>';
   } else {
-    title='Data';
+    title='Backup & reset';
     var kb=Math.round(storageBytes()/1024);
     var pct=Math.min(100,Math.round(storageBytes()/(5*1024*1024)*100));
-    h='<div class="card-box"><div class="label">'+kb+' kB used ('+pct+'% of ~5 MB)</div>'+
-      '<button class="btn-full" style="margin-bottom:0.5em;" onclick="exportData()">Export backup (JSON)</button>'+
-      '<button class="btn-full" style="margin-bottom:0.5em;" onclick="purgeOld()">Delete transactions older than 12 months</button>'+
-      '<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);" onclick="wipeData()">Erase all data</button></div>';
+    var now=new Date(), minYear=now.getFullYear()-1;
+    if(st.transactions.length){
+      st.transactions.forEach(function(t){
+        var y=new Date(t.ts).getFullYear();
+        if(y<minYear) minYear=y;
+      });
+    }
+    var mOpts='';
+    for(var mi=0;mi<12;mi++) mOpts+='<option value="'+mi+'"'+(mi===now.getMonth()?' selected':'')+'>'+MONTHS[mi]+'</option>';
+    var yOpts='';
+    for(var y2=now.getFullYear(); y2>=minYear; y2--) yOpts+='<option value="'+y2+'">'+y2+'</option>';
+
+    h='<div class="card-box"><div class="label">Backup</div>'+
+      '<button class="btn-full" style="margin-bottom:0.5em;" onclick="doBackup()">Save backup</button>'+
+      '<button class="btn-full" style="border-color:var(--text3);color:var(--text2);" onclick="pickRestoreFile()">Load backup</button>'+
+      '<div class="hint">A backup from the old SE7EN app can be loaded here too \u2014 it is converted automatically.</div></div>'+
+
+      '<div class="card-box"><div class="label">Purge old data</div>'+
+      '<div class="hint" style="margin:0 0 0.6em;">Delete all transactions before the selected month.</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5em;margin-bottom:0.6em;">'+
+      '<select id="purge-month">'+mOpts+'</select><select id="purge-year">'+yOpts+'</select></div>'+
+      '<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);" onclick="purgeBeforeSelected()">Purge old data</button>'+
+      '<div class="hint">Save a backup first.</div></div>'+
+
+      '<div class="card-box"><div class="label">Storage \u2014 '+kb+' kB used ('+pct+'% of ~5 MB)</div></div>'+
+
+      '<div class="card-box" style="border-color:var(--rborder);"><div class="label" style="color:var(--red);">Danger zone</div>'+
+      '<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);margin-bottom:0.5em;" onclick="clearHistory()">Clear all history</button>'+
+      '<button class="btn-full" style="background:var(--rbg);border-color:var(--red);color:var(--red);" onclick="wipeData()">Reset all data</button>'+
+      '<div class="hint">Clearing history keeps products, categories and tables. Reset removes everything.</div></div>';
   }
   document.getElementById('sp-title').textContent=title;
   document.getElementById('sp-body').innerHTML=h;
@@ -1870,23 +1897,92 @@ function bumpCols(d){
   st.settings.cols=Math.min(6,Math.max(2,st.settings.cols+d));
   if(saveState(st)){ applyAppearance(); renderSetPage(); }
 }
-function exportData(){
+function doBackup(){
+  var d=new Date();
+  var name='se7env2-backup-'+d.getFullYear()+pad2(d.getMonth()+1)+pad2(d.getDate())+'.json';
   var blob=new Blob([JSON.stringify(getState(),null,2)],{type:'application/json'});
   var a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download='se7env2-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  a.download=name;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  toast('Backup saved','ok');
 }
-function purgeOld(){
-  var cut=new Date(); cut.setMonth(cut.getMonth()-12); cut.setHours(0,0,0,0);
-  var ct=cut.getTime(), st=getState();
+function pickRestoreFile(){ document.getElementById('restore-file').click(); }
+
+/* A V2 backup always carries a settings object. Anything else with customers
+   and transactions is treated as an old SE7EN file and converted. */
+function looksLikeV1(o){ return o && o.customers && o.transactions && !o.settings; }
+/* Only the history is worth taking from the old app: it has no products or
+   categories. Anything already set up in V2 is left untouched. */
+function convertV1(o){
+  var st=getState();
+  st.customers=(o.customers||[]).map(function(c){
+    var n={id:c.id||uid('c'),name:c.name||'?'};
+    if(c.permanent) n.permanent=true;
+    return n;
+  });
+  st._tablesSeeded=st.customers.some(function(c){ return c.permanent; });
+  st.transactions=(o.transactions||[]).map(function(t){
+    var type = (t.type==='adjustment') ? 'expense' : t.type;
+    var tx={ id:t.id||uid('t'), ts:t.ts||Date.now(), type:type,
+             amount:Number(t.amount)||0,
+             customerId:t.customerId, customerName:t.customerName||'?' };
+    if(t.method) tx.method=t.method;
+    if(t.note) tx.note=t.note;
+    if(type==='expense'){ tx.customerId='__house__'; tx.customerName='Expense'; }
+    /* The old app closed its bar day at 06:00, so historical entries are
+       stamped with that rule and keep the totals they were reported with. */
+    tx.barDate=computeBarDate(tx.ts,6);
+    return tx;
+  });
+  return st;
+}
+document.getElementById('restore-file').addEventListener('change',function(e){
+  var file=e.target.files && e.target.files[0];
+  if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var data;
+    try{ data=JSON.parse(ev.target.result); }
+    catch(err){ toast('Could not read that file','err'); return; }
+    if(!data || !data.customers || !data.transactions){ toast('Not a valid backup','err'); return; }
+    var v1=looksLikeV1(data);
+    var st = v1 ? convertV1(data) : data;
+    var n=st.transactions.length, c=st.customers.length;
+    showConfirm(v1?'Import old SE7EN history?':'Restore backup?',
+      v1 ? (c+' customers and '+n+' transactions come across. Products, categories and settings already in this app are kept.')
+         : (c+' customers and '+n+' transactions will replace everything currently stored.'),
+      function(){
+        if(!saveState(st)) return;
+        applyAppearance();
+        toast(v1?'Old backup imported':'Backup restored','ok');
+        goHome();
+      });
+  };
+  reader.readAsText(file);
+  e.target.value='';
+});
+function purgeBeforeSelected(){
+  var m=parseInt(document.getElementById('purge-month').value,10);
+  var y=parseInt(document.getElementById('purge-year').value,10);
+  var ct=new Date(y,m,1,0,0,0,0).getTime();
+  var st=getState();
   var n=st.transactions.filter(function(t){ return t.ts<ct; }).length;
-  if(!n){ toast('Nothing older than 12 months','err'); return; }
-  showConfirm('Purge old data?', n+' transactions before '+fmtDate(ct)+' will be deleted.', function(){
+  if(!n){ toast('Nothing before '+MONTHS[m]+' '+y,'err'); return; }
+  showConfirm('Purge old data?', n+' transactions before '+MONTHS[m]+' '+y+' will be deleted.', function(){
     var st2=getState();
     st2.transactions=st2.transactions.filter(function(t){ return t.ts>=ct; });
     if(saveState(st2)){ renderSetPage(); toast(n+' transactions deleted','ok'); }
   });
+}
+function clearHistory(){
+  showConfirm('Clear all history?','Every transaction is deleted. Products, categories and tables are kept, and all balances return to zero.',
+    function(){
+      var st=getState();
+      st.transactions=[];
+      st.customers=st.customers.filter(function(c){ return c.permanent; });
+      if(saveState(st)){ toast('History cleared','ok'); goHome(); }
+    });
 }
 function wipeData(){
   showConfirm('Erase everything?','All customers, products and transactions will be permanently deleted.',function(){

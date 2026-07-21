@@ -1,5 +1,5 @@
 {
-  "version": "2.00.14",
-  "cache": "se7env2-v16",
-  "notes": "Settings split into pages instead of one long scroll; returning-customer prompt shows last seen date."
+  "version": "2.00.16",
+  "cache": "se7env2-v18",
+  "notes": "Importing an old SE7EN backup now brings across history only and keeps products, categories and settings already configured in V2."
 }

@@ -1,6 +1,6 @@
 // SE7EN V2 service worker
 // Bump CACHE on every release.
-const CACHE = 'se7env2-v16';
+const CACHE = 'se7env2-v18';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 // cache:'reload' is essential: without it the browser may serve these files
