@@ -167,10 +167,13 @@ input:focus,select:focus{border-color:var(--gold);}
   <div class="top-bar">
     <div class="top-row">
       <div class="screen-title">Tables</div>
-      <div class="top-actions"><button class="btn-icon" onclick="goHome()">&#8592; Back</button></div>
+      
     </div>
   </div>
   <div class="body-scroll" id="tables-list"></div>
+  <div class="foot">
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="goHome()">Back</button>
+  </div>
 </div>
 
 <!-- CUSTOMER -->
@@ -182,7 +185,6 @@ input:focus,select:focus{border-color:var(--gold);}
         <div id="cust-balance" style="font-weight:700;margin-top:2px;"></div>
       </div>
       <div class="top-actions">
-        <button class="btn-icon" onclick="backFromCustomer()">&#8592; Back</button>
         <button class="btn-settled-list" onclick="askBillSettled()">Settled</button>
       </div>
     </div>
@@ -205,6 +207,9 @@ input:focus,select:focus{border-color:var(--gold);}
       <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" id="cart-confirm" onclick="commitCart()"></button>
     </div>
   </div>
+  <div class="foot">
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="backFromCustomer()">Back</button>
+  </div>
 </div>
 
 <!-- WALK-IN -->
@@ -212,7 +217,7 @@ input:focus,select:focus{border-color:var(--gold);}
   <div class="top-bar">
     <div class="top-row">
       <div class="screen-title">Walk-in</div>
-      <div class="top-actions"><button class="btn-icon" onclick="goHome()">&#8592; Back</button></div>
+      
     </div>
   </div>
   <div class="body-scroll" style="padding-top:0.5em;">
@@ -226,6 +231,9 @@ input:focus,select:focus{border-color:var(--gold);}
       <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" id="wi-pay" onclick="openWalkinPay()"></button>
     </div>
   </div>
+  <div class="foot">
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="goHome()">Back</button>
+  </div>
 </div>
 
 <!-- REPORTS / HISTORY -->
@@ -233,7 +241,7 @@ input:focus,select:focus{border-color:var(--gold);}
   <div class="top-bar">
     <div class="top-row">
       <div class="screen-title">History</div>
-      <div class="top-actions"><button class="btn-icon" onclick="goHome()">&#8592; Back</button></div>
+      
     </div>
     <div class="tabs">
       <button class="tab active" id="rtab-day" onclick="setRepTab('day')">Day</button>
@@ -243,7 +251,8 @@ input:focus,select:focus{border-color:var(--gold);}
   </div>
   <div class="body-scroll" id="rep-body"></div>
   <div class="foot">
-    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="printReport()">Print / PDF</button>
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--border2);color:var(--text2);margin-bottom:0.57em;" onclick="printReport()">Print / PDF</button>
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="goHome()">Back</button>
   </div>
 </div>
 
@@ -252,10 +261,13 @@ input:focus,select:focus{border-color:var(--gold);}
   <div class="top-bar">
     <div class="top-row">
       <div class="screen-title">Settings</div>
-      <div class="top-actions"><button class="btn-icon" onclick="goHome()">&#8592; Back</button></div>
+      
     </div>
   </div>
   <div class="body-scroll" id="set-body"></div>
+  <div class="foot">
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="goHome()">Back</button>
+  </div>
 </div>
 
 <!-- CATEGORIES -->
@@ -263,10 +275,13 @@ input:focus,select:focus{border-color:var(--gold);}
   <div class="top-bar">
     <div class="top-row">
       <div class="screen-title">Categories</div>
-      <div class="top-actions"><button class="btn-icon" onclick="openSettings()">&#8592; Back</button></div>
+      
     </div>
   </div>
   <div class="body-scroll" id="cats-body"></div>
+  <div class="foot">
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openSettings()">Back</button>
+  </div>
 </div>
 
 <!-- PRODUCTS IN CATEGORY -->
@@ -276,12 +291,14 @@ input:focus,select:focus{border-color:var(--gold);}
       <div class="screen-title" id="catprod-title"></div>
       <div class="top-actions">
         <button class="btn-icon" onclick="editProduct(null)">+ New</button>
-        <button class="btn-icon" onclick="openCategories()">&#8592; Back</button>
       </div>
     </div>
     <div class="hint">Tap a product to edit &middot; star toggles Favorites</div>
   </div>
   <div class="body-scroll" id="catprod-body"></div>
+  <div class="foot">
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openCategories()">Back</button>
+  </div>
 </div>
 
 <!-- TABLES MANAGEMENT -->
@@ -289,10 +306,13 @@ input:focus,select:focus{border-color:var(--gold);}
   <div class="top-bar">
     <div class="top-row">
       <div class="screen-title">Tables</div>
-      <div class="top-actions"><button class="btn-icon" onclick="openSettings()">&#8592; Back</button></div>
+      
     </div>
   </div>
   <div class="body-scroll" id="tabman-body"></div>
+  <div class="foot">
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openSettings()">Back</button>
+  </div>
 </div>
 
 <!-- MODALS -->
@@ -403,7 +423,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.01.02';
+var APP_VERSION = '2.02.00';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';

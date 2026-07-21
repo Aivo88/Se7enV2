@@ -1,5 +1,5 @@
 {
-  "version": "2.01.02",
-  "cache": "se7env2-v9",
-  "notes": "Pencil icon next to the customer name so the menu is discoverable; tables no longer appear in the merge list."
+  "version": "2.02.00",
+  "cache": "se7env2-v10",
+  "notes": "Back button moved to a fixed bar at the bottom of every screen, as in V1."
 }
