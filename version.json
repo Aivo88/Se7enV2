@@ -1,5 +1,5 @@
 {
-  "version": "2.0.2",
-  "cache": "se7env2-v4",
-  "notes": "Adding an order always returns to the home screen, tables included."
+  "version": "2.0.4",
+  "cache": "se7env2-v6",
+  "notes": "Service worker now bypasses the HTTP cache when installing, so updates actually take effect."
 }

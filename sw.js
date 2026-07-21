@@ -1,13 +1,17 @@
 // SE7EN V2 service worker
-// Bump CACHE on every release. The new SW builds its cache during install()
-// BEFORE old caches are deleted, so the app is never left without one.
-const CACHE = 'se7env2-v5';
+// Bump CACHE on every release.
+const CACHE = 'se7env2-v6';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
+// cache:'reload' is essential: without it the browser may serve these files
+// from its own HTTP cache (GitHub Pages sets max-age), so a freshly installed
+// service worker would cache a stale index.html and the app would never update.
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE)
-      .then(c => Promise.all(ASSETS.map(u => c.add(u).catch(() => {}))))
+      .then(c => Promise.all(
+        ASSETS.map(u => c.add(new Request(u, { cache: 'reload' })).catch(() => {}))
+      ))
       .then(() => self.skipWaiting())
   );
 });
