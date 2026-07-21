@@ -1,1 +1,5 @@
-{ "version": "2.0.0" }
+{
+  "version": "2.0.0",
+  "cache": "se7env2-v2",
+  "notes": "V1-style home, tables, walk-in with cash/card/split, categories and products under Settings, configurable bar day end, header text or image, storage-quota warning."
+}

@@ -1,9 +1,9 @@
 {
-  "name": "SE7EN V2",
-  "short_name": "SE7EN V2",
-  "start_url": "./",
+  "name": "Pub",
+  "short_name": "Pub",
+  "start_url": "./index.html",
   "scope": "./",
-  "display": "standalone",
+  "display": "fullscreen",
   "orientation": "any",
   "background_color": "#0B1220",
   "theme_color": "#0B1220",
