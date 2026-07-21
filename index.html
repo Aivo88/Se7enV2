@@ -375,7 +375,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.0.0';
+var APP_VERSION = '2.0.2';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -731,8 +731,9 @@ function commitCart(){
   pushTx(st,{customerId:c.id,customerName:c.name,type:'debt',amount:cartTotal(),items:cartItems()});
   if(!saveState(st)) return;
   cart={};
-  refreshCartViews(); renderCustBalance();
   toast('Added to '+c.name,'ok');
+  // Order is done: back to the home screen so the next customer can be served.
+  goHome();
 }
 
 /* ---------- HISTORY (per customer) ---------- */
