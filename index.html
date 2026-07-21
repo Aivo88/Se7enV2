@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>SE7EN V2</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0B1220">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+[onclick]{cursor:pointer;}
+button{font-family:inherit;font-size:inherit;background:none;border:none;text-align:left;cursor:pointer;}
+:root{
+  --bg:#0B1220; --bg2:#111827; --bg3:#1A2540; --bg4:#223060;
+  --border:#1E3058; --border2:#2A4080;
+  --gold:#D4A843; --gold2:#F0C860;
+  --text:#F0F4FF; --text2:#9DB0D0; --text3:#5A7090; --text4:#2E4060;
+  --green:#3CB878; --gbg:#0A2818; --gborder:#1A5030;
+  --red:#E05040; --rbg:#2A0C0C; --rborder:#602020;
+  --blue:#4A80D0; --bbg:#0A1A30;
+  --card-scale:1;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html{height:-webkit-fill-available;font-size:14px;}
+body{height:100%;height:-webkit-fill-available;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',sans-serif;overflow:hidden;}
+.screen{display:none;flex-direction:column;height:100%;height:-webkit-fill-available;width:100%;
+  position:absolute;top:0;left:0;background:var(--bg);}
+.screen.active{display:flex;}
+
+/* TOP BAR */
+.top-bar{padding:calc(1em + var(--safe-top)) 1.14em 0.71em;flex-shrink:0;background:var(--bg2);border-bottom:2px solid var(--border2);}
+.top-row{display:flex;justify-content:space-between;align-items:center;gap:0.57em;margin-bottom:0.71em;}
+.screen-title{font-family:'Palatino Linotype','Palatino','Book Antiqua',Georgia,serif;
+  color:var(--gold2);font-size:1.55em;font-weight:700;letter-spacing:1px;}
+.top-actions{display:flex;gap:0.5em;flex-wrap:wrap;justify-content:flex-end;}
+.btn-icon{background:var(--bg3);border:1.5px solid var(--border2);border-radius:8px;
+  padding:0.64em 1em;color:var(--text2);font-size:0.93em;font-weight:500;min-height:44px;}
+.btn-icon:active{background:var(--bg4);color:var(--text);}
+.search-wrap{background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;
+  padding:0.71em 1em;display:flex;align-items:center;gap:0.57em;}
+.search-wrap input{background:transparent;border:none;outline:none;color:var(--text);font-size:1.14em;flex:1;}
+.search-wrap input::placeholder{color:var(--text4);}
+
+/* SCROLL BODY */
+.body-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0.85em;}
+.sub{color:var(--text3);font-size:0.93em;margin:0.4em 0 0.6em;letter-spacing:0.5px;text-transform:uppercase;}
+
+/* CUSTOMER CARDS */
+.cust-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(calc(210px * var(--card-scale)),1fr));gap:0.71em;}
+.cust-card{background:var(--bg2);border:1.5px solid var(--border);border-radius:12px;
+  padding:calc(0.85em * var(--card-scale));display:flex;flex-direction:column;gap:0.5em;min-height:calc(84px * var(--card-scale));}
+.cust-card:active{background:var(--bg3);}
+.cust-card.perm{border-color:var(--border2);background:var(--bg3);}
+.cust-name{font-size:calc(1.14em * var(--card-scale));font-weight:700;color:var(--text);word-break:break-word;}
+.cust-bal{font-size:calc(1.07em * var(--card-scale));font-weight:700;}
+.bal-owe{color:var(--red);} .bal-cred{color:var(--gold2);} .bal-zero{color:var(--text4);}
+.card-row{display:flex;justify-content:space-between;align-items:center;gap:0.5em;}
+.btn-settled-list{background:#1A3010;border:1.5px solid var(--green);border-radius:8px;
+  padding:0.5em 0.9em;color:var(--green);font-size:0.86em;font-weight:700;flex-shrink:0;min-height:40px;}
+.btn-settled-list:active{opacity:0.7;}
+
+/* CATEGORY CHIPS */
+.cat-row{display:flex;gap:0.5em;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  padding:0.6em 0.85em;flex-shrink:0;background:var(--bg2);border-bottom:1.5px solid var(--border);}
+.cat-row::-webkit-scrollbar{display:none;}
+.chip{background:var(--bg3);border:1.5px solid var(--border2);border-radius:20px;
+  padding:0.6em 1.1em;color:var(--text2);font-size:0.95em;font-weight:600;white-space:nowrap;min-height:42px;}
+.chip.active{background:var(--gold);border-color:var(--gold2);color:#101010;}
+.chip.fav.active{background:var(--gold2);}
+
+/* PRODUCT GRID */
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(calc(120px * var(--card-scale)),1fr));gap:0.6em;}
+.prod-card{background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;
+  padding:calc(0.7em * var(--card-scale));display:flex;flex-direction:column;justify-content:space-between;
+  gap:0.4em;min-height:calc(76px * var(--card-scale));position:relative;overflow:hidden;}
+.prod-card:active{background:var(--bg4);}
+.prod-name{font-size:calc(0.98em * var(--card-scale));font-weight:600;color:var(--text);line-height:1.25;word-break:break-word;}
+.prod-price{font-size:calc(1em * var(--card-scale));font-weight:700;color:var(--gold2);}
+.prod-star{position:absolute;top:4px;right:6px;color:var(--gold2);font-size:0.9em;}
+.prod-qty{position:absolute;top:0;left:0;background:var(--green);color:#04150C;
+  font-size:0.8em;font-weight:800;padding:2px 7px;border-bottom-right-radius:8px;}
+
+/* CART BAR */
+.cart-bar{flex-shrink:0;background:var(--bg2);border-top:2px solid var(--border2);
+  padding:0.7em 0.85em calc(0.7em + var(--safe-bottom));display:flex;align-items:center;gap:0.7em;}
+.cart-info{flex:1;min-width:0;}
+.cart-total{font-size:1.3em;font-weight:800;color:var(--gold2);}
+.cart-items{font-size:0.86em;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.btn-charge{background:var(--gbg);border:2px solid var(--green);border-radius:10px;
+  padding:0.8em 1.4em;color:var(--green);font-weight:800;font-size:1.05em;min-height:48px;}
+.btn-charge:disabled{opacity:0.35;}
+.btn-clear{background:var(--rbg);border:1.5px solid var(--rborder);border-radius:10px;
+  padding:0.8em 1em;color:var(--red);font-weight:700;min-height:48px;}
+
+/* TABS */
+.tab-row{display:flex;flex-shrink:0;background:var(--bg2);border-bottom:2px solid var(--border2);}
+.tab-btn{flex:1;text-align:center;padding:0.9em;color:var(--text3);font-weight:700;font-size:1.02em;
+  border-bottom:3px solid transparent;}
+.tab-btn.active{color:var(--gold2);border-bottom-color:var(--gold);}
+
+/* HISTORY */
+.day-head{display:flex;justify-content:space-between;align-items:center;background:var(--bg3);
+  border:1.5px solid var(--border2);border-radius:10px;padding:0.75em 1em;margin-top:0.6em;}
+.day-head:active{background:var(--bg4);}
+.day-date{font-weight:700;color:var(--text);font-size:1.02em;}
+.day-sum{font-weight:800;color:var(--gold2);}
+.day-body{padding:0.3em 0 0.5em;}
+.tx-row{background:var(--bg2);border:1px solid var(--border);border-radius:8px;
+  padding:0.65em 0.85em;margin-top:0.4em;}
+.tx-top{display:flex;justify-content:space-between;gap:0.6em;align-items:baseline;}
+.tx-time{color:var(--text3);font-size:0.86em;}
+.tx-amt{font-weight:700;}
+.tx-lines{color:var(--text2);font-size:0.9em;margin-top:0.3em;line-height:1.5;}
+.tx-note{color:var(--text3);font-size:0.9em;font-style:italic;}
+
+/* LIST ROWS (products mgmt, settings) */
+.row{background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;
+  padding:0.8em 1em;margin-top:0.5em;display:flex;align-items:center;gap:0.7em;}
+.row .grow{flex:1;min-width:0;}
+.lbl{color:var(--text2);font-size:0.95em;display:block;margin-bottom:0.35em;}
+input[type=text],input[type=number],select{width:100%;background:var(--bg3);border:1.5px solid var(--border2);
+  border-radius:8px;padding:0.7em 0.85em;color:var(--text);font-size:1.05em;outline:none;font-family:inherit;min-height:44px;}
+input[type=range]{width:100%;}
+.btn-full{width:100%;text-align:center;background:var(--bg3);border:2px solid var(--border2);
+  border-radius:10px;padding:0.85em;color:var(--text);font-weight:700;font-size:1.05em;min-height:48px;}
+.btn-primary{background:var(--gbg);border-color:var(--green);color:var(--green);}
+.btn-danger{background:var(--rbg);border-color:var(--rborder);color:var(--red);}
+.btn-sm{padding:0.55em 0.85em;border-radius:8px;border:1.5px solid var(--border2);
+  background:var(--bg3);color:var(--text2);font-size:0.9em;font-weight:600;min-height:40px;}
+.empty{color:var(--text4);text-align:center;padding:2em 1em;font-size:1em;}
+
+/* MODALS */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;
+  align-items:center;justify-content:center;padding:1.2em;}
+.modal-bg.show{display:flex;}
+.modal{background:var(--bg2);border:2px solid var(--border2);border-radius:14px;
+  padding:1.3em;width:100%;max-width:460px;max-height:88vh;overflow-y:auto;}
+.modal-title{font-family:'Palatino Linotype','Palatino',Georgia,serif;color:var(--gold2);
+  font-size:1.35em;font-weight:700;text-align:center;margin-bottom:0.8em;}
+.modal-row{display:flex;gap:0.6em;margin-top:0.7em;}
+.modal-row>*{flex:1;}
+.btn-modal-cancel{width:100%;text-align:center;background:var(--bg3);border:1.5px solid var(--border2);
+  border-radius:10px;padding:0.8em;color:var(--text2);font-weight:600;min-height:46px;}
+
+/* TOAST */
+#toast{position:fixed;left:50%;bottom:calc(1.5em + var(--safe-bottom));transform:translateX(-50%);
+  background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:0.8em 1.3em;
+  color:var(--text);font-weight:600;z-index:200;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;text-align:center;}
+#toast.show{opacity:1;}
+#toast.ok{border-color:var(--green);color:var(--green);}
+#toast.err{border-color:var(--red);color:var(--red);}
+
+@media print{
+  body{overflow:visible;background:#fff;color:#000;height:auto;}
+  .screen{display:none!important;}
+  #print-area{display:block!important;padding:12mm;color:#000;font-size:11pt;}
+  #print-area h1{font-size:16pt;margin-bottom:8pt;}
+  #print-area h2{font-size:12pt;margin:10pt 0 4pt;border-bottom:1px solid #999;}
+  #print-area table{width:100%;border-collapse:collapse;margin-bottom:8pt;}
+  #print-area td,#print-area th{border-bottom:1px solid #ccc;padding:3pt 5pt;text-align:left;font-size:10pt;}
+  #print-area td.n,#print-area th.n{text-align:right;}
+}
+#print-area{display:none;}
+</style>
+</head>
+<body>
+
+<!-- ══════════ HOME ══════════ -->
+<div class="screen active" id="s-home">
+  <div class="top-bar">
+    <div class="top-row">
+      <div class="screen-title">SE7EN V2</div>
+      <div class="top-actions">
+        <button class="btn-icon" onclick="openWalkIn()">Walk-in</button>
+        <button class="btn-icon" onclick="openSummary()">Summary</button>
+        <button class="btn-icon" onclick="openSettings()">Settings</button>
+      </div>
+    </div>
+    <div class="search-wrap">
+      <input id="search" type="text" placeholder="Search or add name..." oninput="renderHome()">
+      <button class="btn-sm" onclick="addCustomerFromSearch()">+ Add</button>
+    </div>
+  </div>
+  <div class="body-scroll">
+    <div id="home-tables"></div>
+    <div id="home-custs"></div>
+  </div>
+</div>
+
+<!-- ══════════ CUSTOMER ══════════ -->
+<div class="screen" id="s-cust">
+  <div class="top-bar">
+    <div class="top-row">
+      <div class="screen-title" id="cust-title">—</div>
+      <div class="top-actions">
+        <button class="btn-icon" onclick="goHome()">Back</button>
+      </div>
+    </div>
+    <div class="card-row">
+      <div class="cust-bal" id="cust-bal">—</div>
+      <button class="btn-settled-list" onclick="askBillSettled()">Settled</button>
+    </div>
+  </div>
+  <div class="tab-row">
+    <button class="tab-btn active" id="tab-add" onclick="setCustTab('add')">Add</button>
+    <button class="tab-btn" id="tab-hist" onclick="setCustTab('hist')">History</button>
+  </div>
+  <div class="cat-row" id="cat-row"></div>
+  <div class="body-scroll" id="cust-body"></div>
+  <div class="cart-bar" id="cart-bar">
+    <button class="btn-clear" onclick="clearCart()">✕</button>
+    <div class="cart-info">
+      <div class="cart-total" id="cart-total">0.00 €</div>
+      <div class="cart-items" id="cart-items">Tap products to add</div>
+    </div>
+    <button class="btn-charge" id="btn-charge" onclick="chargeCart()" disabled>Charge</button>
+  </div>
+</div>
+
+<!-- ══════════ PRODUCTS ══════════ -->
+<div class="screen" id="s-prod">
+  <div class="top-bar">
+    <div class="top-row">
+      <div class="screen-title">Products</div>
+      <div class="top-actions">
+        <button class="btn-icon" onclick="openProductModal()">+ New</button>
+        <button class="btn-icon" onclick="openSettings()">Back</button>
+      </div>
+    </div>
+  </div>
+  <div class="body-scroll" id="prod-list"></div>
+</div>
+
+<!-- ══════════ SETTINGS ══════════ -->
+<div class="screen" id="s-set">
+  <div class="top-bar">
+    <div class="top-row">
+      <div class="screen-title">Settings</div>
+      <div class="top-actions"><button class="btn-icon" onclick="goHome()">Back</button></div>
+    </div>
+  </div>
+  <div class="body-scroll">
+    <div class="sub">Bar</div>
+    <div class="row"><div class="grow">
+      <span class="lbl">Bar day ends at</span>
+      <select id="set-dayend" onchange="saveSettings()"></select>
+    </div></div>
+    <div class="row" style="display:block;">
+      <span class="lbl">Font size — <b id="lbl-font">14px</b></span>
+      <input type="range" id="set-font" min="10" max="26" step="1" oninput="previewFont(this.value)">
+    </div>
+    <div class="row" style="display:block;">
+      <span class="lbl">Card size — <b id="lbl-card">100%</b></span>
+      <input type="range" id="set-card" min="70" max="180" step="5" oninput="previewCard(this.value)">
+    </div>
+    <button class="btn-full btn-primary" style="margin-top:0.7em;" onclick="saveSettings(true)">Save</button>
+
+    <div class="sub" style="margin-top:1.4em;">Data</div>
+    <button class="btn-full" onclick="openProducts()">Products &amp; categories</button>
+    <button class="btn-full" style="margin-top:0.5em;" onclick="openTablesModal()">Tables</button>
+    <button class="btn-full" style="margin-top:0.5em;" onclick="exportData()">Export backup (JSON)</button>
+    <button class="btn-full" style="margin-top:0.5em;" onclick="document.getElementById('impfile').click()">Import backup</button>
+    <input type="file" id="impfile" accept="application/json" style="display:none" onchange="importData(this)">
+
+    <div class="sub" style="margin-top:1.4em;">App</div>
+    <div class="row"><div class="grow"><span class="lbl">Version</span><b id="set-ver">—</b></div>
+      <button class="btn-sm" onclick="checkUpdate()">Check for updates</button></div>
+    <button class="btn-full btn-danger" style="margin-top:1.4em;" onclick="wipeAll()">Erase all data</button>
+    <div style="height:2em;"></div>
+  </div>
+</div>
+
+<!-- ══════════ SUMMARY ══════════ -->
+<div class="screen" id="s-sum">
+  <div class="top-bar">
+    <div class="top-row">
+      <div class="screen-title">Summary</div>
+      <div class="top-actions">
+        <button class="btn-icon" onclick="printSummary()">PDF</button>
+        <button class="btn-icon" onclick="goHome()">Back</button>
+      </div>
+    </div>
+    <div class="card-row">
+      <select id="sum-year" onchange="renderSummary()" style="max-width:150px;"></select>
+      <select id="sum-mode" onchange="renderSummary()" style="max-width:190px;">
+        <option value="day">By day</option>
+        <option value="month">By month</option>
+        <option value="prod">By product</option>
+      </select>
+    </div>
+  </div>
+  <div class="body-scroll" id="sum-body"></div>
+</div>
+
+<!-- ══════════ MODALS ══════════ -->
+<div class="modal-bg" id="m-confirm"><div class="modal">
+  <div class="modal-title" id="confirm-title">Confirm</div>
+  <div style="text-align:center;color:var(--text2);font-size:1.05em;margin-bottom:1em;" id="confirm-body"></div>
+  <div class="modal-row">
+    <button class="btn-modal-cancel" onclick="closeModal('m-confirm')">Cancel</button>
+    <button class="btn-full btn-danger" id="confirm-ok">OK</button>
+  </div>
+</div></div>
+
+<div class="modal-bg" id="m-settle"><div class="modal">
+  <div class="modal-title">Settle bill</div>
+  <div style="text-align:center;color:var(--text2);font-size:1.1em;" id="settle-name"></div>
+  <div style="text-align:center;color:var(--gold2);font-size:1.5em;font-weight:800;margin-bottom:1em;" id="settle-amt"></div>
+  <div class="modal-row">
+    <button class="btn-full btn-primary" onclick="settlePayment('cash')">Cash</button>
+    <button class="btn-full" style="background:var(--bbg);border-color:var(--blue);color:var(--blue);" onclick="settlePayment('card')">Card</button>
+  </div>
+  <div class="modal-row">
+    <button class="btn-full" onclick="openSplit()">Split</button>
+    <button class="btn-full btn-danger" onclick="writeOffDebt()">Write off</button>
+  </div>
+  <div class="modal-row"><button class="btn-modal-cancel" onclick="closeModal('m-settle')">Cancel</button></div>
+</div></div>
+
+<div class="modal-bg" id="m-split"><div class="modal">
+  <div class="modal-title">Split payment</div>
+  <div style="text-align:center;color:var(--gold2);font-size:1.3em;font-weight:800;margin-bottom:0.8em;" id="split-total"></div>
+  <span class="lbl">Cash</span><input type="number" inputmode="decimal" id="split-cash" oninput="updateSplit()">
+  <span class="lbl" style="margin-top:0.7em;">Card</span><input type="number" inputmode="decimal" id="split-card" oninput="updateSplit()">
+  <div style="text-align:center;color:var(--text3);margin-top:0.7em;" id="split-info"></div>
+  <div class="modal-row">
+    <button class="btn-modal-cancel" onclick="closeModal('m-split')">Cancel</button>
+    <button class="btn-full btn-primary" id="split-ok" onclick="confirmSplit()" disabled>Confirm</button>
+  </div>
+</div></div>
+
+<div class="modal-bg" id="m-prod"><div class="modal">
+  <div class="modal-title" id="prod-modal-title">New product</div>
+  <span class="lbl">Name</span><input type="text" id="pm-name">
+  <span class="lbl" style="margin-top:0.7em;">Price (€)</span><input type="number" inputmode="decimal" id="pm-price">
+  <span class="lbl" style="margin-top:0.7em;">Category</span>
+  <select id="pm-cat" onchange="pmCatChange()"></select>
+  <input type="text" id="pm-newcat" placeholder="New category name" style="margin-top:0.5em;display:none;">
+  <div class="modal-row">
+    <button class="btn-modal-cancel" onclick="closeModal('m-prod')">Cancel</button>
+    <button class="btn-full btn-primary" onclick="saveProduct()">Save</button>
+  </div>
+</div></div>
+
+<div class="modal-bg" id="m-tables"><div class="modal">
+  <div class="modal-title">Tables</div>
+  <div id="tables-list"></div>
+  <span class="lbl" style="margin-top:0.9em;">New table name</span>
+  <input type="text" id="tbl-name" placeholder="Table 1">
+  <div class="modal-row">
+    <button class="btn-modal-cancel" onclick="closeModal('m-tables')">Close</button>
+    <button class="btn-full btn-primary" onclick="addTable()">Add</button>
+  </div>
+</div></div>
+
+<div class="modal-bg" id="m-walkin"><div class="modal">
+  <div class="modal-title">Walk-in</div>
+  <div style="text-align:center;color:var(--text2);margin-bottom:1em;">Paid immediately — no tab.</div>
+  <div class="modal-row">
+    <button class="btn-full btn-primary" onclick="startWalkIn('cash')">Cash</button>
+    <button class="btn-full" style="background:var(--bbg);border-color:var(--blue);color:var(--blue);" onclick="startWalkIn('card')">Card</button>
+  </div>
+  <div class="modal-row"><button class="btn-modal-cancel" onclick="closeModal('m-walkin')">Cancel</button></div>
+</div></div>
+
+<div id="toast"></div>
+<div id="print-area"></div>
+
+<script>
+'use strict';
+const APP_VERSION = '2.0.0';
+const KEY = 'se7env2_state';
+const CASH_ID = '__cash__', CARD_ID = '__card__';
+
+// ═════════ STATE ═════════
+function defaultState(){
+  return {
+    version: APP_VERSION,
+    customers: [],
+    transactions: [],
+    products: [],
+    categories: ['Beers'],
+    settings: { dayEnd: 2, fontSize: 14, cardScale: 100 }
+  };
+}
+let ST = null;
+function getState(){
+  if (ST) return ST;
+  try {
+    const raw = localStorage.getItem(KEY);
+    ST = raw ? JSON.parse(raw) : defaultState();
+  } catch(e){ ST = defaultState(); }
+  const d = defaultState();
+  for (const k in d) if (ST[k] === undefined) ST[k] = d[k];
+  for (const k in d.settings) if (ST.settings[k] === undefined) ST.settings[k] = d.settings[k];
+  if (!ST.categories.length) ST.categories = ['Beers'];
+  return ST;
+}
+function saveState(st){ ST = st || ST; try { localStorage.setItem(KEY, JSON.stringify(ST)); } catch(e){ toast('Storage full','err'); } }
+
+// ═════════ HELPERS ═════════
+function f(n){ return (Math.round(n*100)/100).toFixed(2); }
+function uid(p){ return p + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// Bar-day: a sale at 01:30 with dayEnd=2 belongs to the PREVIOUS calendar day.
+// Computed once at sale time and frozen into the transaction.
+function barDate(ts, dayEnd){
+  const d = new Date(ts - dayEnd * 3600000);
+  const p = n => String(n).padStart(2,'0');
+  return d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate());
+}
+function todayBarDate(){ return barDate(Date.now(), getState().settings.dayEnd); }
+function prettyDate(iso){
+  const [y,m,d] = iso.split('-');
+  return d + '.' + m + '.' + y;
+}
+function hhmm(ts){ const d=new Date(ts); const p=n=>String(n).padStart(2,'0'); return p(d.getHours())+':'+p(d.getMinutes()); }
+
+let toastT;
+function toast(msg, kind){
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'show ' + (kind||'');
+  clearTimeout(toastT); toastT = setTimeout(()=>{ el.className=''; }, 2200);
+}
+function openModal(id){ document.getElementById(id).classList.add('show'); }
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function showConfirm(title, body, cb){
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-body').textContent = body;
+  const btn = document.getElementById('confirm-ok');
+  btn.onclick = function(){ closeModal('m-confirm'); cb(); };
+  openModal('m-confirm');
+}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// Balance: negative = owes us. debt subtracts; pay/credit/writeoff add.
+function calcBalance(custId){
+  let b = 0;
+  getState().transactions.forEach(t=>{
+    if (t.customerId !== custId) return;
+    if (t.type === 'debt') b -= t.amount;
+    else b += t.amount;
+  });
+  return b;
+}
+
+// ═════════ HOME ═════════
+function goHome(){ activeCustomerId = null; cart = []; showScreen('s-home'); renderHome(); }
+
+function balClass(b){ return b < -0.001 ? 'bal-owe' : (b > 0.001 ? 'bal-cred' : 'bal-zero'); }
+function balText(b){
+  if (b < -0.001) return '−' + f(Math.abs(b)) + ' €';
+  if (b > 0.001) return '+' + f(b) + ' € credit';
+  return '0.00 €';
+}
+
+function renderHome(){
+  const st = getState();
+  const q = (document.getElementById('search').value || '').toLowerCase().trim();
+  const match = c => !q || c.name.toLowerCase().includes(q);
+
+  const tables = st.customers.filter(c=>c.permanent && match(c));
+  const custs = st.customers.filter(c=>!c.permanent && match(c));
+
+  document.getElementById('home-tables').innerHTML = tables.length
+    ? '<div class="sub">Tables</div><div class="cust-grid">' + tables.map(cardHTML).join('') + '</div>'
+    : '';
+  document.getElementById('home-custs').innerHTML =
+    '<div class="sub">Customers</div>' +
+    (custs.length ? '<div class="cust-grid">' + custs.map(cardHTML).join('') + '</div>'
+      : '<div class="empty">No open tabs.' + (q ? '<br>Tap “+ Add” to create “'+esc(q)+'”.' : '') + '</div>');
+}
+function cardHTML(c){
+  const b = calcBalance(c.id);
+  return '<div class="cust-card' + (c.permanent?' perm':'') + '" onclick="openCustomer(\'' + c.id + '\')">' +
+    '<div class="cust-name">' + esc(c.name) + '</div>' +
+    '<div class="card-row">' +
+      '<div class="cust-bal ' + balClass(b) + '">' + balText(b) + '</div>' +
+      (Math.abs(b) > 0.001 ? '<button class="btn-settled-list" onclick="event.stopPropagation();askBillSettled(\'' + c.id + '\')">Settled</button>' : '') +
+    '</div></div>';
+}
+
+function addCustomerFromSearch(){
+  const inp = document.getElementById('search');
+  const name = inp.value.trim();
+  if (!name) { toast('Type a name first','err'); return; }
+  const st = getState();
+  const existing = st.customers.find(c => c.name.toLowerCase() === name.toLowerCase());
+  if (existing){ inp.value=''; openCustomer(existing.id); return; }
+  const id = uid('c');
+  st.customers.push({ id, name, permanent:false });
+  saveState(st);
+  inp.value = '';
+  openCustomer(id);
+}
+
+// ═════════ CUSTOMER SCREEN ═════════
+let activeCustomerId = null;
+let custTab = 'add';
+let activeCat = '__fav__';
+let cart = [];
+let walkInMethod = null;
+
+function openCustomer(id){
+  activeCustomerId = id; cart = []; walkInMethod = null;
+  custTab = 'add'; activeCat = '__fav__';
+  showScreen('s-cust');
+  renderCustomer();
+}
+function currentCustomer(){
+  if (walkInMethod) return { id: walkInMethod==='card'?CARD_ID:CASH_ID, name: 'Walk-in ' + walkInMethod, permanent:false, walkin:true };
+  return getState().customers.find(c=>c.id===activeCustomerId);
+}
+function setCustTab(t){ custTab = t; renderCustomer(); }
+
+function renderCustomer(){
+  const c = currentCustomer();
+  if (!c) { goHome(); return; }
+  document.getElementById('cust-title').textContent = c.name;
+  const b = c.walkin ? 0 : calcBalance(c.id);
+  const bEl = document.getElementById('cust-bal');
+  bEl.className = 'cust-bal ' + balClass(b);
+  bEl.textContent = c.walkin ? 'Pay now' : balText(b);
+
+  document.getElementById('tab-add').classList.toggle('active', custTab==='add');
+  document.getElementById('tab-hist').classList.toggle('active', custTab==='hist');
+  document.getElementById('cat-row').style.display = custTab==='add' ? 'flex' : 'none';
+  document.getElementById('cart-bar').style.display = custTab==='add' ? 'flex' : 'none';
+
+  if (custTab === 'add'){ renderCats(); renderProducts(); renderCart(); }
+  else renderHistory();
+}
+
+function renderCats(){
+  const st = getState();
+  let h = '<button class="chip fav' + (activeCat==='__fav__'?' active':'') + '" onclick="setCat(\'__fav__\')">★ Favorites</button>';
+  h += st.categories.map(cat =>
+    '<button class="chip' + (activeCat===cat?' active':'') + '" onclick="setCat(\'' + esc(cat).replace(/'/g,"\\'") + '\')">' + esc(cat) + '</button>'
+  ).join('');
+  h += '<button class="chip" onclick="openProducts()">+ Manage</button>';
+  document.getElementById('cat-row').innerHTML = h;
+}
+function setCat(c){ activeCat = c; renderCats(); renderProducts(); }
+
+function renderProducts(){
+  const st = getState();
+  const list = activeCat === '__fav__'
+    ? st.products.filter(p=>p.fav)
+    : st.products.filter(p=>p.category === activeCat);
+  const el = document.getElementById('cust-body');
+  if (!list.length){
+    el.innerHTML = '<div class="empty">' +
+      (activeCat==='__fav__' ? 'No favorites yet.<br>Long-press a product to star it.' : 'No products in this category.') +
+      '<br><br><button class="btn-sm" onclick="openProducts()">Manage products</button></div>';
+    return;
+  }
+  el.innerHTML = '<div class="prod-grid">' + list.map(p=>{
+    const qty = cart.filter(i=>i.productId===p.id).reduce((s,i)=>s+i.qty,0);
+    return '<div class="prod-card" data-pid="' + p.id + '">' +
+      (qty ? '<div class="prod-qty">' + qty + '</div>' : '') +
+      (p.fav ? '<div class="prod-star">★</div>' : '') +
+      '<div class="prod-name">' + esc(p.name) + '</div>' +
+      '<div class="prod-price">' + f(p.price) + ' €</div></div>';
+  }).join('') + '</div>';
+  wireProductTaps();
+}
+
+// Tap = add to cart. Long-press (500ms) = toggle favorite.
+function wireProductTaps(){
+  document.querySelectorAll('.prod-card').forEach(el=>{
+    let timer = null, longFired = false;
+    const pid = el.dataset.pid;
+    const start = () => { longFired = false; timer = setTimeout(()=>{ longFired = true; toggleFav(pid); }, 500); };
+    const end = (e) => {
+      clearTimeout(timer);
+      if (!longFired){ e.preventDefault(); addToCart(pid); }
+    };
+    el.addEventListener('touchstart', start, {passive:true});
+    el.addEventListener('touchend', end);
+    el.addEventListener('touchmove', ()=>clearTimeout(timer), {passive:true});
+    el.addEventListener('mousedown', start);
+    el.addEventListener('mouseup', end);
+    el.addEventListener('mouseleave', ()=>clearTimeout(timer));
+    el.addEventListener('contextmenu', e=>e.preventDefault());
+  });
+}
+function toggleFav(pid){
+  const st = getState();
+  const p = st.products.find(x=>x.id===pid);
+  if (!p) return;
+  p.fav = !p.fav; saveState(st);
+  toast(p.name + (p.fav ? ' → favorites' : ' removed from favorites'), 'ok');
+  renderProducts();
+}
+function addToCart(pid){
+  const st = getState();
+  const p = st.products.find(x=>x.id===pid);
+  if (!p) return;
+  const line = cart.find(i=>i.productId===pid);
+  if (line) line.qty++;
+  else cart.push({ productId:p.id, name:p.name, price:p.price, category:p.category, qty:1 });
+  renderProducts(); renderCart();
+}
+function cartTotal(){ return cart.reduce((s,i)=>s + i.price*i.qty, 0); }
+function renderCart(){
+  const tot = cartTotal();
+  document.getElementById('cart-total').textContent = f(tot) + ' €';
+  document.getElementById('cart-items').textContent = cart.length
+    ? cart.map(i=>i.qty + '× ' + i.name).join(', ')
+    : 'Tap products to add';
+  const btn = document.getElementById('btn-charge');
+  btn.disabled = !cart.length;
+  btn.textContent = walkInMethod ? ('Paid ' + walkInMethod) : 'Charge';
+}
+function clearCart(){ if(!cart.length) return; cart = []; renderProducts(); renderCart(); }
+
+function chargeCart(){
+  if (!cart.length) return;
+  const st = getState();
+  const c = currentCustomer();
+  const tot = cartTotal();
+  const ts = Date.now();
+  const items = cart.map(i=>({ name:i.name, price:i.price, qty:i.qty, category:i.category }));
+
+  st.transactions.push({
+    id: uid('t'), ts, barDate: barDate(ts, st.settings.dayEnd),
+    customerId: c.id, customerName: c.name,
+    type: 'debt', amount: tot, items
+  });
+  if (walkInMethod){
+    st.transactions.push({
+      id: uid('t'), ts: ts+1, barDate: barDate(ts, st.settings.dayEnd),
+      customerId: c.id, customerName: c.name,
+      type: 'pay', method: walkInMethod, amount: tot, note: 'Walk-in'
+    });
+  }
+  saveState(st);
+  cart = [];
+  toast(f(tot) + ' € — ' + (walkInMethod ? 'paid ' + walkInMethod : 'added to ' + c.name), 'ok');
+  if (walkInMethod){ goHome(); return; }
+  renderCustomer();
+}
+
+// ═════════ HISTORY (grouped by bar-day) ═════════
+let openDays = {};
+function renderHistory(){
+  const c = currentCustomer();
+  const txs = getState().transactions.filter(t=>t.customerId===c.id).sort((a,b)=>b.ts-a.ts);
+  const el = document.getElementById('cust-body');
+  if (!txs.length){ el.innerHTML = '<div class="empty">No history yet.</div>'; return; }
+
+  const days = {};
+  txs.forEach(t=>{ const d = t.barDate || barDate(t.ts, getState().settings.dayEnd); (days[d] = days[d] || []).push(t); });
+  const keys = Object.keys(days).sort().reverse();
+  const today = todayBarDate();
+
+  el.innerHTML = keys.map((d,idx)=>{
+    const list = days[d];
+    const spent = list.filter(t=>t.type==='debt').reduce((s,t)=>s+t.amount,0);
+    const open = (openDays[d] !== undefined) ? openDays[d] : (idx === 0);
+    return '<div class="day-head" onclick="toggleDay(\'' + d + '\',' + (open?1:0) + ')">' +
+      '<div class="day-date">' + prettyDate(d) + (d===today?' · today':'') + '</div>' +
+      '<div class="day-sum">' + f(spent) + ' €</div></div>' +
+      (open ? '<div class="day-body">' + list.map(txHTML).join('') + '</div>' : '');
+  }).join('');
+}
+function toggleDay(d, isOpen){
+  openDays[d] = !isOpen;
+  renderHistory();
+}
+function txHTML(t){
+  let amtCls = 'bal-cred', amtTxt = '+' + f(t.amount) + ' €';
+  if (t.type==='debt'){ amtCls='bal-owe'; amtTxt = f(t.amount) + ' €'; }
+  let sub = '';
+  if (t.items && t.items.length)
+    sub = '<div class="tx-lines">' + t.items.map(i=>i.qty + '× ' + esc(i.name) + ' — ' + f(i.price*i.qty) + ' €').join('<br>') + '</div>';
+  else {
+    const label = t.type==='pay' ? ('Paid' + (t.method?' · '+t.method:'')) : (t.type==='writeoff' ? 'Written off (loss)' : 'Credit');
+    sub = '<div class="tx-note">' + label + (t.note ? ' — ' + esc(t.note) : '') + '</div>';
+  }
+  return '<div class="tx-row"><div class="tx-top"><div class="tx-time">' + hhmm(t.ts) + '</div>' +
+    '<div class="tx-amt ' + amtCls + '">' + amtTxt + '</div></div>' + sub + '</div>';
+}
+
+// ═════════ SETTLE ═════════
+function askBillSettled(id){
+  if (id) activeCustomerId = id;
+  walkInMethod = null;
+  const c = currentCustomer();
+  if (!c) return;
+  const owed = Math.max(0, -calcBalance(c.id));
+  document.getElementById('settle-name').textContent = c.name;
+  document.getElementById('settle-amt').textContent = owed > 0 ? f(owed) + ' €' : '';
+  openModal('m-settle');
+}
+function settlePayment(method){
+  const st = getState();
+  const c = st.customers.find(x=>x.id===activeCustomerId);
+  if (!c){ closeModal('m-settle'); return; }
+  const owed = Math.max(0, -calcBalance(c.id));
+  if (owed > 0) pushPay(st, c, owed, method, 'Bill settled');
+  const res = finishSettle(st, c);
+  closeModal('m-settle');
+  if (res.removed) toast(c.name + ' — settled (' + method + ')', 'ok');
+  else toast(c.name + ' — ' + f(res.balance) + ' € credit remaining', 'ok');
+}
+function pushPay(st, c, amount, method, note){
+  const ts = Date.now();
+  st.transactions.push({ id: uid('t'), ts, barDate: barDate(ts, st.settings.dayEnd),
+    customerId: c.id, customerName: c.name, type:'pay', method, amount, note });
+}
+function writeOffDebt(){
+  const st = getState();
+  const c = st.customers.find(x=>x.id===activeCustomerId);
+  if (!c){ closeModal('m-settle'); return; }
+  const owed = Math.max(0, -calcBalance(c.id));
+  if (owed <= 0){ closeModal('m-settle'); toast('Nothing to write off','err'); return; }
+  closeModal('m-settle');
+  showConfirm('Write off debt?', c.name + ' — ' + f(owed) + ' € cleared as a loss (no income recorded).', function(){
+    const st2 = getState();
+    const c2 = st2.customers.find(x=>x.id===activeCustomerId);
+    if (!c2) return;
+    const ts = Date.now();
+    st2.transactions.push({ id: uid('t'), ts, barDate: barDate(ts, st2.settings.dayEnd),
+      customerId: c2.id, customerName: c2.name, type:'writeoff', amount: owed, note:'Written off (loss)' });
+    finishSettle(st2, c2);
+    toast(c2.name + ' — written off', 'ok');
+  });
+}
+// Recompute; a customer with remaining credit is KEPT. History always survives.
+function finishSettle(st, c){
+  const bal = calcBalance(c.id);
+  if (c.permanent){ saveState(st); goHome(); return { removed:false, balance: Math.max(0,bal) }; }
+  if (bal > 0.001){ saveState(st); goHome(); return { removed:false, balance: bal }; }
+  st.customers = st.customers.filter(x=>x.id!==c.id);
+  saveState(st); goHome();
+  return { removed:true, balance:0 };
+}
+
+function openSplit(){
+  const c = currentCustomer(); if (!c) return;
+  const owed = Math.max(0, -calcBalance(c.id));
+  document.getElementById('split-total').textContent = f(owed) + ' €';
+  document.getElementById('split-cash').value = '';
+  document.getElementById('split-card').value = '';
+  document.getElementById('split-info').textContent = '';
+  document.getElementById('split-ok').disabled = true;
+  closeModal('m-settle'); openModal('m-split');
+}
+function splitOwed(){ const c = currentCustomer(); return c ? Math.max(0,-calcBalance(c.id)) : 0; }
+function updateSplit(){
+  const cash = parseFloat(document.getElementById('split-cash').value) || 0;
+  const card = parseFloat(document.getElementById('split-card').value) || 0;
+  const owed = splitOwed();
+  const diff = owed - cash - card;
+  const info = document.getElementById('split-info');
+  if (Math.abs(diff) < 0.005){ info.textContent = 'Balanced'; info.style.color = 'var(--green)'; document.getElementById('split-ok').disabled = false; }
+  else { info.textContent = (diff>0?'Missing ':'Over by ') + f(Math.abs(diff)) + ' €'; info.style.color = 'var(--red)'; document.getElementById('split-ok').disabled = true; }
+}
+function confirmSplit(){
+  const st = getState();
+  const c = st.customers.find(x=>x.id===activeCustomerId);
+  if (!c) return;
+  const cash = parseFloat(document.getElementById('split-cash').value) || 0;
+  const card = parseFloat(document.getElementById('split-card').value) || 0;
+  if (cash > 0) pushPay(st, c, cash, 'cash', 'Split payment');
+  if (card > 0) pushPay(st, c, card, 'card', 'Split payment');
+  const res = finishSettle(st, c);
+  closeModal('m-split');
+  toast(c.name + ' — split settled', 'ok');
+}
+
+// ═════════ WALK-IN ═════════
+function openWalkIn(){ openModal('m-walkin'); }
+function startWalkIn(method){
+  closeModal('m-walkin');
+  walkInMethod = method; activeCustomerId = null; cart = [];
+  custTab = 'add'; activeCat = '__fav__';
+  showScreen('s-cust'); renderCustomer();
+}
+
+// ═════════ PRODUCTS ═════════
+let editingProductId = null;
+function openProducts(){ showScreen('s-prod'); renderProdList(); }
+function renderProdList(){
+  const st = getState();
+  const el = document.getElementById('prod-list');
+  if (!st.products.length){
+    el.innerHTML = '<div class="empty">No products yet.<br>Tap “+ New” to add the first one.</div>';
+    return;
+  }
+  let h = '';
+  st.categories.forEach(cat=>{
+    const list = st.products.filter(p=>p.category===cat);
+    h += '<div class="sub">' + esc(cat) + ' (' + list.length + ')' +
+      (list.length===0 && st.categories.length>1 ? ' <button class="btn-sm" onclick="deleteCategory(\''+esc(cat).replace(/'/g,"\\'")+'\')">delete</button>' : '') +
+      '</div>';
+    h += list.map(p =>
+      '<div class="row"><div class="grow"><b>' + (p.fav?'★ ':'') + esc(p.name) + '</b><br>' +
+      '<span style="color:var(--gold2);font-weight:700;">' + f(p.price) + ' €</span></div>' +
+      '<button class="btn-sm" onclick="toggleFav(\''+p.id+'\');renderProdList()">' + (p.fav?'Unstar':'Star') + '</button>' +
+      '<button class="btn-sm" onclick="openProductModal(\''+p.id+'\')">Edit</button>' +
+      '<button class="btn-sm" style="color:var(--red);border-color:var(--rborder);" onclick="deleteProduct(\''+p.id+'\')">✕</button></div>'
+    ).join('');
+  });
+  el.innerHTML = h;
+}
+function openProductModal(id){
+  const st = getState();
+  editingProductId = id || null;
+  const p = id ? st.products.find(x=>x.id===id) : null;
+  document.getElementById('prod-modal-title').textContent = p ? 'Edit product' : 'New product';
+  document.getElementById('pm-name').value = p ? p.name : '';
+  document.getElementById('pm-price').value = p ? p.price : '';
+  const sel = document.getElementById('pm-cat');
+  sel.innerHTML = st.categories.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('')
+    + '<option value="__new__">+ New category…</option>';
+  sel.value = p ? p.category : st.categories[0];
+  document.getElementById('pm-newcat').style.display = 'none';
+  document.getElementById('pm-newcat').value = '';
+  openModal('m-prod');
+}
+function pmCatChange(){
+  const isNew = document.getElementById('pm-cat').value === '__new__';
+  document.getElementById('pm-newcat').style.display = isNew ? 'block' : 'none';
+}
+function saveProduct(){
+  const st = getState();
+  const name = document.getElementById('pm-name').value.trim();
+  const price = parseFloat(document.getElementById('pm-price').value);
+  let cat = document.getElementById('pm-cat').value;
+  if (!name){ toast('Name required','err'); return; }
+  if (isNaN(price) || price < 0){ toast('Valid price required','err'); return; }
+  if (cat === '__new__'){
+    cat = document.getElementById('pm-newcat').value.trim();
+    if (!cat){ toast('Category name required','err'); return; }
+    if (!st.categories.includes(cat)) st.categories.push(cat);
+  }
+  if (editingProductId){
+    const p = st.products.find(x=>x.id===editingProductId);
+    p.name = name; p.price = price; p.category = cat;
+  } else {
+    st.products.push({ id: uid('p'), name, price, category: cat, fav: false });
+  }
+  saveState(st); closeModal('m-prod'); renderProdList();
+  toast('Saved','ok');
+}
+function deleteProduct(id){
+  const st = getState();
+  const p = st.products.find(x=>x.id===id); if (!p) return;
+  showConfirm('Delete product?', p.name + ' will be removed. Past sales keep their recorded lines.', function(){
+    const s = getState();
+    s.products = s.products.filter(x=>x.id!==id);
+    saveState(s); renderProdList(); toast('Deleted','ok');
+  });
+}
+function deleteCategory(cat){
+  const st = getState();
+  if (st.categories.length <= 1){ toast('Keep at least one category','err'); return; }
+  if (st.products.some(p=>p.category===cat)){ toast('Category not empty','err'); return; }
+  st.categories = st.categories.filter(c=>c!==cat);
+  saveState(st); renderProdList(); toast('Category deleted','ok');
+}
+
+// ═════════ TABLES ═════════
+function openTablesModal(){ renderTablesList(); openModal('m-tables'); }
+function renderTablesList(){
+  const st = getState();
+  const tables = st.customers.filter(c=>c.permanent);
+  document.getElementById('tables-list').innerHTML = tables.length
+    ? tables.map(t=>'<div class="row"><div class="grow"><b>'+esc(t.name)+'</b></div>' +
+        '<button class="btn-sm" style="color:var(--red);border-color:var(--rborder);" onclick="deleteTable(\''+t.id+'\')">✕</button></div>').join('')
+    : '<div class="empty" style="padding:1em;">No tables.</div>';
+}
+function addTable(){
+  const st = getState();
+  const name = document.getElementById('tbl-name').value.trim();
+  if (!name){ toast('Name required','err'); return; }
+  st.customers.push({ id: uid('c'), name, permanent:true });
+  saveState(st);
+  document.getElementById('tbl-name').value = '';
+  renderTablesList(); renderHome(); toast('Table added','ok');
+}
+function deleteTable(id){
+  const st = getState();
+  const t = st.customers.find(c=>c.id===id); if(!t) return;
+  if (Math.abs(calcBalance(id)) > 0.001){ toast('Settle the balance first','err'); return; }
+  showConfirm('Delete table?', t.name + ' will be removed. History is kept.', function(){
+    const s = getState();
+    s.customers = s.customers.filter(c=>c.id!==id);
+    saveState(s); renderTablesList(); renderHome(); toast('Deleted','ok');
+  });
+}
+
+// ═════════ SETTINGS ═════════
+function openSettings(){
+  const st = getState();
+  const sel = document.getElementById('set-dayend');
+  let h = '';
+  for (let i=1;i<=8;i++) h += '<option value="'+i+'">'+String(i).padStart(2,'0')+':00</option>';
+  sel.innerHTML = h; sel.value = st.settings.dayEnd;
+  document.getElementById('set-font').value = st.settings.fontSize;
+  document.getElementById('set-card').value = st.settings.cardScale;
+  document.getElementById('lbl-font').textContent = st.settings.fontSize + 'px';
+  document.getElementById('lbl-card').textContent = st.settings.cardScale + '%';
+  document.getElementById('set-ver').textContent = APP_VERSION;
+  showScreen('s-set');
+}
+function previewFont(v){
+  document.documentElement.style.fontSize = v + 'px';
+  document.getElementById('lbl-font').textContent = v + 'px';
+}
+function previewCard(v){
+  document.documentElement.style.setProperty('--card-scale', v/100);
+  document.getElementById('lbl-card').textContent = v + '%';
+}
+function saveSettings(showMsg){
+  const st = getState();
+  st.settings.dayEnd = parseInt(document.getElementById('set-dayend').value);
+  st.settings.fontSize = parseInt(document.getElementById('set-font').value);
+  st.settings.cardScale = parseInt(document.getElementById('set-card').value);
+  saveState(st); applyLook();
+  if (showMsg) toast('Settings saved','ok');
+}
+function applyLook(){
+  const s = getState().settings;
+  document.documentElement.style.fontSize = s.fontSize + 'px';
+  document.documentElement.style.setProperty('--card-scale', s.cardScale/100);
+}
+
+function exportData(){
+  const blob = new Blob([JSON.stringify(getState(), null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'se7env2-backup-' + todayBarDate() + '.json';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+function importData(input){
+  const file = input.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = function(){
+    try {
+      const data = JSON.parse(r.result);
+      if (!data.transactions || !data.customers) throw new Error('bad');
+      showConfirm('Replace all data?', 'Current data will be overwritten by the backup.', function(){
+        ST = data; saveState(ST); applyLook(); goHome(); toast('Backup restored','ok');
+      });
+    } catch(e){ toast('Invalid backup file','err'); }
+  };
+  r.readAsText(file);
+  input.value = '';
+}
+function wipeAll(){
+  showConfirm('Erase everything?', 'All customers, products and history will be deleted permanently.', function(){
+    localStorage.removeItem(KEY); ST = null; getState(); saveState();
+    applyLook(); goHome(); toast('All data erased','ok');
+  });
+}
+function checkUpdate(){
+  if (!navigator.onLine){ toast('Offline — connect to update','err'); return; }
+  toast('Checking…');
+  fetch('version.json?t=' + Date.now(), {cache:'no-store'})
+    .then(r=>r.json())
+    .then(v=>{
+      if (v.version && v.version !== APP_VERSION){
+        showConfirm('Update available', 'Version ' + v.version + ' is ready. Reload now?', function(){
+          if ('serviceWorker' in navigator)
+            navigator.serviceWorker.getRegistrations().then(rs=>Promise.all(rs.map(r=>r.unregister())))
+              .then(()=>caches.keys()).then(ks=>Promise.all(ks.map(k=>caches.delete(k))))
+              .then(()=>location.reload(true));
+          else location.reload(true);
+        });
+      } else toast('Up to date','ok');
+    })
+    .catch(()=>toast('Update check failed','err'));
+}
+
+// ═════════ SUMMARY ═════════
+function openSummary(){
+  const st = getState();
+  const years = [...new Set(st.transactions.map(t=>(t.barDate||barDate(t.ts,st.settings.dayEnd)).slice(0,4)))].sort().reverse();
+  if (!years.length) years.push(String(new Date().getFullYear()));
+  const sel = document.getElementById('sum-year');
+  sel.innerHTML = years.map(y=>'<option value="'+y+'">'+y+'</option>').join('');
+  showScreen('s-sum');
+  renderSummary();
+}
+function summaryData(){
+  const st = getState();
+  const year = document.getElementById('sum-year').value;
+  return st.transactions.filter(t => (t.barDate || barDate(t.ts, st.settings.dayEnd)).startsWith(year));
+}
+function renderSummary(){
+  const mode = document.getElementById('sum-mode').value;
+  const txs = summaryData();
+  const el = document.getElementById('sum-body');
+  if (!txs.length){ el.innerHTML = '<div class="empty">No data for this year.</div>'; return; }
+
+  const sales = txs.filter(t=>t.type==='debt').reduce((s,t)=>s+t.amount,0);
+  const cash = txs.filter(t=>t.type==='pay'&&t.method==='cash').reduce((s,t)=>s+t.amount,0);
+  const card = txs.filter(t=>t.type==='pay'&&t.method==='card').reduce((s,t)=>s+t.amount,0);
+  const loss = txs.filter(t=>t.type==='writeoff').reduce((s,t)=>s+t.amount,0);
+
+  let h = '<div class="row"><div class="grow"><span class="lbl">Total sales</span>' +
+    '<b style="color:var(--gold2);font-size:1.3em;">' + f(sales) + ' €</b></div></div>' +
+    '<div class="row"><div class="grow"><span class="lbl">Cash</span><b class="bal-cred">' + f(cash) + ' €</b></div>' +
+    '<div class="grow"><span class="lbl">Card</span><b style="color:var(--blue);">' + f(card) + ' €</b></div>' +
+    '<div class="grow"><span class="lbl">Losses</span><b class="bal-owe">' + f(loss) + ' €</b></div></div>';
+
+  const rows = [];
+  if (mode === 'prod'){
+    const map = {};
+    txs.filter(t=>t.items).forEach(t=>t.items.forEach(i=>{
+      const k = i.name;
+      map[k] = map[k] || { qty:0, sum:0 };
+      map[k].qty += i.qty; map[k].sum += i.price*i.qty;
+    }));
+    Object.keys(map).sort((a,b)=>map[b].sum-map[a].sum)
+      .forEach(k=>rows.push([k, map[k].qty + ' pcs', f(map[k].sum) + ' €']));
+  } else {
+    const map = {};
+    txs.filter(t=>t.type==='debt').forEach(t=>{
+      const d = t.barDate || barDate(t.ts, getState().settings.dayEnd);
+      const k = mode==='month' ? d.slice(0,7) : d;
+      map[k] = (map[k]||0) + t.amount;
+    });
+    Object.keys(map).sort().reverse()
+      .forEach(k=>rows.push([ mode==='month' ? k : prettyDate(k), '', f(map[k]) + ' €' ]));
+  }
+  h += '<div class="sub" style="margin-top:1.2em;">' +
+    (mode==='prod'?'By product':(mode==='month'?'By month':'By bar day')) + '</div>';
+  h += rows.map(r=>'<div class="row"><div class="grow"><b>'+esc(r[0])+'</b>' +
+    (r[1]?'<br><span style="color:var(--text3);font-size:0.9em;">'+esc(r[1])+'</span>':'') +
+    '</div><b style="color:var(--gold2);">'+r[2]+'</b></div>').join('');
+  h += '<div style="height:2em;"></div>';
+  el.innerHTML = h;
+}
+function printSummary(){
+  const year = document.getElementById('sum-year').value;
+  const mode = document.getElementById('sum-mode').value;
+  const txs = summaryData();
+  const sales = txs.filter(t=>t.type==='debt').reduce((s,t)=>s+t.amount,0);
+  const cash = txs.filter(t=>t.type==='pay'&&t.method==='cash').reduce((s,t)=>s+t.amount,0);
+  const card = txs.filter(t=>t.type==='pay'&&t.method==='card').reduce((s,t)=>s+t.amount,0);
+  const loss = txs.filter(t=>t.type==='writeoff').reduce((s,t)=>s+t.amount,0);
+
+  let rowsHtml = '';
+  if (mode === 'prod'){
+    const map = {};
+    txs.filter(t=>t.items).forEach(t=>t.items.forEach(i=>{
+      map[i.name] = map[i.name] || {qty:0,sum:0};
+      map[i.name].qty += i.qty; map[i.name].sum += i.price*i.qty;
+    }));
+    rowsHtml = Object.keys(map).sort((a,b)=>map[b].sum-map[a].sum)
+      .map(k=>'<tr><td>'+esc(k)+'</td><td class="n">'+map[k].qty+'</td><td class="n">'+f(map[k].sum)+' €</td></tr>').join('');
+  } else {
+    const map = {};
+    txs.filter(t=>t.type==='debt').forEach(t=>{
+      const d = t.barDate || barDate(t.ts, getState().settings.dayEnd);
+      const k = mode==='month' ? d.slice(0,7) : d;
+      map[k] = (map[k]||0) + t.amount;
+    });
+    rowsHtml = Object.keys(map).sort().reverse()
+      .map(k=>'<tr><td>'+(mode==='month'?k:prettyDate(k))+'</td><td class="n"></td><td class="n">'+f(map[k])+' €</td></tr>').join('');
+  }
+
+  document.getElementById('print-area').innerHTML =
+    '<h1>SE7EN V2 — Summary ' + year + '</h1>' +
+    '<p>Bar day ends at ' + String(getState().settings.dayEnd).padStart(2,'0') + ':00 · printed ' + prettyDate(todayBarDate()) + '</p>' +
+    '<h2>Totals</h2><table>' +
+    '<tr><td>Total sales</td><td class="n">' + f(sales) + ' €</td></tr>' +
+    '<tr><td>Cash received</td><td class="n">' + f(cash) + ' €</td></tr>' +
+    '<tr><td>Card received</td><td class="n">' + f(card) + ' €</td></tr>' +
+    '<tr><td>Written off (loss)</td><td class="n">' + f(loss) + ' €</td></tr></table>' +
+    '<h2>' + (mode==='prod'?'By product':(mode==='month'?'By month':'By bar day')) + '</h2>' +
+    '<table><tr><th>Item</th><th class="n">Qty</th><th class="n">Amount</th></tr>' + rowsHtml + '</table>';
+  window.print();
+}
+
+// ═════════ BOOT ═════════
+document.querySelectorAll('.modal-bg').forEach(bg=>{
+  bg.addEventListener('click', e=>{ if (e.target === bg) bg.classList.remove('show'); });
+});
+getState(); saveState();
+applyLook();
+renderHome();
+if ('serviceWorker' in navigator)
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
