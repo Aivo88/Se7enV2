@@ -13,12 +13,12 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 [onclick]{cursor:pointer;}
-button{font-family:inherit;font-size:inherit;background:none;border:none;text-align:left;cursor:pointer;}
+button{font-family:inherit;font-size:inherit;color:inherit;background:none;border:none;text-align:left;cursor:pointer;}
 :root{
   --bg:#0B1220; --bg2:#111827; --bg3:#1A2540; --bg4:#223060;
   --border:#1E3058; --border2:#2A4080;
   --gold:#D4A843; --gold2:#F0C860;
-  --text:#F0F4FF; --text2:#9DB0D0; --text3:#5A7090; --text4:#2E4060;
+  --text:#F0F4FF; --text2:#AFC0DC; --text3:#8095B8; --text4:#4A6088;
   --green:#3CB878; --gbg:#0A2818;
   --red:#E05040; --rbg:#2A0C0C; --rborder:#602020;
   --blue:#4A80D0; --bbg:#0A1A30;
@@ -403,7 +403,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.1.0';
+var APP_VERSION = '2.01.01';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -1209,7 +1209,7 @@ function openTablesManage(){
     var b=balanceOf(st,c.id);
     return '<div class="row">'+
       '<button class="row-main" onclick="renameTable(\''+c.id+'\')">'+
-      '<div style="font-weight:600;">'+esc(c.name)+' <span style="color:var(--text4);font-size:0.8em;">\u270E</span></div>'+
+      '<div style="font-weight:600;">'+esc(c.name)+' <span style="color:var(--gold);font-size:0.9em;">\u270E</span></div>'+
       '<div class="row-sub '+balClass(b)+'">'+balText(b)+'</div></button>'+
       '<button class="qbtn" style="color:var(--red);" onclick="removeTable(\''+c.id+'\')">\u2715</button></div>';
   }).join('') : '<div class="empty-hint">No tables.</div>')+

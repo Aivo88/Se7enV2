@@ -1,5 +1,5 @@
 {
-  "version": "2.1.0",
-  "cache": "se7env2-v7",
-  "notes": "Known names ask whether it is the same person; customers can be renamed or merged from the customer screen."
+  "version": "2.01.01",
+  "cache": "se7env2-v8",
+  "notes": "Fixed grey/unreadable text on buttons (tables, categories, products), lifted dim greys, version numbering now major.minor.patch with two digits."
 }
