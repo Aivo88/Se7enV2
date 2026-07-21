@@ -502,7 +502,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.00.23';
+var APP_VERSION = '2.00.24';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -1661,6 +1661,12 @@ function summaryGridHTML(s){
 
 /* One row per customer for the selected period, mirroring V1: what they ran up,
    what came in, and how many entries sit behind it. */
+/* Walk-in and house entries also live under reserved ids, so they are excluded
+   rather than being coloured as if they were tables. */
+function isPermanentId(id){
+  if(!id || id.indexOf('__')!==0) return false;
+  return id!==CASH_ID && id!==CARD_ID && id!=='__house__';
+}
 function customerRowsHTML(txs,scope){
   var by={};
   txs.forEach(function(t){
@@ -1676,7 +1682,7 @@ function customerRowsHTML(txs,scope){
     r.count++;
   });
   var rows=Object.keys(by).map(function(k){ return by[k]; })
-    .sort(function(a,b){ return (b.tab-b.paid)-(a.tab-a.paid); });
+    .sort(function(a,b){ return a.name.toLowerCase().localeCompare(b.name.toLowerCase()); });
   if(!rows.length) return '<div class="empty-hint">No transactions.</div>';
   return rows.map(function(r){
     var unpaid=r.tab-r.paid, amt;
@@ -1691,8 +1697,10 @@ function customerRowsHTML(txs,scope){
       amt='<div style="color:'+paidCol+';font-weight:700;">+'+f(r.paid)+EUR+'</div>';
     }
     if(r.loss>0.001) amt+='<div style="color:var(--red);font-size:0.85em;">'+f(r.loss)+EUR+' loss</div>';
-    return '<div class="row"><button class="row-main" onclick="openTxDay(\''+scope+'\',\''+r.id+'\')">'+
-      '<div style="font-weight:600;">'+esc(r.name)+'</div>'+
+    var perm=isPermanentId(r.id);
+    return '<div class="row"'+(perm?' style="border-color:var(--gold);"':'')+
+      '><button class="row-main" onclick="openTxDay(\''+scope+'\',\''+r.id+'\')">'+
+      '<div style="font-weight:600;'+(perm?'color:var(--gold2);':'')+'">'+esc(r.name)+'</div>'+
       '<div class="row-sub">'+r.count+' transaction'+(r.count===1?'':'s')+' \u2014 tap to open</div></button>'+
       '<div style="text-align:right;">'+amt+'</div></div>';
   }).join('');

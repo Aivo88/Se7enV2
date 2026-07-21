@@ -1,5 +1,5 @@
 {
-  "version": "2.00.23",
-  "cache": "se7env2-v25",
-  "notes": "Update check now compares version.json fetched straight from the server and clears every cache before reloading; version.json is never cached."
+  "version": "2.00.24",
+  "cache": "se7env2-v26",
+  "notes": "History customer list is sorted alphabetically; table and regular entries are shown in gold."
 }
