@@ -189,6 +189,7 @@ input:focus,select:focus{border-color:var(--gold);}
     </div>
     <div class="tabs">
       <button class="tab active" id="tab-add" onclick="setCustTab('add')">Add</button>
+      <button class="tab" id="tab-bal" onclick="setCustTab('bal')">Balance</button>
       <button class="tab" id="tab-hist" onclick="setCustTab('hist')">History</button>
     </div>
   </div>
@@ -196,6 +197,23 @@ input:focus,select:focus{border-color:var(--gold);}
     <div id="pane-add">
       <div class="cat-bar" id="cat-bar"></div>
       <div class="prod-grid" id="prod-grid"></div>
+    </div>
+    <div id="pane-bal" style="display:none;">
+      <div class="card-box">
+        <div class="label">Customer hands over money</div>
+        <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.5em;" onclick="balAction('credit')">Add credit</button>
+        <div class="hint">Money taken now and held against future purchases.</div>
+      </div>
+      <div class="card-box">
+        <div class="label">Payment towards the tab</div>
+        <button class="btn-full" style="background:var(--bbg);border-color:var(--blue);color:var(--blue);" onclick="balAction('pay')">Add payment</button>
+        <div class="hint">Reduces what is currently owed.</div>
+      </div>
+      <div class="card-box">
+        <div class="label">Charge without products</div>
+        <button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);" onclick="balAction('debt')">Add debt</button>
+        <div class="hint">A manual charge, for example a broken glass.</div>
+      </div>
     </div>
     <div id="pane-hist" style="display:none;"></div>
   </div>
@@ -207,7 +225,6 @@ input:focus,select:focus{border-color:var(--gold);}
     </div>
   </div>
   <div class="foot">
-    <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.57em;" onclick="askBillSettled()">Settled</button>
     <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="backFromCustomer()">Back</button>
   </div>
 </div>
@@ -379,6 +396,33 @@ input:focus,select:focus{border-color:var(--gold);}
   </div>
 </div>
 
+<div class="modal-bg" id="m-amount">
+  <div class="modal">
+    <div class="modal-title" id="ma-title"></div>
+    <div class="hint" id="ma-hint" style="text-align:center;margin-bottom:0.8em;"></div>
+    <div class="field"><div class="label">Amount</div><input type="text" id="ma-amount" inputmode="decimal" autocomplete="off"></div>
+    <div class="field"><div class="label">Reason (optional)</div><input type="text" id="ma-note" autocomplete="off"></div>
+    <div id="ma-methods" class="btn-row" style="margin-bottom:0.6em;">
+      <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="amountOk('cash')">Cash</button>
+      <button class="btn-full" style="background:var(--bbg);border-color:var(--blue);color:var(--blue);" onclick="amountOk('card')">Card</button>
+    </div>
+    <button class="btn-full" id="ma-save" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.6em;" onclick="amountOk(null)">Save</button>
+    <button class="btn-modal-cancel" onclick="closeModal('m-amount')">Cancel</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="m-txedit">
+  <div class="modal">
+    <div class="modal-title">Edit transaction</div>
+    <div class="hint" id="te-what" style="text-align:center;margin-bottom:0.8em;"></div>
+    <div class="field"><div class="label">Amount</div><input type="text" id="te-amount" inputmode="decimal" autocomplete="off"></div>
+    <div class="field"><div class="label">Reason (optional)</div><input type="text" id="te-note" autocomplete="off"></div>
+    <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.6em;" onclick="saveTxEdit()">Save changes</button>
+    <button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);margin-bottom:0.6em;" onclick="deleteTx()">Delete transaction</button>
+    <button class="btn-modal-cancel" onclick="closeModal('m-txedit')">Cancel</button>
+  </div>
+</div>
+
 <div class="modal-bg" id="m-olddebt">
   <div class="modal">
     <div class="modal-title">Old written-off debt</div>
@@ -446,7 +490,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.00.10';
+var APP_VERSION = '2.00.12';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -716,8 +760,8 @@ function addCustomer(id,name,restored){
   var st=getState();
   st.customers.push({id:id,name:name});
   if(!saveState(st)) return;
-  if(restored) toast('History restored','ok');
-  openCustomer(id);
+  toast(restored ? (name+' \u2014 history restored') : (name+' added'),'ok');
+  goHome();
 }
 
 /* ---------- RENAME / MERGE ---------- */
@@ -829,12 +873,15 @@ function renderCustBalance(){
 }
 function setCustTab(t){
   custTab=t;
-  document.getElementById('tab-add').classList.toggle('active',t==='add');
-  document.getElementById('tab-hist').classList.toggle('active',t==='hist');
-  document.getElementById('pane-add').style.display = t==='add'?'':'none';
-  document.getElementById('pane-hist').style.display = t==='hist'?'':'none';
+  ['add','bal','hist'].forEach(function(k){
+    document.getElementById('tab-'+k).classList.toggle('active',k===t);
+    document.getElementById('pane-'+k).style.display = k===t?'':'none';
+  });
   if(t==='add'){ renderCats('cat-bar'); renderProds('prod-grid'); renderCart(); }
-  else { document.getElementById('cart-wrap').style.display='none'; renderHistory(); }
+  else {
+    document.getElementById('cart-wrap').style.display='none';
+    if(t==='hist') renderHistory();
+  }
 }
 
 /* ---------- CATEGORY BAR + PRODUCT GRID ---------- */
@@ -959,21 +1006,33 @@ function toggleDay(d){
   var e=document.getElementById('day-'+d);
   if(e) e.style.display = e.style.display==='none' ? '' : 'none';
 }
+function txLabel(t){
+  if(t.type==='debt') return 'Purchase';
+  if(t.type==='writeoff') return 'Written off (loss)';
+  if(t.type==='credit') return 'Credit added ('+(t.method==='card'?'card':'cash')+')';
+  if(t.type==='recovery') return 'Old debt collected ('+(t.method==='card'?'card':'cash')+')';
+  if(t.type==='expense') return 'Expense';
+  if(t.type==='income') return 'Other income ('+(t.method==='card'?'card':'cash')+')';
+  return (t.method==='card'?'Card':'Cash')+' payment';
+}
+function txIsOut(t){ return t.type==='debt'||t.type==='expense'; }
 function txHTML(t,withName){
-  var cls='pay', label='Payment';
-  if(t.type==='debt'){ cls='debt'; label='Purchase'; }
-  else if(t.type==='writeoff'){ cls='debt'; label='Written off (loss)'; }
-  else if(t.type==='credit'){ cls='credit'; label='Credit added'; }
-  else if(t.type==='recovery'){ cls=(t.method==='card')?'card':'pay'; label='Old debt collected ('+(t.method==='card'?'card':'cash')+')'; }
-  else if(t.type==='pay'){ cls=(t.method==='card')?'card':'pay'; label=(t.method==='card'?'Card':'Cash')+' payment'; }
+  var cls='pay', label=txLabel(t);
+  if(t.type==='debt'||t.type==='writeoff'||t.type==='expense') cls='debt';
+  else if(t.type==='credit') cls='credit';
+  else if(t.method==='card') cls='card';
   var items = (t.items && t.items.length)
     ? '<div class="tx-items">'+t.items.map(function(i){ return esc(i.name)+' \u00D7'+i.qty+' \u2014 '+f(i.price*i.qty)+EUR; }).join('<br>')+'</div>'
     : '';
   var head = withName ? (esc(t.customerName||'?')+' \u00B7 '+label) : label;
   var when = withName ? (fmtDate(txBarDate(t))+' '+fmtTime(t.ts)) : fmtTime(t.ts);
+  var note = t.note ? '<div class="tx-items" style="font-style:italic;">'+esc(t.note)+'</div>' : '';
+  var edit = '<button class="qbtn" style="width:auto;padding:0 12px;color:var(--gold2);" '+
+    'onclick="openTxEdit(\''+t.id+'\')">\u270E</button>';
   return '<div class="tx '+cls+'"><div class="tx-top"><span>'+head+'</span>'+
-    '<span>'+(t.type==='debt'?'\u2212':'+')+f(t.amount)+EUR+'</span></div>'+
-    '<div class="tx-time">'+when+'</div>'+items+'</div>';
+    '<span style="display:flex;align-items:center;gap:0.5em;">'+
+    (txIsOut(t)?'\u2212':'+')+f(t.amount)+EUR+edit+'</span></div>'+
+    '<div class="tx-time">'+when+'</div>'+note+items+'</div>';
 }
 
 /* ---------- SETTLE ---------- */
@@ -1020,6 +1079,127 @@ function finishSettle(st,c){
   saveState(st);
   if(c.permanent) openTables(); else goHome();
   return {balance:bal};
+}
+
+/* ---------- AMOUNT MODAL ---------- */
+var amountCtx=null;
+function openAmount(title,hint,needMethod,onOk){
+  amountCtx={onOk:onOk,needMethod:needMethod};
+  document.getElementById('ma-title').textContent=title;
+  document.getElementById('ma-hint').textContent=hint||'';
+  document.getElementById('ma-amount').value='';
+  document.getElementById('ma-note').value='';
+  document.getElementById('ma-methods').style.display=needMethod?'':'none';
+  document.getElementById('ma-save').style.display=needMethod?'none':'';
+  openModal('m-amount');
+  setTimeout(function(){ document.getElementById('ma-amount').focus(); },100);
+}
+function amountOk(method){
+  if(!amountCtx) return;
+  var v=parseAmt(document.getElementById('ma-amount').value);
+  if(isNaN(v)||v<=0){ toast('Enter an amount','err'); return; }
+  var note=document.getElementById('ma-note').value.trim();
+  var cb=amountCtx.onOk;
+  closeModal('m-amount'); amountCtx=null;
+  cb(v,note,method);
+}
+
+/* ---------- BALANCE TAB ---------- */
+function balAction(kind){
+  var st=getState(), c=findCustomer(st,activeCustomerId);
+  if(!c) return;
+  if(kind==='credit'){
+    openAmount('Add credit','Money handed over now, held against future purchases.',true,
+      function(v,note,method){ addBalanceTx('credit',v,note,method); });
+  } else if(kind==='pay'){
+    openAmount('Add payment','Reduces what is currently owed.',true,
+      function(v,note,method){ addBalanceTx('pay',v,note,method); });
+  } else {
+    openAmount('Add debt','A manual charge with no products attached.',false,
+      function(v,note){ addBalanceTx('debt',v,note,null); });
+  }
+}
+function addBalanceTx(type,amount,note,method){
+  var st=getState(), c=findCustomer(st,activeCustomerId);
+  if(!c) return;
+  var tx={customerId:c.id,customerName:c.name,type:type,amount:amount};
+  if(method) tx.method=method;
+  if(note) tx.note=note;
+  pushTx(st,tx);
+  if(!saveState(st)) return;
+  renderCustBalance();
+  toast('Saved','ok');
+  goHome();
+}
+
+/* ---------- HOUSE CASH FLOW ---------- */
+function addHouseEntry(kind){
+  var isExp=(kind==='expense');
+  openAmount(isExp?'Add expense':'Add other income',
+    isExp?'Money out of the till that is not a customer debt.'
+         :'Money in that did not come from a tab.',
+    true,
+    function(v,note,method){
+      var st=getState();
+      pushTx(st,{customerId:'__house__',customerName:isExp?'Expense':'Other income',
+        type:isExp?'expense':'income',method:method,amount:v,note:note||''});
+      if(!saveState(st)) return;
+      renderSettings();
+      toast('Saved','ok');
+    });
+}
+
+/* ---------- EDIT / DELETE A TRANSACTION ---------- */
+var editingTxId=null;
+function openTxEdit(id){
+  var st=getState(), t=null;
+  for(var i=0;i<st.transactions.length;i++) if(st.transactions[i].id===id) t=st.transactions[i];
+  if(!t) return;
+  editingTxId=id;
+  document.getElementById('te-what').textContent=
+    (t.customerName||'')+' \u00B7 '+txLabel(t)+' \u00B7 '+fmtDate(txBarDate(t))+' '+fmtTime(t.ts);
+  document.getElementById('te-amount').value=f(t.amount);
+  document.getElementById('te-note').value=t.note||'';
+  openModal('m-txedit');
+}
+function saveTxEdit(){
+  var v=parseAmt(document.getElementById('te-amount').value);
+  if(isNaN(v)||v<=0){ toast('Enter an amount','err'); return; }
+  var note=document.getElementById('te-note').value.trim();
+  var st=getState();
+  for(var i=0;i<st.transactions.length;i++){
+    if(st.transactions[i].id===editingTxId){
+      st.transactions[i].amount=v;
+      st.transactions[i].note=note;
+      /* Item lines no longer add up to the amount, so drop them rather than
+         showing a total that contradicts its own breakdown. */
+      if(st.transactions[i].items) delete st.transactions[i].items;
+    }
+  }
+  if(!saveState(st)) return;
+  closeModal('m-txedit');
+  refreshAfterTxChange();
+  toast('Transaction updated','ok');
+}
+function deleteTx(){
+  closeModal('m-txedit');
+  showConfirm('Delete transaction?','This removes the entry and corrects every balance and report it affected.',
+    function(){
+      var st=getState();
+      st.transactions=st.transactions.filter(function(t){ return t.id!==editingTxId; });
+      if(!saveState(st)) return;
+      refreshAfterTxChange();
+      toast('Transaction deleted','ok');
+    });
+}
+function refreshAfterTxChange(){
+  if(document.getElementById('s-txday').classList.contains('active')){
+    if(txdayCtx) openTxDay(txdayCtx.scope,txdayCtx.id);
+  } else if(document.getElementById('s-rep').classList.contains('active')){
+    setRepTab(repTab);
+  } else if(document.getElementById('s-cust').classList.contains('active')){
+    renderCustBalance(); renderHistory();
+  }
 }
 
 /* ---------- OLD DEBT ---------- */
@@ -1371,18 +1551,22 @@ function setRepTab(t){
 }
 
 function sumRange(txs){
-  var cash=0,card=0,loss=0,tab=0;
+  var cash=0,card=0,loss=0,tab=0,exp=0;
   txs.forEach(function(t){
-    if(t.type==='pay'||t.type==='recovery'){ if(t.method==='card') card+=t.amount; else cash+=t.amount; }
+    if(t.type==='pay'||t.type==='recovery'||t.type==='credit'||t.type==='income'){
+      if(t.method==='card') card+=t.amount; else cash+=t.amount;
+    }
     else if(t.type==='writeoff') loss+=t.amount;
+    else if(t.type==='expense') exp+=t.amount;
     else if(t.type==='debt') tab+=t.amount;
   });
-  return {cash:cash,card:card,loss:loss,tab:tab,income:cash+card,net:cash+card-loss};
+  return {cash:cash,card:card,loss:loss,exp:exp,tab:tab,
+          income:cash+card,net:cash+card-loss-exp};
 }
 function summaryGridHTML(s){
   return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6em;margin-bottom:0.9em;">'+
     box('Total','+'+f(s.income)+EUR,'green')+box('Net total','+'+f(s.net)+EUR,'green')+
-    box('Cash',f(s.cash)+EUR,'green')+box('On tab',f(s.tab)+EUR,'gold')+
+    box('Cash',f(s.cash)+EUR,'green')+box('Expenses',f(s.exp)+EUR,'gold')+
     box('Card',f(s.card)+EUR,'blue')+box('Loss',f(s.loss)+EUR,'red')+'</div>';
 }
 
@@ -1395,8 +1579,11 @@ function customerRowsHTML(txs,scope){
     if(!by[id]) by[id]={id:id,name:t.customerName||'?',tab:0,paid:0,cardPaid:0,loss:0,count:0};
     var r=by[id];
     if(t.type==='debt') r.tab+=t.amount;
-    else if(t.type==='pay'||t.type==='recovery'){ r.paid+=t.amount; if(t.method==='card') r.cardPaid+=t.amount; }
+    else if(t.type==='pay'||t.type==='recovery'||t.type==='credit'||t.type==='income'){
+      r.paid+=t.amount; if(t.method==='card') r.cardPaid+=t.amount;
+    }
     else if(t.type==='writeoff') r.loss+=t.amount;
+    else if(t.type==='expense') r.tab+=t.amount;
     r.count++;
   });
   var rows=Object.keys(by).map(function(k){ return by[k]; })
@@ -1424,7 +1611,7 @@ function customerRowsHTML(txs,scope){
 
 function dayTxs(st){ var bd=todayBarDate(); return st.transactions.filter(function(t){ return txBarDate(t)===bd; }); }
 function monthTxs(st){
-  if(!repMonth){ var n=new Date(); repMonth={year:n.getFullYear(),month:n.getMonth()}; }
+  if(!repMonth){ var n=new Date(); repMonth={year:n.getFullYear(),month:n.getMonth(),summary:false}; }
   return st.transactions.filter(function(t){
     var d=new Date(txBarDate(t));
     return d.getFullYear()===repMonth.year && d.getMonth()===repMonth.month;
@@ -1439,6 +1626,8 @@ function renderDay(){
     summaryGridHTML(sumRange(txs))+customerRowsHTML(txs,'day');
 }
 function renderMonth(){
+  if(!repMonth){ var n=new Date(); repMonth={year:n.getFullYear(),month:n.getMonth(),summary:false}; }
+  if(repMonth.summary){ renderYearSummary(); return; }
   var st=getState(), txs=monthTxs(st);
   document.getElementById('rtab-month').textContent=MONTHS[repMonth.month]+' '+repMonth.year;
   var nav='<div class="row" style="justify-content:space-between;">'+
@@ -1448,11 +1637,78 @@ function renderMonth(){
   document.getElementById('rep-body').innerHTML=
     nav+summaryGridHTML(sumRange(txs))+customerRowsHTML(txs,'month');
 }
+/* Stepping past December lands on a year-summary page before continuing into
+   January, and the same in reverse. */
 function shiftMonth(d){
+  if(repMonth.summary){
+    repMonth.summary=false;
+    if(d<0){ repMonth.month=11; }
+    else { repMonth.month=0; repMonth.year+=1; }
+    renderMonth(); return;
+  }
+  if(d<0 && repMonth.month===0){ repMonth.summary=true; repMonth.year-=1; renderMonth(); return; }
+  if(d>0 && repMonth.month===11){ repMonth.summary=true; renderMonth(); return; }
   repMonth.month+=d;
   if(repMonth.month<0){ repMonth.month=11; repMonth.year--; }
   if(repMonth.month>11){ repMonth.month=0; repMonth.year++; }
   renderMonth();
+}
+function gotoMonth(year,month){
+  repMonth={year:year,month:month,summary:false};
+  renderMonth();
+}
+function yearTxs(st,year){
+  return st.transactions.filter(function(t){ return new Date(txBarDate(t)).getFullYear()===year; });
+}
+function stRow(label,value,o){
+  o=o||{};
+  var size=o.big?'1.2em':'1em', weight=o.bold?'700':'500';
+  var sign = value<0 ? '\u2212' : (o.plus?'+':'');
+  return '<div style="display:flex;justify-content:space-between;align-items:baseline;padding:0.4em 0;'+
+    (o.border?'border-top:1px solid var(--border2);margin-top:0.3em;padding-top:0.6em;':'')+'">'+
+    '<span style="color:'+(o.labelColor||'var(--text3)')+';font-size:'+size+';font-weight:'+weight+';">'+label+'</span>'+
+    '<span style="color:'+(o.color||'var(--text)')+';font-size:'+size+';font-weight:'+weight+';">'+
+    sign+f(Math.abs(value))+EUR+'</span></div>';
+}
+function stTitle(t){
+  return '<div style="color:var(--gold2);font-size:0.8em;font-weight:700;letter-spacing:1.5px;'+
+    'text-transform:uppercase;margin:0.7em 0 0.2em;">'+t+'</div>';
+}
+function renderYearSummary(){
+  var st=getState(), year=repMonth.year;
+  document.getElementById('rtab-month').textContent='Year '+year;
+  var txs=yearTxs(st,year), s2=sumRange(txs);
+  var nav='<div class="row" style="justify-content:space-between;">'+
+    '<button class="qbtn" onclick="shiftMonth(-1)">\u2039</button>'+
+    '<div style="text-align:center;"><div style="font-weight:700;color:var(--gold2);">'+year+'</div>'+
+    '<div class="row-sub" style="margin:0;">Year summary</div></div>'+
+    '<button class="qbtn" onclick="shiftMonth(1)">\u203A</button></div>';
+  var statement='<div class="card-box">'+
+    stTitle('Income')+
+    stRow('Cash',s2.cash,{color:'var(--green)',plus:true})+
+    stRow('Card',s2.card,{color:'var(--blue)',plus:true})+
+    stRow('Total in',s2.income,{color:'var(--green)',plus:true,bold:true,border:true})+
+    stTitle('Deductions')+
+    stRow('Written off',-s2.loss,{color:'var(--red)'})+
+    stRow('Expenses',-s2.exp,{color:'var(--gold2)'})+
+    stRow('Total out',-(s2.loss+s2.exp),{color:'var(--red)',bold:true,border:true})+
+    '<div style="border-top:2px solid var(--gold);margin-top:0.7em;padding-top:0.7em;">'+
+    stRow('Net total',s2.net,{color:s2.net>=0?'var(--green)':'var(--red)',plus:true,bold:true,big:true,labelColor:'var(--gold2)'})+
+    '</div></div>';
+  var mIn=[0,0,0,0,0,0,0,0,0,0,0,0];
+  txs.forEach(function(t){
+    if(t.type!=='pay' && t.type!=='recovery') return;
+    mIn[new Date(txBarDate(t)).getMonth()]+=t.amount;
+  });
+  var rows='';
+  for(var m=11;m>=0;m--){
+    if(!mIn[m]) continue;
+    rows+='<div class="row"><button class="row-main" onclick="gotoMonth('+year+','+m+')">'+
+      '<div style="font-weight:600;">'+MONTHS[m]+' '+year+'</div></button>'+
+      '<div style="color:var(--green);font-weight:700;">+'+f(mIn[m])+EUR+'</div></div>';
+  }
+  document.getElementById('rep-body').innerHTML=
+    nav+statement+(rows?stTitle('Months')+rows:'<div class="empty-hint">No income this year.</div>');
 }
 function renderRaw(){
   var st=getState();
@@ -1492,6 +1748,11 @@ function renderSettings(){
     '<button class="btn-full" style="margin-bottom:0.5em;" onclick="pickHeaderImage()">Choose image from device</button>'+
     (s.headerImage?'<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);" onclick="clearHeaderImage()">Remove image</button>':'')+
     '<div class="hint">An image replaces the text. Large photos are scaled down automatically before saving.</div></div>'+
+
+    '<div class="card-box"><div class="label">Cash flow</div>'+
+    '<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);margin-bottom:0.5em;" onclick="addHouseEntry(\'expense\')">+ Expense</button>'+
+    '<button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="addHouseEntry(\'income\')">+ Other income</button>'+
+    '<div class="hint">Money in or out of the till that is not tied to a customer tab. Both appear in History.</div></div>'+
 
     '<div class="card-box"><div class="label">Products</div>'+
     '<button class="btn-full" style="margin-bottom:0.5em;" onclick="openCategories()">Categories &amp; products</button>'+

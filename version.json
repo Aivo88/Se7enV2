@@ -1,5 +1,5 @@
 {
-  "version": "2.00.10",
-  "cache": "se7env2-v12",
-  "notes": "History rebuilt in the V1 style: Today / Month / Raw tabs, summary grid, one row per customer, tap a customer to see that period's transactions with product lines."
+  "version": "2.00.12",
+  "cache": "se7env2-v14",
+  "notes": "Balance tab (credit, payment, manual debt, each with a reason); expenses and other income in Settings; every transaction can be edited or deleted; new customer returns to the home screen."
 }
