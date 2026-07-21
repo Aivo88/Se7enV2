@@ -295,6 +295,17 @@ input:focus,select:focus{border-color:var(--gold);}
   </div>
 </div>
 
+<!-- SETTINGS SUB-PAGE -->
+<div class="screen" id="s-setpage">
+  <div class="top-bar">
+    <div class="top-row"><div class="screen-title" id="sp-title"></div></div>
+  </div>
+  <div class="body-scroll" id="sp-body"></div>
+  <div class="foot">
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openSettings()">Back</button>
+  </div>
+</div>
+
 <!-- CATEGORIES -->
 <div class="screen" id="s-cats">
   <div class="top-bar">
@@ -490,7 +501,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.00.12';
+var APP_VERSION = '2.00.14';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -742,8 +753,7 @@ function askNewCustomer(){
     }
     if(match){
       document.getElementById('mk-body').textContent=
-        match.name+' has been here before \u2014 '+match.visits+' entr'+(match.visits===1?'y':'ies')+
-        ', last on '+fmtDate(match.last)+'. Is this the same person?';
+        match.name+' \u2014 last seen '+fmtDate(match.last)+'. Is this the same person?';
       document.getElementById('mk-same').onclick=function(){
         closeModal('m-known'); addCustomer(match.id,name,true);
       };
@@ -796,14 +806,17 @@ function openMergePicker(){
   if(!c) return;
   if(c.permanent){ toast('Tables cannot be merged','err'); return; }
   closeModal('m-cmenu');
-  var others=knownCustomers(st).filter(function(k){ return k.id!==c.id && isPerson(st,k.id); });
+  /* Only open tabs are offered: over time the historical list would grow into
+   hundreds of one-off visitors and become useless to scroll. */
+  var others=st.customers.filter(function(x){
+    return x.id!==c.id && !x.permanent;
+  }).map(function(x){ return {id:x.id,name:x.name}; });
   document.getElementById('mg-hint').textContent=
     others.length ? ('All of '+c.name+'\u2019s history moves to the customer you pick.')
-                  : 'No other customers on record yet.';
+                  : 'No other open tabs to merge with.';
   document.getElementById('mg-list').innerHTML=others.map(function(k){
     return '<div class="row"><button class="row-main" onclick="doMerge(\''+k.id+'\')">'+
-      '<div style="font-weight:600;">'+esc(k.name)+'</div>'+
-      '<div class="row-sub">'+k.visits+' entries \u00B7 last '+fmtDate(k.last)+'</div></button></div>';
+      '<div style="font-weight:600;">'+esc(k.name)+'</div></button></div>';
   }).join('');
   openModal('m-merge');
 }
@@ -811,8 +824,7 @@ function doMerge(targetId){
   var st=getState();
   var from=findCustomer(st,activeCustomerId);
   if(!from || targetId===from.id) return;
-  var known=knownCustomers(st), target=null;
-  for(var i=0;i<known.length;i++) if(known[i].id===targetId) target=known[i];
+  var target=findCustomer(st,targetId);
   if(!target) return;
   closeModal('m-merge');
   showConfirm('Merge customers?',
@@ -1144,7 +1156,6 @@ function addHouseEntry(kind){
       pushTx(st,{customerId:'__house__',customerName:isExp?'Expense':'Other income',
         type:isExp?'expense':'income',method:method,amount:v,note:note||''});
       if(!saveState(st)) return;
-      renderSettings();
       toast('Saved','ok');
     });
 }
@@ -1735,65 +1746,93 @@ function openTxDay(scope,custId){
 }
 
 /* ---------- SETTINGS ---------- */
+/* The tablet screen is short, so settings are split into pages instead of one
+   long scroll. */
 function openSettings(){ show('s-set'); renderSettings(); }
+function menuRow(label,sub,handler){
+  return '<div class="row"><button class="row-main" onclick="'+handler+'">'+
+    '<div style="font-weight:600;">'+label+'</div>'+
+    (sub?'<div class="row-sub">'+sub+'</div>':'')+'</button>'+
+    '<div style="color:var(--text3);font-size:1.2em;">\u203A</div></div>';
+}
 function renderSettings(){
-  var st=getState(), s=st.settings, hours='';
-  for(var h=1;h<=8;h++) hours+='<option value="'+h+'"'+(s.dayEnd===h?' selected':'')+'>'+pad2(h)+':00</option>';
-  var kb=Math.round(storageBytes()/1024);
-  var pct=Math.min(100,Math.round(storageBytes()/(5*1024*1024)*100));
+  var st=getState(), s=st.settings;
   document.getElementById('set-body').innerHTML=
-    '<div class="card-box"><div class="label">Header</div>'+
-    '<div class="field"><input type="text" id="set-hdrtext" value="'+esc(s.headerText||'Pub')+'" placeholder="Pub"></div>'+
-    '<button class="btn-full" style="margin-bottom:0.5em;" onclick="saveHeaderText()">Use this text</button>'+
-    '<button class="btn-full" style="margin-bottom:0.5em;" onclick="pickHeaderImage()">Choose image from device</button>'+
-    (s.headerImage?'<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);" onclick="clearHeaderImage()">Remove image</button>':'')+
-    '<div class="hint">An image replaces the text. Large photos are scaled down automatically before saving.</div></div>'+
-
-    '<div class="card-box"><div class="label">Cash flow</div>'+
-    '<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);margin-bottom:0.5em;" onclick="addHouseEntry(\'expense\')">+ Expense</button>'+
-    '<button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="addHouseEntry(\'income\')">+ Other income</button>'+
-    '<div class="hint">Money in or out of the till that is not tied to a customer tab. Both appear in History.</div></div>'+
-
-    '<div class="card-box"><div class="label">Products</div>'+
-    '<button class="btn-full" style="margin-bottom:0.5em;" onclick="openCategories()">Categories &amp; products</button>'+
-    '<button class="btn-full" onclick="openTablesManage()">Tables</button></div>'+
-
-    '<div class="card-box"><div class="label">Bar day ends at</div>'+
-    '<select onchange="setDayEnd(this.value)">'+hours+'</select>'+
-    '<div class="hint">Sales before this hour count towards the previous day. Each transaction stores its bar day when created, so changing this only affects new entries \u2014 past reports stay as they were.</div></div>'+
-
-    '<div class="card-box"><div class="label">Text size \u2014 '+Math.round(s.fontScale*100)+'%</div>'+
-    '<div class="btn-row"><button class="btn-full" onclick="bumpFont(-0.05)">A \u2212</button>'+
-    '<button class="btn-full" onclick="bumpFont(0.05)">A +</button></div></div>'+
-
-    '<div class="card-box"><div class="label">Product cards per row \u2014 '+s.cols+'</div>'+
-    '<div class="btn-row"><button class="btn-full" onclick="bumpCols(-1)">Bigger</button>'+
-    '<button class="btn-full" onclick="bumpCols(1)">Smaller</button></div></div>'+
-
-    '<div class="card-box"><div class="label">Updates \u2014 version '+APP_VERSION+'</div>'+
-    '<button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="checkUpdate()">Check for updates</button>'+
-    '<div id="upd-status" class="hint" style="text-align:center;"></div></div>'+
-
-    '<div class="card-box"><div class="label">Data \u2014 '+kb+' kB used ('+pct+'% of ~5 MB)</div>'+
-    '<button class="btn-full" style="margin-bottom:0.5em;" onclick="exportData()">Export backup (JSON)</button>'+
-    '<button class="btn-full" style="margin-bottom:0.5em;" onclick="purgeOld()">Delete transactions older than 12 months</button>'+
-    '<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);" onclick="wipeData()">Erase all data</button></div>';
+    menuRow('Header', s.headerImage?'Image':(s.headerText||'Pub'), "openSetPage('header')")+
+    menuRow('Appearance','Text size '+Math.round(s.fontScale*100)+'% \u00B7 '+s.cols+' cards per row', "openSetPage('look')")+
+    menuRow('Bar day','Ends at '+pad2(s.dayEnd)+':00', "openSetPage('day')")+
+    menuRow('Categories &amp; products', st.products.length+' product'+(st.products.length===1?'':'s'), 'openCategories()')+
+    menuRow('Tables', getTables(st).length+' table'+(getTables(st).length===1?'':'s'), 'openTablesManage()')+
+    menuRow('Cash flow','Expenses and other income', "openSetPage('cash')")+
+    menuRow('Updates','Version '+APP_VERSION, "openSetPage('upd')")+
+    menuRow('Data','Backup and storage', "openSetPage('data')");
+}
+var setPage=null;
+function openSetPage(k){ setPage=k; renderSetPage(); show('s-setpage'); }
+function renderSetPage(){
+  var st=getState(), s=st.settings, h='', title='';
+  if(setPage==='header'){
+    title='Header';
+    h='<div class="card-box"><div class="label">Text</div>'+
+      '<div class="field"><input type="text" id="set-hdrtext" value="'+esc(s.headerText||'Pub')+'" placeholder="Pub"></div>'+
+      '<button class="btn-full" onclick="saveHeaderText()">Use this text</button></div>'+
+      '<div class="card-box"><div class="label">Image</div>'+
+      '<button class="btn-full" style="margin-bottom:0.5em;" onclick="pickHeaderImage()">Choose image from device</button>'+
+      (s.headerImage?'<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);" onclick="clearHeaderImage()">Remove image</button>':'')+
+      '<div class="hint">An image replaces the text. Large photos are scaled down automatically before saving.</div></div>';
+  } else if(setPage==='look'){
+    title='Appearance';
+    h='<div class="card-box"><div class="label">Text size \u2014 '+Math.round(s.fontScale*100)+'%</div>'+
+      '<div class="btn-row"><button class="btn-full" onclick="bumpFont(-0.05)">A \u2212</button>'+
+      '<button class="btn-full" onclick="bumpFont(0.05)">A +</button></div></div>'+
+      '<div class="card-box"><div class="label">Product cards per row \u2014 '+s.cols+'</div>'+
+      '<div class="btn-row"><button class="btn-full" onclick="bumpCols(-1)">Bigger</button>'+
+      '<button class="btn-full" onclick="bumpCols(1)">Smaller</button></div></div>';
+  } else if(setPage==='day'){
+    title='Bar day';
+    var hours='';
+    for(var i=1;i<=8;i++) hours+='<option value="'+i+'"'+(s.dayEnd===i?' selected':'')+'>'+pad2(i)+':00</option>';
+    h='<div class="card-box"><div class="label">Bar day ends at</div>'+
+      '<select onchange="setDayEnd(this.value)">'+hours+'</select>'+
+      '<div class="hint">Sales before this hour count towards the previous day. Each transaction stores its bar day when created, so changing this only affects new entries \u2014 past reports stay as they were.</div></div>';
+  } else if(setPage==='cash'){
+    title='Cash flow';
+    h='<div class="card-box">'+
+      '<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);margin-bottom:0.5em;" onclick="addHouseEntry(\'expense\')">+ Expense</button>'+
+      '<button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="addHouseEntry(\'income\')">+ Other income</button>'+
+      '<div class="hint">Money in or out of the till that is not tied to a customer tab. Both appear in History.</div></div>';
+  } else if(setPage==='upd'){
+    title='Updates';
+    h='<div class="card-box"><div class="label">Version '+APP_VERSION+'</div>'+
+      '<button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="checkUpdate()">Check for updates</button>'+
+      '<div id="upd-status" class="hint" style="text-align:center;"></div></div>';
+  } else {
+    title='Data';
+    var kb=Math.round(storageBytes()/1024);
+    var pct=Math.min(100,Math.round(storageBytes()/(5*1024*1024)*100));
+    h='<div class="card-box"><div class="label">'+kb+' kB used ('+pct+'% of ~5 MB)</div>'+
+      '<button class="btn-full" style="margin-bottom:0.5em;" onclick="exportData()">Export backup (JSON)</button>'+
+      '<button class="btn-full" style="margin-bottom:0.5em;" onclick="purgeOld()">Delete transactions older than 12 months</button>'+
+      '<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);" onclick="wipeData()">Erase all data</button></div>';
+  }
+  document.getElementById('sp-title').textContent=title;
+  document.getElementById('sp-body').innerHTML=h;
 }
 function saveHeaderText(){
   var v=document.getElementById('set-hdrtext').value.trim()||'Pub';
   var st=getState();
   st.settings.headerText=v;
   st.settings.headerImage=null;
-  if(saveState(st)){ renderHeader(); renderSettings(); toast('Header updated','ok'); }
+  if(saveState(st)){ renderHeader(); renderSetPage(); toast('Header updated','ok'); }
 }
 function pickHeaderImage(){ document.getElementById('hdr-file').click(); }
 function clearHeaderImage(){
   var st=getState();
   st.settings.headerImage=null;
-  if(saveState(st)){ renderHeader(); renderSettings(); toast('Image removed','ok'); }
+  if(saveState(st)){ renderHeader(); renderSetPage(); toast('Image removed','ok'); }
 }
-/* Scale down before storing: a full-size photo in base64 can exhaust the
-   whole localStorage quota and take the bookkeeping down with it. */
+/* Scale down before storing: a full-size photo in base64 can exhaust the whole
+   localStorage quota and take the bookkeeping down with it. */
 document.getElementById('hdr-file').addEventListener('change',function(e){
   var file=e.target.files && e.target.files[0];
   if(!file) return;
@@ -1801,8 +1840,7 @@ document.getElementById('hdr-file').addEventListener('change',function(e){
   reader.onload=function(ev){
     var img=new Image();
     img.onload=function(){
-      var maxW=480, maxH=160;
-      var r=Math.min(maxW/img.width, maxH/img.height, 1);
+      var r=Math.min(480/img.width, 160/img.height, 1);
       var cv=document.createElement('canvas');
       cv.width=Math.round(img.width*r); cv.height=Math.round(img.height*r);
       cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
@@ -1810,7 +1848,7 @@ document.getElementById('hdr-file').addEventListener('change',function(e){
       if(data.length>700000) data=cv.toDataURL('image/jpeg',0.85);
       var st=getState();
       st.settings.headerImage=data;
-      if(saveState(st)){ renderHeader(); renderSettings(); toast('Header image set','ok'); }
+      if(saveState(st)){ renderHeader(); renderSetPage(); toast('Header image set','ok'); }
     };
     img.onerror=function(){ toast('Could not read that image','err'); };
     img.src=ev.target.result;
@@ -1825,12 +1863,12 @@ function setDayEnd(v){
 function bumpFont(d){
   var st=getState();
   st.settings.fontScale=Math.min(1.6,Math.max(0.75,Math.round((st.settings.fontScale+d)*100)/100));
-  if(saveState(st)){ applyAppearance(); renderSettings(); }
+  if(saveState(st)){ applyAppearance(); renderSetPage(); }
 }
 function bumpCols(d){
   var st=getState();
   st.settings.cols=Math.min(6,Math.max(2,st.settings.cols+d));
-  if(saveState(st)){ applyAppearance(); renderSettings(); }
+  if(saveState(st)){ applyAppearance(); renderSetPage(); }
 }
 function exportData(){
   var blob=new Blob([JSON.stringify(getState(),null,2)],{type:'application/json'});
@@ -1847,7 +1885,7 @@ function purgeOld(){
   showConfirm('Purge old data?', n+' transactions before '+fmtDate(ct)+' will be deleted.', function(){
     var st2=getState();
     st2.transactions=st2.transactions.filter(function(t){ return t.ts>=ct; });
-    if(saveState(st2)){ renderSettings(); toast(n+' transactions deleted','ok'); }
+    if(saveState(st2)){ renderSetPage(); toast(n+' transactions deleted','ok'); }
   });
 }
 function wipeData(){

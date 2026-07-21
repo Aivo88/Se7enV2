@@ -1,5 +1,5 @@
 {
-  "version": "2.00.12",
-  "cache": "se7env2-v14",
-  "notes": "Balance tab (credit, payment, manual debt, each with a reason); expenses and other income in Settings; every transaction can be edited or deleted; new customer returns to the home screen."
+  "version": "2.00.14",
+  "cache": "se7env2-v16",
+  "notes": "Settings split into pages instead of one long scroll; returning-customer prompt shows last seen date."
 }
