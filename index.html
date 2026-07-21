@@ -166,7 +166,7 @@ input:focus,select:focus{border-color:var(--gold);}
 <div class="screen" id="s-tables">
   <div class="top-bar">
     <div class="top-row">
-      <div class="screen-title">Tables</div>
+      <div class="screen-title" id="tables-title">Tables</div>
       
     </div>
   </div>
@@ -341,7 +341,7 @@ input:focus,select:focus{border-color:var(--gold);}
 <div class="screen" id="s-tabman">
   <div class="top-bar">
     <div class="top-row">
-      <div class="screen-title">Tables</div>
+      <div class="screen-title" id="tabman-title">Tables</div>
       
     </div>
   </div>
@@ -502,7 +502,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.00.16';
+var APP_VERSION = '2.00.18';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -516,7 +516,8 @@ var TABLE_DEFS = [
 /* ---------- STATE ---------- */
 function blank(){
   return { customers:[], transactions:[], products:[], categories:[UNCAT],
-    settings:{dayEnd:2,fontScale:1,cols:3,headerText:'Pub',headerImage:null},
+    settings:{dayEnd:2,fontScale:1,cols:3,headerText:'Pub',headerImage:null,
+      tablesLabel:'Tables',tablesHidden:false},
     _tablesSeeded:false };
 }
 function getState(){
@@ -535,6 +536,8 @@ function getState(){
       if(typeof s.fontScale!=='number') s.fontScale=1;
       if(typeof s.cols!=='number') s.cols=3;
       if(typeof s.headerText!=='string') s.headerText='Pub';
+      if(typeof s.tablesLabel!=='string') s.tablesLabel='Tables';
+      if(typeof s.tablesHidden!=='boolean') s.tablesHidden=false;
       if(typeof s.headerImage==='undefined') s.headerImage=null;
       return st;
     }
@@ -649,6 +652,9 @@ function findCustomer(st,id){
   for(var i=0;i<st.customers.length;i++) if(st.customers[i].id===id) return st.customers[i];
   return null;
 }
+/* The permanent group is called Tables by default, but a bar without tables can
+   rename it to whatever it actually holds \u2014 regulars, rooms, staff tabs. */
+function tablesLabel(st){ return (st.settings.tablesLabel||'Tables'); }
 function getTables(st){ return st.customers.filter(function(c){ return c.permanent; }); }
 function ensureTables(){
   var st=getState();
@@ -684,10 +690,11 @@ function renderHome(){
   var open=st.customers.filter(function(c){ return !c.permanent; });
   var tablesBal=getTables(st).reduce(function(s,t){ return s+balanceOf(st,t.id); },0);
 
-  var tablesCard='<div class="cust-item" style="border-color:var(--gold);">'+
+  var tablesCard = st.settings.tablesHidden ? '' :
+    ('<div class="cust-item" style="border-color:var(--gold);">'+
     '<button class="cust-item-tap" onclick="openTables()">'+
-    '<div class="cust-name" style="color:var(--gold2);">Tables</div>'+
-    '<div class="cust-bal '+balClass(tablesBal)+'">'+balText(tablesBal)+'</div></button></div>';
+    '<div class="cust-name" style="color:var(--gold2);">'+esc(tablesLabel(st))+'</div>'+
+    '<div class="cust-bal '+balClass(tablesBal)+'">'+balText(tablesBal)+'</div></button></div>');
 
   document.getElementById('home-list').innerHTML='<div class="cust-grid">'+tablesCard+
     open.map(function(c){
@@ -805,7 +812,7 @@ function renameCustomer(){
 function openMergePicker(){
   var st=getState(), c=findCustomer(st,activeCustomerId);
   if(!c) return;
-  if(c.permanent){ toast('Tables cannot be merged','err'); return; }
+  if(c.permanent){ toast('This cannot be merged','err'); return; }
   closeModal('m-cmenu');
   /* Only open tabs are offered: over time the historical list would grow into
    hundreds of one-off visitors and become useless to scroll. */
@@ -850,6 +857,7 @@ function openTables(){
   ensureTables();
   var st=getState(), ts=getTables(st);
   var el=document.getElementById('tables-list');
+  document.getElementById('tables-title').textContent=tablesLabel(st);
   el.innerHTML = ts.length ? ('<div class="cust-grid">'+ts.map(function(c){
     var b=balanceOf(st,c.id);
     return '<div class="cust-item">'+
@@ -857,7 +865,7 @@ function openTables(){
       '<div class="cust-name">'+esc(c.name)+'</div>'+
       '<div class="cust-bal '+balClass(b)+'">'+balText(b)+'</div></button>'+
       '<button class="btn-settled-list" onclick="askBillSettled(\''+c.id+'\')">Settled</button></div>';
-  }).join('')+'</div>') : '<div class="empty-hint">No tables.<br>Add them in Settings.</div>';
+  }).join('')+'</div>') : '<div class="empty-hint">Nothing here yet.<br>Add entries in Settings.</div>';
   show('s-tables');
 }
 
@@ -1090,7 +1098,7 @@ function finishSettle(st,c){
     st.customers=st.customers.filter(function(x){ return x.id!==c.id; });
   }
   saveState(st);
-  if(c.permanent) openTables(); else goHome();
+  goHome();
   return {balance:bal};
 }
 
@@ -1501,23 +1509,50 @@ function deleteProduct(){
 /* ---------- TABLES MANAGEMENT ---------- */
 function openTablesManage(){
   ensureTables();
-  var st=getState(), ts=getTables(st);
-  document.getElementById('tabman-body').innerHTML = (ts.length ? ts.map(function(c){
+  var st=getState(), ts=getTables(st), lbl=tablesLabel(st);
+  document.getElementById('tabman-title').textContent=lbl;
+  var hid=st.settings.tablesHidden;
+  var head='<div class="card-box"><div class="label">Group name</div>'+
+    '<div class="field"><input type="text" id="tab-label" value="'+esc(lbl)+'" placeholder="Tables"></div>'+
+    '<button class="btn-full" style="margin-bottom:0.5em;" onclick="saveTablesLabel()">Save name</button>'+
+    '<button class="btn-full" style="'+(hid?'border-color:var(--gold);color:var(--gold2);':'')+'" onclick="toggleTablesHidden()">'+
+    (hid?'Show on home screen':'Hide from home screen')+'</button>'+
+    '<div class="hint">'+(hid?'Hidden from the home screen. Balances still count towards Total owed and can be settled from here.'
+      :'Rename this group to suit the bar \u2014 tables, regulars, rooms.')+'</div></div>';
+
+  var list = ts.length ? ts.map(function(c){
     var b=balanceOf(st,c.id);
     return '<div class="row">'+
-      '<button class="row-main" onclick="renameTable(\''+c.id+'\')">'+
-      '<div style="font-weight:600;">'+esc(c.name)+' <span style="color:var(--gold);font-size:0.9em;">\u270E</span></div>'+
-      '<div class="row-sub '+balClass(b)+'">'+balText(b)+'</div></button>'+
+      '<button class="row-main" onclick="openCustomer(\''+c.id+'\')">'+
+      '<div style="font-weight:600;">'+esc(c.name)+'</div>'+
+      '<div class="row-sub '+balClass(b)+'">'+balText(b)+' \u2014 tap to open</div></button>'+
+      '<button class="qbtn" style="color:var(--gold2);" onclick="renameTable(\''+c.id+'\')">\u270E</button>'+
       '<button class="qbtn" style="color:var(--red);" onclick="removeTable(\''+c.id+'\')">\u2715</button></div>';
-  }).join('') : '<div class="empty-hint">No tables.</div>')+
-  '<div style="margin-top:1em;"><button class="btn-full" onclick="addTable()">+ New table</button></div>';
+  }).join('') : '<div class="empty-hint">Nothing here yet.</div>';
+
+  document.getElementById('tabman-body').innerHTML=head+list+
+    '<div style="margin-top:1em;"><button class="btn-full" onclick="addTable()">+ New entry</button></div>';
   show('s-tabman');
 }
+function saveTablesLabel(){
+  var v=document.getElementById('tab-label').value.trim()||'Tables';
+  var st=getState();
+  st.settings.tablesLabel=v;
+  if(saveState(st)){ openTablesManage(); toast('Renamed to '+v,'ok'); }
+}
+function toggleTablesHidden(){
+  var st=getState();
+  st.settings.tablesHidden=!st.settings.tablesHidden;
+  if(saveState(st)){
+    openTablesManage();
+    toast(st.settings.tablesHidden?'Hidden from home screen':'Shown on home screen','ok');
+  }
+}
 function addTable(){
-  askText('New table','',function(name){
+  askText('New entry','',function(name){
     var st=getState();
     if(st.customers.some(function(c){ return c.permanent && c.name.toLowerCase()===name.toLowerCase(); })){
-      toast('Table already exists','err'); return;
+      toast('That name already exists','err'); return;
     }
     st.customers.push({id:'__table_'+Date.now()+'__',name:name,permanent:true});
     st._tablesSeeded=true;
@@ -1527,7 +1562,7 @@ function addTable(){
 function renameTable(id){
   var st=getState(), c=findCustomer(st,id);
   if(!c) return;
-  askText('Rename table',c.name,function(name){
+  askText('Rename',c.name,function(name){
     var st2=getState(), c2=findCustomer(st2,id);
     if(!c2) return;
     c2.name=name;
@@ -1538,7 +1573,7 @@ function removeTable(id){
   var st=getState(), c=findCustomer(st,id);
   if(!c) return;
   if(balanceOf(st,id)<-0.001){ toast('Settle the balance first','err'); return; }
-  showConfirm('Remove table?', 'Remove '+c.name+'? Its history is kept.', function(){
+  showConfirm('Remove entry?', 'Remove '+c.name+'? Its history is kept.', function(){
     var st2=getState();
     st2.customers=st2.customers.filter(function(x){ return x.id!==id; });
     st2._tablesSeeded=true;
@@ -1763,7 +1798,8 @@ function renderSettings(){
     menuRow('Appearance','Text size '+Math.round(s.fontScale*100)+'% \u00B7 '+s.cols+' cards per row', "openSetPage('look')")+
     menuRow('Bar day','Ends at '+pad2(s.dayEnd)+':00', "openSetPage('day')")+
     menuRow('Categories &amp; products', st.products.length+' product'+(st.products.length===1?'':'s'), 'openCategories()')+
-    menuRow('Tables', getTables(st).length+' table'+(getTables(st).length===1?'':'s'), 'openTablesManage()')+
+    menuRow(esc(tablesLabel(st)), getTables(st).length+' entr'+(getTables(st).length===1?'y':'ies')+
+      (s.tablesHidden?' \u00B7 hidden':''), 'openTablesManage()')+
     menuRow('Cash flow','Expenses and other income', "openSetPage('cash')")+
     menuRow('Updates','Version '+APP_VERSION, "openSetPage('upd')")+
     menuRow('Data','Backup and storage', "openSetPage('data')");
@@ -1826,7 +1862,7 @@ function renderSetPage(){
     h='<div class="card-box"><div class="label">Backup</div>'+
       '<button class="btn-full" style="margin-bottom:0.5em;" onclick="doBackup()">Save backup</button>'+
       '<button class="btn-full" style="border-color:var(--text3);color:var(--text2);" onclick="pickRestoreFile()">Load backup</button>'+
-      '<div class="hint">A backup from the old SE7EN app can be loaded here too \u2014 it is converted automatically.</div></div>'+
+      '</div>'+
 
       '<div class="card-box"><div class="label">Purge old data</div>'+
       '<div class="hint" style="margin:0 0 0.6em;">Delete all transactions before the selected month.</div>'+

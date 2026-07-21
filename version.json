@@ -1,5 +1,5 @@
 {
-  "version": "2.00.16",
-  "cache": "se7env2-v18",
-  "notes": "Importing an old SE7EN backup now brings across history only and keeps products, categories and settings already configured in V2."
+  "version": "2.00.18",
+  "cache": "se7env2-v20",
+  "notes": "Group name is used exactly as typed; no singular form is guessed from it."
 }
