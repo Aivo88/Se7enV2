@@ -1,5 +1,5 @@
 {
-  "version": "2.0.4",
-  "cache": "se7env2-v6",
-  "notes": "Service worker now bypasses the HTTP cache when installing, so updates actually take effect."
+  "version": "2.1.0",
+  "cache": "se7env2-v7",
+  "notes": "Known names ask whether it is the same person; customers can be renamed or merged from the customer screen."
 }

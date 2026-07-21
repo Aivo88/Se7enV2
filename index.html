@@ -178,7 +178,7 @@ input:focus,select:focus{border-color:var(--gold);}
   <div class="top-bar">
     <div class="top-row">
       <div style="min-width:0;">
-        <div class="screen-title" id="cust-title" style="font-size:1.45em;"></div>
+        <button class="screen-title" id="cust-title" style="font-size:1.45em;padding:0;" onclick="openCustomerMenu()"></button>
         <div id="cust-balance" style="font-weight:700;margin-top:2px;"></div>
       </div>
       <div class="top-actions">
@@ -351,6 +351,34 @@ input:focus,select:focus{border-color:var(--gold);}
   </div>
 </div>
 
+<div class="modal-bg" id="m-known">
+  <div class="modal">
+    <div class="modal-title">Known name</div>
+    <div style="color:var(--text2);text-align:center;line-height:1.6;margin-bottom:1em;" id="mk-body"></div>
+    <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.6em;" id="mk-same">Same person</button>
+    <button class="btn-full" style="margin-bottom:0.6em;" id="mk-new">Different person</button>
+    <button class="btn-modal-cancel" onclick="closeModal('m-known')">Cancel</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="m-cmenu">
+  <div class="modal">
+    <div class="modal-title" id="cm-title"></div>
+    <button class="btn-full" style="margin-bottom:0.6em;" onclick="renameCustomer()">Rename</button>
+    <button class="btn-full" style="margin-bottom:0.6em;" onclick="openMergePicker()">Merge into another customer</button>
+    <button class="btn-modal-cancel" onclick="closeModal('m-cmenu')">Cancel</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="m-merge">
+  <div class="modal">
+    <div class="modal-title">Merge into</div>
+    <div class="hint" style="text-align:center;margin-bottom:0.8em;" id="mg-hint"></div>
+    <div id="mg-list" style="margin-bottom:0.6em;"></div>
+    <button class="btn-modal-cancel" onclick="closeModal('m-merge')">Cancel</button>
+  </div>
+</div>
+
 <div class="modal-bg" id="m-text">
   <div class="modal">
     <div class="modal-title" id="mt-title"></div>
@@ -375,7 +403,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.0.4';
+var APP_VERSION = '2.1.0';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -574,24 +602,126 @@ function renderHome(){
     box('Cash',f(cash)+EUR,'green')+box('Card',f(card)+EUR,'blue');
 }
 
+/* Everyone who has ever had a transaction, newest visit first. Walk-in
+   pseudo-customers are excluded; they are not real people. */
+function knownCustomers(st){
+  var m={};
+  st.transactions.forEach(function(t){
+    if(!t.customerId || t.customerId===CASH_ID || t.customerId===CARD_ID) return;
+    if(!m[t.customerId]) m[t.customerId]={id:t.customerId,name:t.customerName||'?',visits:0,last:0};
+    var e=m[t.customerId];
+    e.visits++;
+    if(t.ts>e.last){ e.last=t.ts; e.name=t.customerName||e.name; }
+  });
+  st.customers.forEach(function(c){
+    if(c.permanent) return;
+    if(m[c.id]) m[c.id].name=c.name;
+  });
+  return Object.keys(m).map(function(k){ return m[k]; })
+    .sort(function(a,b){ return b.last-a.last; });
+}
+function isOpen(st,id){ return !!findCustomer(st,id); }
+
 function askNewCustomer(){
   askText('New customer','',function(name){
     var st=getState(), i;
     for(i=0;i<st.customers.length;i++){
       if(st.customers[i].name.toLowerCase()===name.toLowerCase()){ openCustomer(st.customers[i].id); return; }
     }
-    var old=null;
-    for(i=0;i<st.transactions.length;i++){
-      var t=st.transactions[i];
-      if(t.customerName && t.customerName.toLowerCase()===name.toLowerCase() &&
-         t.customerId!==CASH_ID && t.customerId!==CARD_ID){ old=t; break; }
+    var match=null, known=knownCustomers(st);
+    for(i=0;i<known.length;i++){
+      if(known[i].name.toLowerCase()===name.toLowerCase()){ match=known[i]; break; }
     }
-    var c={ id: old?old.customerId:uid('c'), name:name };
-    st.customers.push(c);
-    if(!saveState(st)) return;
-    if(old) toast('Returning customer \u2014 history restored','ok');
-    openCustomer(c.id);
+    if(match){
+      document.getElementById('mk-body').textContent=
+        match.name+' has been here before \u2014 '+match.visits+' entr'+(match.visits===1?'y':'ies')+
+        ', last on '+fmtDate(match.last)+'. Is this the same person?';
+      document.getElementById('mk-same').onclick=function(){
+        closeModal('m-known'); addCustomer(match.id,name,true);
+      };
+      document.getElementById('mk-new').onclick=function(){
+        closeModal('m-known'); addCustomer(uid('c'),name,false);
+      };
+      openModal('m-known');
+      return;
+    }
+    addCustomer(uid('c'),name,false);
   });
+}
+function addCustomer(id,name,restored){
+  var st=getState();
+  st.customers.push({id:id,name:name});
+  if(!saveState(st)) return;
+  if(restored) toast('History restored','ok');
+  openCustomer(id);
+}
+
+/* ---------- RENAME / MERGE ---------- */
+function openCustomerMenu(){
+  var st=getState(), c=findCustomer(st,activeCustomerId);
+  if(!c) return;
+  document.getElementById('cm-title').textContent=c.name;
+  openModal('m-cmenu');
+}
+/* The name is stored on the customer AND denormalised onto each transaction,
+   so a rename has to update both or the history would show the old name. */
+function renameCustomer(){
+  var st=getState(), c=findCustomer(st,activeCustomerId);
+  if(!c) return;
+  closeModal('m-cmenu');
+  askText('Rename customer',c.name,function(name){
+    var st2=getState(), c2=findCustomer(st2,activeCustomerId);
+    if(!c2) return;
+    var clash=st2.customers.some(function(x){
+      return x.id!==c2.id && x.name.toLowerCase()===name.toLowerCase();
+    });
+    if(clash){ toast('Another open tab has that name','err'); return; }
+    c2.name=name;
+    st2.transactions.forEach(function(t){ if(t.customerId===c2.id) t.customerName=name; });
+    if(!saveState(st2)) return;
+    document.getElementById('cust-title').textContent=name;
+    toast('Renamed','ok');
+  });
+}
+function openMergePicker(){
+  var st=getState(), c=findCustomer(st,activeCustomerId);
+  if(!c) return;
+  if(c.permanent){ toast('Tables cannot be merged','err'); return; }
+  closeModal('m-cmenu');
+  var others=knownCustomers(st).filter(function(k){ return k.id!==c.id; });
+  document.getElementById('mg-hint').textContent=
+    others.length ? ('All of '+c.name+'\u2019s history moves to the customer you pick.')
+                  : 'No other customers on record yet.';
+  document.getElementById('mg-list').innerHTML=others.map(function(k){
+    return '<div class="row"><button class="row-main" onclick="doMerge(\''+k.id+'\')">'+
+      '<div style="font-weight:600;">'+esc(k.name)+'</div>'+
+      '<div class="row-sub">'+k.visits+' entries \u00B7 last '+fmtDate(k.last)+'</div></button></div>';
+  }).join('');
+  openModal('m-merge');
+}
+function doMerge(targetId){
+  var st=getState();
+  var from=findCustomer(st,activeCustomerId);
+  if(!from || targetId===from.id) return;
+  var known=knownCustomers(st), target=null;
+  for(var i=0;i<known.length;i++) if(known[i].id===targetId) target=known[i];
+  if(!target) return;
+  closeModal('m-merge');
+  showConfirm('Merge customers?',
+    from.name+' will be merged into '+target.name+'. All entries move over and '+from.name+
+    ' disappears. This cannot be undone.',
+    function(){
+      var st2=getState(), f=findCustomer(st2,activeCustomerId);
+      if(!f) return;
+      st2.transactions.forEach(function(t){
+        if(t.customerId===f.id){ t.customerId=targetId; t.customerName=target.name; }
+      });
+      st2.customers=st2.customers.filter(function(x){ return x.id!==f.id; });
+      if(!findCustomer(st2,targetId)) st2.customers.push({id:targetId,name:target.name});
+      if(!saveState(st2)) return;
+      toast('Merged into '+target.name,'ok');
+      goHome();
+    });
 }
 
 /* ---------- TABLES ---------- */
