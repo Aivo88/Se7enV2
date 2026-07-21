@@ -502,7 +502,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.00.21';
+var APP_VERSION = '2.00.22';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -1836,7 +1836,7 @@ function menuRow(label,sub,handler){
 function renderSettings(){
   var st=getState(), s=st.settings;
   document.getElementById('set-body').innerHTML=
-    menuRow('Header', s.headerImage?'Image':(s.headerText||'Pub'), "openSetPage('header')")+
+    menuRow('Header', s.headerImage?'Custom image':((s.headerText&&s.headerText!=='Pub')?s.headerText:'Default logo'), "openSetPage('header')")+
     menuRow('Appearance','Text size '+Math.round(s.fontScale*100)+'% \u00B7 '+s.cols+' cards per row', "openSetPage('look')")+
     menuRow('Bar day','Ends at '+pad2(s.dayEnd)+':00', "openSetPage('day')")+
     menuRow('Currency &amp; language', s.currency+' \u00B7 English', "openSetPage('region')")+
@@ -1854,13 +1854,15 @@ function renderSetPage(){
   if(setPage==='header'){
     title='Header';
     h='<div class="card-box"><div class="label">Text</div>'+
-      '<div class="field"><input type="text" id="set-hdrtext" value="'+esc(s.headerText||'Pub')+'" placeholder="Pub"></div>'+
+      '<div class="field"><input type="text" id="set-hdrtext" value="'+esc(s.headerText==='Pub'?'':(s.headerText||''))+'" placeholder="Pub"></div>'+
       '<button class="btn-full" onclick="saveHeaderText()">Use this text</button></div>'+
       '<div class="card-box"><div class="label">Image</div>'+
       '<button class="btn-full" style="margin-bottom:0.5em;" onclick="pickHeaderImage()">Choose image from device</button>'+
       (s.headerImage?'<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);" onclick="clearHeaderImage()">Remove image</button>':'')+
-      '<div class="hint">An image replaces the text. Large photos are scaled down automatically before saving. '+
-      'With no image and the text left as Pub, the built-in logo is shown.</div></div>';
+      '<div class="hint">An image replaces the text. Large photos are scaled down automatically before saving.</div></div>'+
+      '<div class="card-box"><div class="label">Default</div>'+
+      '<button class="btn-full" style="border-color:var(--gold);color:var(--gold2);" onclick="resetHeader()">Use the built-in logo</button>'+
+      '<div class="hint">Clears both the text and the image and puts the bundled Pub logo back.</div></div>';
   } else if(setPage==='look'){
     title='Appearance';
     h='<div class="card-box"><div class="label">Text size \u2014 '+Math.round(s.fontScale*100)+'%</div>'+
@@ -1940,6 +1942,12 @@ function saveHeaderText(){
   st.settings.headerText=v;
   st.settings.headerImage=null;
   if(saveState(st)){ renderHeader(); renderSetPage(); toast('Header updated','ok'); }
+}
+function resetHeader(){
+  var st=getState();
+  st.settings.headerText='Pub';
+  st.settings.headerImage=null;
+  if(saveState(st)){ renderHeader(); renderSetPage(); renderSettings(); toast('Default logo restored','ok'); }
 }
 function pickHeaderImage(){ document.getElementById('hdr-file').click(); }
 function clearHeaderImage(){

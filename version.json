@@ -1,5 +1,5 @@
 {
-  "version": "2.00.21",
-  "cache": "se7env2-v23",
-  "notes": "Bundled Pub logo is the default header; typing your own text or uploading an image replaces it."
+  "version": "2.00.22",
+  "cache": "se7env2-v24",
+  "notes": "Header page has a button to restore the built-in logo; the text field no longer fills itself with Pub."
 }
