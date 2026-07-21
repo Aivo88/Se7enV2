@@ -1,5 +1,5 @@
 {
-  "version": "2.01.01",
-  "cache": "se7env2-v8",
-  "notes": "Fixed grey/unreadable text on buttons (tables, categories, products), lifted dim greys, version numbering now major.minor.patch with two digits."
+  "version": "2.01.02",
+  "cache": "se7env2-v9",
+  "notes": "Pencil icon next to the customer name so the menu is discoverable; tables no longer appear in the merge list."
 }

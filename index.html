@@ -403,7 +403,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.01.01';
+var APP_VERSION = '2.01.02';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -620,7 +620,16 @@ function knownCustomers(st){
   return Object.keys(m).map(function(k){ return m[k]; })
     .sort(function(a,b){ return b.last-a.last; });
 }
-function isOpen(st,id){ return !!findCustomer(st,id); }
+function setCustTitle(name){
+  document.getElementById('cust-title').innerHTML=
+    esc(name)+' <span style="color:var(--gold);font-size:0.75em;">\u270E</span>';
+}
+/* Tables are places, not people, so they never take part in merging. */
+function isPerson(st,id){
+  if(!id || id.indexOf('__')===0) return false;
+  var c=findCustomer(st,id);
+  return !(c && c.permanent);
+}
 
 function askNewCustomer(){
   askText('New customer','',function(name){
@@ -679,7 +688,7 @@ function renameCustomer(){
     c2.name=name;
     st2.transactions.forEach(function(t){ if(t.customerId===c2.id) t.customerName=name; });
     if(!saveState(st2)) return;
-    document.getElementById('cust-title').textContent=name;
+    setCustTitle(name);
     toast('Renamed','ok');
   });
 }
@@ -688,7 +697,7 @@ function openMergePicker(){
   if(!c) return;
   if(c.permanent){ toast('Tables cannot be merged','err'); return; }
   closeModal('m-cmenu');
-  var others=knownCustomers(st).filter(function(k){ return k.id!==c.id; });
+  var others=knownCustomers(st).filter(function(k){ return k.id!==c.id && isPerson(st,k.id); });
   document.getElementById('mg-hint').textContent=
     others.length ? ('All of '+c.name+'\u2019s history moves to the customer you pick.')
                   : 'No other customers on record yet.';
@@ -748,7 +757,7 @@ function openCustomer(id){
   if(!c){ goHome(); return; }
   cameFromTables = !!c.permanent;
   activeCustomerId=id; cart={}; activeCat='__fav__';
-  document.getElementById('cust-title').textContent=c.name;
+  setCustTitle(c.name);
   show('s-cust');
   setCustTab('add');
   renderCustBalance();
