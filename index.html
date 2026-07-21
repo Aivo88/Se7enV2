@@ -239,19 +239,28 @@ input:focus,select:focus{border-color:var(--gold);}
 <!-- REPORTS / HISTORY -->
 <div class="screen" id="s-rep">
   <div class="top-bar">
-    <div class="top-row">
-      <div class="screen-title">History</div>
-      
-    </div>
+    <div class="top-row"><div class="screen-title">History</div></div>
     <div class="tabs">
-      <button class="tab active" id="rtab-day" onclick="setRepTab('day')">Day</button>
-      <button class="tab" id="rtab-year" onclick="setRepTab('year')">Year</button>
-      <button class="tab" id="rtab-log" onclick="setRepTab('log')">Log</button>
+      <button class="tab active" id="rtab-day" onclick="setRepTab('day')">Today</button>
+      <button class="tab" id="rtab-month" onclick="setRepTab('month')">Month</button>
+      <button class="tab" id="rtab-raw" onclick="setRepTab('raw')">Raw</button>
     </div>
   </div>
   <div class="body-scroll" id="rep-body"></div>
   <div class="foot">
     <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="goHome()">Back</button>
+  </div>
+</div>
+
+<!-- PER-CUSTOMER DETAIL -->
+<div class="screen" id="s-txday">
+  <div class="top-bar">
+    <div class="top-row"><div class="screen-title" id="txday-title"></div></div>
+    <div class="hint" id="txday-sub"></div>
+  </div>
+  <div class="body-scroll" id="txday-body"></div>
+  <div class="foot">
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="backToReports()">Back</button>
   </div>
 </div>
 
@@ -437,7 +446,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.03.00';
+var APP_VERSION = '2.00.10';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -950,7 +959,7 @@ function toggleDay(d){
   var e=document.getElementById('day-'+d);
   if(e) e.style.display = e.style.display==='none' ? '' : 'none';
 }
-function txHTML(t){
+function txHTML(t,withName){
   var cls='pay', label='Payment';
   if(t.type==='debt'){ cls='debt'; label='Purchase'; }
   else if(t.type==='writeoff'){ cls='debt'; label='Written off (loss)'; }
@@ -960,9 +969,11 @@ function txHTML(t){
   var items = (t.items && t.items.length)
     ? '<div class="tx-items">'+t.items.map(function(i){ return esc(i.name)+' \u00D7'+i.qty+' \u2014 '+f(i.price*i.qty)+EUR; }).join('<br>')+'</div>'
     : '';
-  return '<div class="tx '+cls+'"><div class="tx-top"><span>'+label+'</span>'+
+  var head = withName ? (esc(t.customerName||'?')+' \u00B7 '+label) : label;
+  var when = withName ? (fmtDate(txBarDate(t))+' '+fmtTime(t.ts)) : fmtTime(t.ts);
+  return '<div class="tx '+cls+'"><div class="tx-top"><span>'+head+'</span>'+
     '<span>'+(t.type==='debt'?'\u2212':'+')+f(t.amount)+EUR+'</span></div>'+
-    '<div class="tx-time">'+fmtTime(t.ts)+'</div>'+items+'</div>';
+    '<div class="tx-time">'+when+'</div>'+items+'</div>';
 }
 
 /* ---------- SETTLE ---------- */
@@ -1343,14 +1354,22 @@ function removeTable(id){
   });
 }
 
-/* ---------- REPORTS ---------- */
-var repTab='day';
-function openReports(){ show('s-rep'); setRepTab('day'); }
+/* ---------- HISTORY ---------- */
+var repTab='day', repMonth=null, txdayCtx=null;
+var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function openReports(){ show('s-rep'); setRepTab(repTab||'day'); }
+function backToReports(){ show('s-rep'); setRepTab(repTab); }
 function setRepTab(t){
   repTab=t;
-  ['day','year','log'].forEach(function(k){ document.getElementById('rtab-'+k).classList.toggle('active',k===t); });
-  renderReport();
+  ['day','month','raw'].forEach(function(k){
+    document.getElementById('rtab-'+k).classList.toggle('active',k===t);
+  });
+  if(t==='day') renderDay();
+  else if(t==='month') renderMonth();
+  else renderRaw();
 }
+
 function sumRange(txs){
   var cash=0,card=0,loss=0,tab=0;
   txs.forEach(function(t){
@@ -1360,96 +1379,103 @@ function sumRange(txs){
   });
   return {cash:cash,card:card,loss:loss,tab:tab,income:cash+card,net:cash+card-loss};
 }
-function summaryGrid(s){
-  return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6em;margin-bottom:0.8em;">'+
-    box('Total income',f(s.income)+EUR,'green')+box('Net',f(s.net)+EUR,'gold')+
-    box('Cash',f(s.cash)+EUR,'green')+box('Card',f(s.card)+EUR,'blue')+
-    box('On tab',f(s.tab)+EUR,'gold')+box('Loss',f(s.loss)+EUR,'red')+'</div>';
+function summaryGridHTML(s){
+  return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6em;margin-bottom:0.9em;">'+
+    box('Total','+'+f(s.income)+EUR,'green')+box('Net total','+'+f(s.net)+EUR,'green')+
+    box('Cash',f(s.cash)+EUR,'green')+box('On tab',f(s.tab)+EUR,'gold')+
+    box('Card',f(s.card)+EUR,'blue')+box('Loss',f(s.loss)+EUR,'red')+'</div>';
 }
-function topProducts(txs,limit){
-  var m={};
+
+/* One row per customer for the selected period, mirroring V1: what they ran up,
+   what came in, and how many entries sit behind it. */
+function customerRowsHTML(txs,scope){
+  var by={};
   txs.forEach(function(t){
-    (t.items||[]).forEach(function(i){
-      if(!m[i.name]) m[i.name]={qty:0,sum:0};
-      m[i.name].qty+=i.qty; m[i.name].sum+=i.qty*i.price;
-    });
+    var id=t.customerId||'?';
+    if(!by[id]) by[id]={id:id,name:t.customerName||'?',tab:0,paid:0,cardPaid:0,loss:0,count:0};
+    var r=by[id];
+    if(t.type==='debt') r.tab+=t.amount;
+    else if(t.type==='pay'||t.type==='recovery'){ r.paid+=t.amount; if(t.method==='card') r.cardPaid+=t.amount; }
+    else if(t.type==='writeoff') r.loss+=t.amount;
+    r.count++;
   });
-  return Object.keys(m).map(function(k){ return [k,m[k]]; })
-    .sort(function(a,b){ return b[1].qty-a[1].qty; }).slice(0,limit||20);
-}
-function prodRows(tp){
-  if(!tp.length) return '<div class="empty-hint">No data.</div>';
-  return tp.map(function(e){
-    return '<div class="row"><div class="row-main"><div style="font-weight:600;">'+esc(e[0])+'</div>'+
-      '<div class="row-sub">\u00D7'+e[1].qty+'</div></div>'+
-      '<div style="color:var(--gold2);font-weight:700;">'+f(e[1].sum)+EUR+'</div></div>';
+  var rows=Object.keys(by).map(function(k){ return by[k]; })
+    .sort(function(a,b){ return (b.tab-b.paid)-(a.tab-a.paid); });
+  if(!rows.length) return '<div class="empty-hint">No transactions.</div>';
+  return rows.map(function(r){
+    var unpaid=r.tab-r.paid, amt;
+    var allCard = r.paid>0 && r.cardPaid>=r.paid-0.001;
+    var paidCol = allCard?'var(--blue)':'var(--green)';
+    if(unpaid>0.001 && r.paid>0.001){
+      amt='<div style="color:var(--red);font-weight:700;">\u2212'+f(unpaid)+EUR+'</div>'+
+          '<div style="color:'+paidCol+';font-size:0.85em;">+'+f(r.paid)+EUR+' in</div>';
+    } else if(unpaid>0.001){
+      amt='<div style="color:var(--red);font-weight:700;">\u2212'+f(unpaid)+EUR+'</div>';
+    } else {
+      amt='<div style="color:'+paidCol+';font-weight:700;">+'+f(r.paid)+EUR+'</div>';
+    }
+    if(r.loss>0.001) amt+='<div style="color:var(--red);font-size:0.85em;">'+f(r.loss)+EUR+' loss</div>';
+    return '<div class="row"><button class="row-main" onclick="openTxDay(\''+scope+'\',\''+r.id+'\')">'+
+      '<div style="font-weight:600;">'+esc(r.name)+'</div>'+
+      '<div class="row-sub">'+r.count+' transaction'+(r.count===1?'':'s')+' \u2014 tap to open</div></button>'+
+      '<div style="text-align:right;">'+amt+'</div></div>';
   }).join('');
 }
-function renderReport(){
-  var st=getState(), el=document.getElementById('rep-body');
-  if(repTab==='day'){
-    var bd=todayBarDate();
-    var txs=st.transactions.filter(function(t){ return txBarDate(t)===bd; });
-    el.innerHTML='<div class="hint" style="margin:0 0 0.6em;">Bar day '+fmtDate(bd)+' (ends '+pad2(st.settings.dayEnd)+':00)</div>'+
-      summaryGrid(sumRange(txs))+'<div class="label">Sold today</div>'+prodRows(topProducts(txs));
-  } else if(repTab==='year'){
-    var year=new Date().getFullYear();
-    var ytx=st.transactions.filter(function(t){ return new Date(txBarDate(t)).getFullYear()===year; });
-    var MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    var h='<div class="hint" style="margin:0 0 0.6em;">Year '+year+'</div>'+summaryGrid(sumRange(ytx))+
-      '<div class="label">By month</div>';
-    for(var m=0;m<12;m++){
-      var mt=ytx.filter(function(t){ return new Date(txBarDate(t)).getMonth()===m; });
-      if(!mt.length) continue;
-      var ms=sumRange(mt);
-      h+='<div class="row"><div class="row-main"><div style="font-weight:600;">'+MN[m]+'</div>'+
-        '<div class="row-sub">Cash '+f(ms.cash)+EUR+' \u00B7 Card '+f(ms.card)+EUR+' \u00B7 Loss '+f(ms.loss)+EUR+'</div></div>'+
-        '<div style="color:var(--gold2);font-weight:700;">'+f(ms.net)+EUR+'</div></div>';
-    }
-    h+='<div class="label" style="margin-top:1em;">Top products</div>'+prodRows(topProducts(ytx,25));
-    el.innerHTML=h;
-  } else {
-    var all=st.transactions.slice().sort(function(a,b){ return b.ts-a.ts; }).slice(0,300);
-    if(!all.length){ el.innerHTML='<div class="empty-hint">Log is empty.</div>'; return; }
-    var groups={};
-    all.forEach(function(t){ var d=txBarDate(t); if(!groups[d]) groups[d]=[]; groups[d].push(t); });
-    el.innerHTML=Object.keys(groups).map(Number).sort(function(a,b){ return b-a; }).map(function(d){
-      var s=sumRange(groups[d]);
-      return '<div class="day-hdr" onclick="toggleDay('+d+')"><span class="d">'+fmtDate(d)+'</span>'+
-        '<span style="color:var(--green);">'+f(s.income)+EUR+'</span></div>'+
-        '<div id="day-'+d+'" style="display:none;">'+groups[d].map(function(t){
-          var cls = t.type==='debt' ? 'debt' : (t.method==='card' ? 'card' : 'pay');
-          return '<div class="tx '+cls+'"><div class="tx-top"><span>'+esc(t.customerName||'')+'</span>'+
-            '<span>'+(t.type==='debt'?'\u2212':'+')+f(t.amount)+EUR+'</span></div>'+
-            '<div class="tx-time">'+fmtTime(t.ts)+'</div></div>';
-        }).join('')+'</div>';
-    }).join('');
-  }
+
+function dayTxs(st){ var bd=todayBarDate(); return st.transactions.filter(function(t){ return txBarDate(t)===bd; }); }
+function monthTxs(st){
+  if(!repMonth){ var n=new Date(); repMonth={year:n.getFullYear(),month:n.getMonth()}; }
+  return st.transactions.filter(function(t){
+    var d=new Date(txBarDate(t));
+    return d.getFullYear()===repMonth.year && d.getMonth()===repMonth.month;
+  });
 }
-function printReport(){
-  var st=getState(), txs, title;
-  var head=st.settings.headerText||'Pub';
-  if(repTab==='year'){
-    var y=new Date().getFullYear();
-    txs=st.transactions.filter(function(t){ return new Date(txBarDate(t)).getFullYear()===y; });
-    title=head+' \u2014 Year '+y;
-  } else {
-    var bd=todayBarDate();
-    txs=st.transactions.filter(function(t){ return txBarDate(t)===bd; });
-    title=head+' \u2014 '+fmtDate(bd);
-  }
-  var s=sumRange(txs), tp=topProducts(txs,80);
-  document.getElementById('printarea').innerHTML=
-    '<h1>'+esc(title)+'</h1><div style="font-size:11px;">Printed '+fmtDate(Date.now())+' '+fmtTime(Date.now())+
-    ' \u00B7 bar day ends '+pad2(st.settings.dayEnd)+':00</div>'+
-    '<h2>Summary</h2><table>'+
-    '<tr><th>Cash</th><td>'+f(s.cash)+EUR+'</td><th>Card</th><td>'+f(s.card)+EUR+'</td></tr>'+
-    '<tr><th>Total income</th><td>'+f(s.income)+EUR+'</td><th>Loss</th><td>'+f(s.loss)+EUR+'</td></tr>'+
-    '<tr><th>On tab</th><td>'+f(s.tab)+EUR+'</td><th>Net</th><td><b>'+f(s.net)+EUR+'</b></td></tr></table>'+
-    '<h2>Products</h2><div class="cols"><table><tr><th>Product</th><th>Qty</th><th>Sum</th></tr>'+
-    tp.map(function(e){ return '<tr><td>'+esc(e[0])+'</td><td>'+e[1].qty+'</td><td>'+f(e[1].sum)+EUR+'</td></tr>'; }).join('')+
-    '</table></div>';
-  setTimeout(function(){ window.print(); },150);
+
+function renderDay(){
+  var st=getState(), bd=todayBarDate(), txs=dayTxs(st);
+  var d=new Date(bd);
+  document.getElementById('rtab-day').textContent='Today \u2014 '+pad2(d.getDate())+'.'+pad2(d.getMonth()+1);
+  document.getElementById('rep-body').innerHTML=
+    summaryGridHTML(sumRange(txs))+customerRowsHTML(txs,'day');
+}
+function renderMonth(){
+  var st=getState(), txs=monthTxs(st);
+  document.getElementById('rtab-month').textContent=MONTHS[repMonth.month]+' '+repMonth.year;
+  var nav='<div class="row" style="justify-content:space-between;">'+
+    '<button class="qbtn" onclick="shiftMonth(-1)">\u2039</button>'+
+    '<div style="font-weight:700;color:var(--gold2);">'+MONTHS[repMonth.month]+' '+repMonth.year+'</div>'+
+    '<button class="qbtn" onclick="shiftMonth(1)">\u203A</button></div>';
+  document.getElementById('rep-body').innerHTML=
+    nav+summaryGridHTML(sumRange(txs))+customerRowsHTML(txs,'month');
+}
+function shiftMonth(d){
+  repMonth.month+=d;
+  if(repMonth.month<0){ repMonth.month=11; repMonth.year--; }
+  if(repMonth.month>11){ repMonth.month=0; repMonth.year++; }
+  renderMonth();
+}
+function renderRaw(){
+  var st=getState();
+  var txs=st.transactions.slice().sort(function(a,b){ return b.ts-a.ts; }).slice(0,400);
+  document.getElementById('rep-body').innerHTML=
+    txs.length ? txs.map(function(t){ return txHTML(t,true); }).join('')
+               : '<div class="empty-hint">No transactions yet.</div>';
+}
+
+function openTxDay(scope,custId){
+  var st=getState();
+  var txs=(scope==='month'?monthTxs(st):dayTxs(st))
+    .filter(function(t){ return (t.customerId||'?')===custId; })
+    .sort(function(a,b){ return b.ts-a.ts; });
+  txdayCtx={scope:scope,id:custId};
+  var name=txs.length?(txs[0].customerName||'?'):'?';
+  var period = scope==='month' ? (MONTHS[repMonth.month]+' '+repMonth.year) : fmtDate(todayBarDate());
+  document.getElementById('txday-title').textContent=name;
+  document.getElementById('txday-sub').textContent=period+' \u00B7 '+txs.length+' transaction'+(txs.length===1?'':'s');
+  document.getElementById('txday-body').innerHTML=
+    txs.length ? txs.map(function(t){ return txHTML(t,false); }).join('')
+               : '<div class="empty-hint">No transactions.</div>';
+  show('s-txday');
 }
 
 /* ---------- SETTINGS ---------- */

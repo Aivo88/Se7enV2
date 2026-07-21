@@ -1,5 +1,5 @@
 {
-  "version": "2.03.00",
-  "cache": "se7env2-v11",
-  "notes": "Settled moved to the bottom bar; written-off debt is remembered and can be collected later as income; Print/PDF removed from History."
+  "version": "2.00.10",
+  "cache": "se7env2-v12",
+  "notes": "History rebuilt in the V1 style: Today / Month / Raw tabs, summary grid, one row per customer, tap a customer to see that period's transactions with product lines."
 }
