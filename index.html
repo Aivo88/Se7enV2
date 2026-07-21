@@ -502,7 +502,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.00.22';
+var APP_VERSION = '2.00.23';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -2101,27 +2101,50 @@ function wipeData(){
 }
 
 /* ---------- UPDATES ---------- */
+/* The check asks the server directly for version.json and compares numbers, so
+   it can say what it actually found instead of guessing from service worker
+   events that may never fire. */
 function checkUpdate(){
   var el=document.getElementById('upd-status');
-  if(!navigator.onLine){ el.textContent='You are offline. Connect to the internet first.'; el.style.color='var(--red)'; return; }
-  el.textContent='Checking for updates...'; el.style.color='var(--text3)';
-  if(!('serviceWorker' in navigator)){ setTimeout(function(){ location.reload(); },500); return; }
-  navigator.serviceWorker.getRegistration().then(function(reg){
-    if(!reg){ setTimeout(function(){ location.reload(); },500); return; }
-    var done=false;
-    function finish(msg,ok){
-      if(done) return; done=true;
-      el.textContent=msg; el.style.color= ok?'var(--green)':'var(--text3)';
-      if(ok) setTimeout(function(){ location.reload(); },700);
-    }
-    reg.addEventListener('updatefound',function(){
-      var sw=reg.installing; if(!sw) return;
-      sw.addEventListener('statechange',function(){
-        if(sw.state==='installed') finish('Updated \u2014 reloading.',true);
-      });
+  if(!el) return;
+  if(!navigator.onLine){
+    el.textContent='You are offline. Connect to the internet first.';
+    el.style.color='var(--red)'; return;
+  }
+  el.textContent='Checking...'; el.style.color='var(--text3)';
+  fetch('version.json?ts='+Date.now(),{cache:'no-store'})
+    .then(function(r){ return r.json(); })
+    .then(function(info){
+      var remote=info && info.version;
+      if(!remote){ el.textContent='Could not read the version file.'; el.style.color='var(--red)'; return; }
+      if(remote===APP_VERSION){
+        el.textContent='You already have the latest version ('+APP_VERSION+').';
+        el.style.color='var(--text3)';
+        return;
+      }
+      el.textContent='Version '+remote+' found \u2014 installing...';
+      el.style.color='var(--green)';
+      applyUpdate();
+    })
+    ['catch'](function(){
+      el.textContent='Could not reach the server.';
+      el.style.color='var(--red)';
     });
-    reg.update()['catch'](function(){});
-    setTimeout(function(){ finish('You already have the latest version.',false); },6000);
+}
+/* Every cache is dropped and the worker re-registered, so the next load comes
+   from the network no matter what state the old worker was left in. */
+function applyUpdate(){
+  var done=function(){ setTimeout(function(){ location.reload(); },400); };
+  var clearCaches = (window.caches && caches.keys)
+    ? caches.keys().then(function(keys){
+        return Promise.all(keys.map(function(k){ return caches.delete(k); }));
+      })['catch'](function(){})
+    : Promise.resolve();
+  clearCaches.then(function(){
+    if(!('serviceWorker' in navigator)) return done();
+    navigator.serviceWorker.getRegistrations().then(function(regs){
+      return Promise.all(regs.map(function(r){ return r.unregister()['catch'](function(){}); }));
+    })['catch'](function(){}).then(done);
   });
 }
 

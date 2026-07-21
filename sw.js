@@ -1,11 +1,12 @@
 // SE7EN V2 service worker
 // Bump CACHE on every release.
-const CACHE = 'se7env2-v24';
-const ASSETS = ['./', './index.html', './manifest.json', './header-default.png', './icon-192.png', './icon-512.png'];
+const CACHE = 'se7env2-v25';
+const ASSETS = ['./', './index.html', './manifest.json', './header-default.png',
+                './icon-192.png', './icon-512.png'];
 
-// cache:'reload' is essential: without it the browser may serve these files
-// from its own HTTP cache (GitHub Pages sets max-age), so a freshly installed
-// service worker would cache a stale index.html and the app would never update.
+// cache:'reload' is essential: without it the browser may serve these files from
+// its own HTTP cache (GitHub Pages sets max-age), so a freshly installed service
+// worker would cache a stale index.html and the app would never update.
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE)
@@ -24,9 +25,17 @@ self.addEventListener('activate', e => {
   );
 });
 
-// Cache-first: the tablet must work with no network at all.
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+
+  // version.json is how the app finds out an update exists, so it must never be
+  // answered from a cache — otherwise it reports the version forever frozen at
+  // whatever was current the first time it was fetched.
+  if (e.request.url.indexOf('version.json') !== -1) {
+    e.respondWith(fetch(e.request, { cache: 'no-store' }).catch(() => new Response('{}')));
+    return;
+  }
+
   e.respondWith(
     caches.match(e.request).then(hit => {
       if (hit) return hit;
