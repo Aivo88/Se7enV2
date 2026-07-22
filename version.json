@@ -1,5 +1,5 @@
 {
-  "version": "2.00.28",
-  "cache": "se7env2-v30",
-  "notes": "Customers tab also sorts tables and regulars to the bottom of the list."
+  "version": "2.01.00",
+  "cache": "se7env2-v31",
+  "notes": "Multiple groups: create, rename, hide and delete groups; each shows as its own gold card on the home screen. Existing tables migrate into a default group. Adding an existing customer to a group moves them in with their history. Deleting a non-default group moves its members to the default."
 }

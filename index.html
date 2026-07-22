@@ -308,6 +308,17 @@ input:focus,select:focus{border-color:var(--gold);}
   </div>
 </div>
 
+<!-- GROUP MEMBERS -->
+<div class="screen" id="s-grpman">
+  <div class="top-bar">
+    <div class="top-row"><div class="screen-title" id="grpman-title"></div></div>
+  </div>
+  <div class="body-scroll" id="grpman-body"></div>
+  <div class="foot">
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openTablesManage()">Back</button>
+  </div>
+</div>
+
 <!-- MONTH DAY DETAIL -->
 <div class="screen" id="s-mday">
   <div class="top-bar">
@@ -526,7 +537,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.00.28';
+var APP_VERSION = '2.01.00';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -541,9 +552,9 @@ var TABLE_DEFS = [
 /* ---------- STATE ---------- */
 function blank(){
   return { customers:[], transactions:[], products:[], categories:[UNCAT],
-    hiddenCustomers:[],
+    hiddenCustomers:[], groups:[],
     settings:{dayEnd:2,fontScale:1,cols:3,headerText:'Pub',headerImage:null,
-      tablesLabel:'Tables',tablesHidden:false,currency:'\u20AC',lang:'en'},
+      tablesLabel:'Tables',tablesHidden:false,groupsLabel:'Groups',currency:'\u20AC',lang:'en'},
     _tablesSeeded:false };
 }
 function getState(){
@@ -563,7 +574,9 @@ function getState(){
       if(typeof s.cols!=='number') s.cols=3;
       if(typeof s.headerText!=='string') s.headerText='Pub';
       if(typeof s.tablesLabel!=='string') s.tablesLabel='Tables';
+      if(typeof s.groupsLabel!=='string') s.groupsLabel='Groups';
       if(!Array.isArray(st.hiddenCustomers)) st.hiddenCustomers=[];
+      migrateGroups(st);
       if(typeof s.currency!=='string' || !s.currency) s.currency='\u20AC';
       if(typeof s.lang!=='string') s.lang='en';
       if(typeof s.tablesHidden!=='boolean') s.tablesHidden=false;
@@ -707,18 +720,43 @@ function findCustomer(st,id){
   for(var i=0;i<st.customers.length;i++) if(st.customers[i].id===id) return st.customers[i];
   return null;
 }
-/* The permanent group is called Tables by default, but a bar without tables can
-   rename it to whatever it actually holds \u2014 regulars, rooms, staff tabs. */
-function tablesLabel(st){ return (st.settings.tablesLabel||'Tables'); }
-function getTables(st){ return st.customers.filter(function(c){ return c.permanent; }); }
-function ensureTables(){
-  var st=getState();
-  if(!st._tablesSeeded && !st.customers.some(function(c){ return c.permanent; })){
-    TABLE_DEFS.forEach(function(d){ st.customers.push({id:d.id,name:d.name,permanent:true}); });
+/* ---------- GROUPS ----------
+   Each permanent customer belongs to a group. Older data used a single
+   `permanent` flag with an optional `tablesLabel`; it is migrated once into a
+   default group so nothing is lost. */
+var DEFAULT_GROUP='__grp_tables__';
+function migrateGroups(st){
+  if(!Array.isArray(st.groups)) st.groups=[];
+  var legacy=st.customers.some(function(c){ return c.permanent && !c.groupId; });
+  var needSeed = !st._tablesSeeded && !st.customers.some(function(c){ return c.permanent; });
+  if(st.groups.length===0 && (legacy || needSeed)){
+    st.groups.push({ id:DEFAULT_GROUP, name:(st.settings.tablesLabel||'Tables'),
+      hidden:!!st.settings.tablesHidden });
+  }
+  if(needSeed){
+    TABLE_DEFS.forEach(function(d){ st.customers.push({id:d.id,name:d.name,permanent:true,groupId:DEFAULT_GROUP}); });
     st._tablesSeeded=true;
-    saveState(st);
+  }
+  // any stray permanent without a group joins the first group
+  var fallback = st.groups.length ? st.groups[0].id : null;
+  if(fallback){
+    st.customers.forEach(function(c){ if(c.permanent && !c.groupId) c.groupId=fallback; });
   }
 }
+function groupsLabel(st){ return st.settings.groupsLabel||'Groups'; }
+function getGroups(st){ return st.groups||[]; }
+function findGroup(st,gid){
+  var gs=getGroups(st);
+  for(var i=0;i<gs.length;i++) if(gs[i].id===gid) return gs[i];
+  return null;
+}
+function groupMembers(st,gid){
+  return st.customers.filter(function(c){ return c.permanent && c.groupId===gid; });
+}
+function groupBalance(st,gid){
+  return groupMembers(st,gid).reduce(function(sum,c){ return sum+balanceOf(st,c.id); },0);
+}
+function ensureTables(){ var st=getState(); migrateGroups(st); saveState(st); }
 
 /* ---------- APPEARANCE / HEADER ---------- */
 function applyAppearance(){
@@ -753,15 +791,16 @@ function renderHome(){
   ensureTables();
   var st=getState();
   var open=st.customers.filter(function(c){ return !c.permanent; });
-  var tablesBal=getTables(st).reduce(function(s,t){ return s+balanceOf(st,t.id); },0);
 
-  var tablesCard = st.settings.tablesHidden ? '' :
-    ('<div class="cust-item" style="border-color:var(--gold);">'+
-    '<button class="cust-item-tap" onclick="openTables()">'+
-    '<div class="cust-name" style="color:var(--gold2);">'+esc(tablesLabel(st))+'</div>'+
-    '<div class="cust-bal '+balClass(tablesBal)+'">'+balText(tablesBal)+'</div></button></div>');
+  var groupCards=getGroups(st).filter(function(g){ return !g.hidden; }).map(function(g){
+    var gb=groupBalance(st,g.id);
+    return '<div class="cust-item" style="border-color:var(--gold);">'+
+      '<button class="cust-item-tap" onclick="openTables(\''+g.id+'\')">'+
+      '<div class="cust-name" style="color:var(--gold2);">'+esc(g.name)+'</div>'+
+      '<div class="cust-bal '+balClass(gb)+'">'+balText(gb)+'</div></button></div>';
+  }).join('');
 
-  document.getElementById('home-list').innerHTML='<div class="cust-grid">'+tablesCard+
+  document.getElementById('home-list').innerHTML='<div class="cust-grid">'+groupCards+
     open.map(function(c){
       var b=balanceOf(st,c.id);
       return '<div class="cust-item">'+
@@ -821,7 +860,9 @@ function askNewCustomer(prefill){
        apart later, so the name has to be made unique up front. */
     for(i=0;i<st.customers.length;i++){
       if(st.customers[i].name.toLowerCase()===name.toLowerCase()){
-        var where = st.customers[i].permanent ? ' in '+tablesLabel(st) : ' with an open tab';
+        var pc=st.customers[i];
+        var g0 = pc.permanent ? findGroup(st,pc.groupId) : null;
+        var where = g0 ? (' in '+g0.name) : ' with an open tab';
         showConfirm('Name already in use',
           'There is already a '+st.customers[i].name+where+
           '. Give this one a name you can tell apart, for example '+name+' B.',
@@ -889,7 +930,7 @@ function renameCustomer(){
 function openMergePicker(){
   var st=getState(), c=findCustomer(st,activeCustomerId);
   if(!c) return;
-  if(c.permanent){ toast('This cannot be merged','err'); return; }
+  if(c.permanent){ toast('Group members cannot be merged','err'); return; }
   closeModal('m-cmenu');
   /* Only open tabs are offered: over time the historical list would grow into
    hundreds of one-off visitors and become useless to scroll. */
@@ -929,13 +970,19 @@ function doMerge(targetId){
     });
 }
 
-/* ---------- TABLES ---------- */
-function openTables(){
+/* ---------- GROUP VIEW ---------- */
+var activeGroupId=null;
+function openTables(gid){
   ensureTables();
-  var st=getState(), ts=getTables(st);
+  var st=getState();
+  if(gid) activeGroupId=gid;
+  var g=findGroup(st,activeGroupId) || getGroups(st)[0];
+  if(!g){ goHome(); return; }
+  activeGroupId=g.id;
+  var members=groupMembers(st,g.id);
+  document.getElementById('tables-title').textContent=g.name;
   var el=document.getElementById('tables-list');
-  document.getElementById('tables-title').textContent=tablesLabel(st);
-  el.innerHTML = ts.length ? ('<div class="cust-grid">'+ts.map(function(c){
+  el.innerHTML = members.length ? ('<div class="cust-grid">'+members.map(function(c){
     var b=balanceOf(st,c.id);
     return '<div class="cust-item">'+
       '<button class="cust-item-tap" onclick="openCustomer(\''+c.id+'\')">'+
@@ -947,19 +994,18 @@ function openTables(){
 }
 
 /* ---------- CUSTOMER ---------- */
-var activeCustomerId=null, custTab='add', cart={}, activeCat='__fav__', cameFromTables=false;
+var activeCustomerId=null, custTab='add', cart={}, activeCat='__fav__';
 
 function openCustomer(id){
   var st=getState(), c=findCustomer(st,id);
   if(!c){ goHome(); return; }
-  cameFromTables = !!c.permanent;
   activeCustomerId=id; cart={}; activeCat='__fav__';
   setCustTitle(c.name);
   show('s-cust');
   setCustTab('add');
   renderCustBalance();
 }
-function backFromCustomer(){ cart={}; if(cameFromTables) openTables(); else goHome(); }
+function backFromCustomer(){ cart={}; goHome(); }
 function renderCustBalance(){
   var st=getState();
   var b=balanceOf(st,activeCustomerId), el=document.getElementById('cust-balance');
@@ -1583,21 +1629,73 @@ function deleteProduct(){
   });
 }
 
-/* ---------- TABLES MANAGEMENT ---------- */
+/* ---------- GROUPS MANAGEMENT ---------- */
+/* Two levels: a list of groups, and one group opened to manage its members.
+   The first group is the default and cannot be deleted; deleting any other
+   moves its members into the default group so nothing is orphaned. */
+var activeManageGroup=null;
+
 function openTablesManage(){
   ensureTables();
-  var st=getState(), ts=getTables(st), lbl=tablesLabel(st);
-  document.getElementById('tabman-title').textContent=lbl;
-  var hid=st.settings.tablesHidden;
-  var head='<div class="card-box"><div class="label">Group name</div>'+
-    '<div class="field"><input type="text" id="tab-label" value="'+esc(lbl)+'" placeholder="Tables"></div>'+
-    '<button class="btn-full" style="margin-bottom:0.5em;" onclick="saveTablesLabel()">Save name</button>'+
-    '<button class="btn-full" style="'+(hid?'border-color:var(--gold);color:var(--gold2);':'')+'" onclick="toggleTablesHidden()">'+
-    (hid?'Show on home screen':'Hide from home screen')+'</button>'+
-    '<div class="hint">'+(hid?'Hidden from the home screen. Balances still count towards Total owed and can be settled from here.'
-      :'Rename this group to suit the bar \u2014 tables, regulars, rooms.')+'</div></div>';
+  renderGroupsList();
+  show('s-tabman');
+}
+function renderGroupsList(){
+  var st=getState(), gs=getGroups(st);
+  document.getElementById('tabman-title').textContent=groupsLabel(st);
+  var head='<div class="card-box"><div class="label">Section name</div>'+
+    '<div class="field"><input type="text" id="groups-label" value="'+esc(groupsLabel(st))+'" placeholder="Groups"></div>'+
+    '<button class="btn-full" onclick="saveGroupsLabel()">Save</button>'+
+    '<div class="hint">The word used for these groups across the app.</div></div>';
+  var list=gs.map(function(g,i){
+    var gb=groupBalance(st,g.id), n=groupMembers(st,g.id).length;
+    return '<div class="row"'+(g.hidden?'':' style="border-color:var(--gold);"')+'>'+
+      '<button class="row-main" onclick="openGroupManage(\''+g.id+'\')">'+
+      '<div style="font-weight:600;'+(g.hidden?'color:var(--text3);':'color:var(--gold2);')+'">'+esc(g.name)+
+        (g.hidden?' \u00B7 hidden':'')+(i===0?' \u00B7 default':'')+'</div>'+
+      '<div class="row-sub">'+n+' member'+(n===1?'':'s')+' \u00B7 '+balText(gb)+'</div></button>'+
+      '<div style="color:var(--text3);font-size:1.2em;">\u203A</div></div>';
+  }).join('');
+  document.getElementById('tabman-body').innerHTML=head+list+
+    '<div style="margin-top:1em;"><button class="btn-full" onclick="addGroup()">+ New group</button></div>';
+}
+function saveGroupsLabel(){
+  var v=document.getElementById('groups-label').value.trim()||'Groups';
+  var st=getState(); st.settings.groupsLabel=v;
+  if(saveState(st)){ renderGroupsList(); renderSettings(); toast('Saved','ok'); }
+}
+function addGroup(){
+  askText('New group','',function(name){
+    var st=getState();
+    if(getGroups(st).some(function(g){ return g.name.toLowerCase()===name.toLowerCase(); })){
+      toast('That group exists','err'); return;
+    }
+    st.groups.push({ id:'__grp_'+Date.now()+'__', name:name, hidden:false });
+    if(saveState(st)){ renderGroupsList(); toast(name+' added','ok'); }
+  });
+}
+function openGroupManage(gid){
+  activeManageGroup=gid;
+  renderGroupManage();
+  show('s-grpman');
+}
+function renderGroupManage(){
+  var st=getState(), g=findGroup(st,activeManageGroup);
+  if(!g){ openTablesManage(); return; }
+  var isDefault = getGroups(st)[0].id===g.id;
+  document.getElementById('grpman-title').textContent=g.name;
+  var members=groupMembers(st,g.id);
 
-  var list = ts.length ? ts.map(function(c){
+  var head='<div class="card-box"><div class="label">Group name</div>'+
+    '<div class="field"><input type="text" id="grp-name" value="'+esc(g.name)+'"></div>'+
+    '<button class="btn-full" style="margin-bottom:0.5em;" onclick="saveGroupName()">Save name</button>'+
+    '<button class="btn-full" style="'+(g.hidden?'border-color:var(--gold);color:var(--gold2);':'')+'" onclick="toggleGroupHidden()">'+
+    (g.hidden?'Show on home screen':'Hide from home screen')+'</button>'+
+    (isDefault?'':'<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);margin-top:0.5em;" onclick="deleteGroup()">Delete group</button>')+
+    '<div class="hint">'+(g.hidden?'Hidden from the home screen. Balances still count and can be settled here.'
+      :(isDefault?'The default group cannot be deleted.':'Deleting moves its members to the default group.'))+'</div></div>';
+
+  var list = members.length ? members.map(function(c){
     var b=balanceOf(st,c.id);
     return '<div class="row">'+
       '<button class="row-main" onclick="openCustomer(\''+c.id+'\')">'+
@@ -1605,35 +1703,73 @@ function openTablesManage(){
       '<div class="row-sub '+balClass(b)+'">'+balText(b)+' \u2014 tap to open</div></button>'+
       '<button class="qbtn" style="color:var(--gold2);" onclick="renameTable(\''+c.id+'\')">\u270E</button>'+
       '<button class="qbtn" style="color:var(--red);" onclick="removeTable(\''+c.id+'\')">\u2715</button></div>';
-  }).join('') : '<div class="empty-hint">Nothing here yet.</div>';
+  }).join('') : '<div class="empty-hint">No members yet.</div>';
 
-  document.getElementById('tabman-body').innerHTML=head+list+
-    '<div style="margin-top:1em;"><button class="btn-full" onclick="addTable()">+ New entry</button></div>';
-  show('s-tabman');
+  document.getElementById('grpman-body').innerHTML=head+
+    '<div class="label">Members</div>'+list+
+    '<div style="margin-top:1em;"><button class="btn-full" onclick="addTable()">+ Add member</button></div>';
 }
-function saveTablesLabel(){
-  var v=document.getElementById('tab-label').value.trim()||'Tables';
-  var st=getState();
-  st.settings.tablesLabel=v;
-  if(saveState(st)){ openTablesManage(); toast('Renamed to '+v,'ok'); }
+function saveGroupName(){
+  var v=document.getElementById('grp-name').value.trim();
+  if(!v){ toast('Name is required','err'); return; }
+  var st=getState(), g=findGroup(st,activeManageGroup);
+  if(!g) return;
+  g.name=v;
+  if(saveState(st)){ renderGroupManage(); toast('Renamed','ok'); }
 }
-function toggleTablesHidden(){
-  var st=getState();
-  st.settings.tablesHidden=!st.settings.tablesHidden;
-  if(saveState(st)){
-    openTablesManage();
-    toast(st.settings.tablesHidden?'Hidden from home screen':'Shown on home screen','ok');
-  }
+function toggleGroupHidden(){
+  var st=getState(), g=findGroup(st,activeManageGroup);
+  if(!g) return;
+  g.hidden=!g.hidden;
+  if(saveState(st)){ renderGroupManage(); toast(g.hidden?'Hidden from home screen':'Shown on home screen','ok'); }
+}
+function deleteGroup(){
+  var st=getState(), g=findGroup(st,activeManageGroup);
+  if(!g) return;
+  var gs=getGroups(st);
+  if(gs[0].id===g.id){ toast('The default group cannot be deleted','err'); return; }
+  var def=gs[0], n=groupMembers(st,g.id).length;
+  showConfirm('Delete '+g.name+'?',
+    n ? (n+' member'+(n===1?'':'s')+' will move to '+def.name+'.') : 'The group is empty.',
+    function(){
+      var st2=getState();
+      st2.customers.forEach(function(c){ if(c.permanent && c.groupId===g.id) c.groupId=def.id; });
+      st2.groups=st2.groups.filter(function(x){ return x.id!==g.id; });
+      if(saveState(st2)){ openTablesManage(); toast(n?(n+' moved to '+def.name):'Group deleted','ok'); }
+    });
 }
 function addTable(){
-  askText('New entry','',function(name){
-    var st=getState();
-    if(st.customers.some(function(c){ return c.permanent && c.name.toLowerCase()===name.toLowerCase(); })){
-      toast('That name already exists','err'); return;
+  var st=getState();
+  askText('Add member','',function(name){
+    var st2=getState();
+    // already a member here?
+    if(st2.customers.some(function(c){ return c.permanent && c.groupId===activeManageGroup && c.name.toLowerCase()===name.toLowerCase(); })){
+      toast('That name is already here','err'); return;
     }
-    st.customers.push({id:'__table_'+Date.now()+'__',name:name,permanent:true});
-    st._tablesSeeded=true;
-    if(saveState(st)){ openTablesManage(); toast(name+' added','ok'); }
+    // an existing non-permanent customer with history -> ask to promote
+    var known=knownCustomers(st2), match=null;
+    for(var i=0;i<known.length;i++){
+      if(known[i].name.toLowerCase()===name.toLowerCase() && !isPermanentId(known[i].id)){ match=known[i]; break; }
+    }
+    var openC=st2.customers.filter(function(c){ return !c.permanent; })
+      .filter(function(c){ return c.name.toLowerCase()===name.toLowerCase(); })[0];
+    if(match || openC){
+      var id=(openC?openC.id:match.id);
+      var g=findGroup(st2,activeManageGroup);
+      showConfirm('Same customer?',
+        'There is already a customer called '+name+'. Move them into '+g.name+' with all their history?',
+        function(){
+          var st3=getState();
+          var existing=findCustomer(st3,id);
+          if(existing){ existing.permanent=true; existing.groupId=activeManageGroup; }
+          else st3.customers.push({id:id,name:name,permanent:true,groupId:activeManageGroup});
+          unhideCustomer(st3,id);
+          if(saveState(st3)){ renderGroupManage(); toast(name+' moved in','ok'); }
+        },'Move in');
+      return;
+    }
+    st2.customers.push({id:'__member_'+Date.now()+'__',name:name,permanent:true,groupId:activeManageGroup});
+    if(saveState(st2)){ renderGroupManage(); toast(name+' added','ok'); }
   });
 }
 function renameTable(id){
@@ -1643,18 +1779,33 @@ function renameTable(id){
     var st2=getState(), c2=findCustomer(st2,id);
     if(!c2) return;
     c2.name=name;
-    if(saveState(st2)){ openTablesManage(); toast('Renamed','ok'); }
+    st2.transactions.forEach(function(t){ if(t.customerId===id) t.customerName=name; });
+    if(saveState(st2)){ renderGroupManage(); toast('Renamed','ok'); }
   });
 }
+/* Removing a member works like removing a customer: a leftover balance is
+   cleared as a recorded write-off (or dropped credit) first. */
 function removeTable(id){
   var st=getState(), c=findCustomer(st,id);
   if(!c) return;
-  if(balanceOf(st,id)<-0.001){ toast('Settle the balance first','err'); return; }
-  showConfirm('Remove entry?', 'Remove '+c.name+'? Its history is kept.', function(){
+  var bal=balanceOf(st,id), name=c.name;
+  if(Math.abs(bal)>0.001){
+    var owed=bal<0;
+    showConfirm('Balance outstanding',
+      (owed?(name+' still owes '+f(Math.abs(bal))+EUR+'.'):(name+' still has '+f(bal)+EUR+' credit.'))+
+      ' Clear it and remove? The write-off is recorded in today\u2019s history.',
+      function(){
+        var st2=getState();
+        pushTx(st2,{customerId:id,customerName:name,type:owed?'writeoff':'debt',amount:Math.abs(bal),note:'Cleared on removal'});
+        st2.customers=st2.customers.filter(function(x){ return x.id!==id; });
+        if(saveState(st2)){ renderGroupManage(); toast(name+' removed','ok'); }
+      },'Clear & remove');
+    return;
+  }
+  showConfirm('Remove '+name+'?', 'Its history is kept.', function(){
     var st2=getState();
     st2.customers=st2.customers.filter(function(x){ return x.id!==id; });
-    st2._tablesSeeded=true;
-    if(saveState(st2)){ openTablesManage(); toast('Table removed','ok'); }
+    if(saveState(st2)){ renderGroupManage(); toast(name+' removed','ok'); }
   });
 }
 
@@ -2041,8 +2192,7 @@ function renderSettings(){
     menuRow('Bar day','Ends at '+pad2(s.dayEnd)+':00', "openSetPage('day')")+
     menuRow('Currency &amp; language', s.currency+' \u00B7 English', "openSetPage('region')")+
     menuRow('Categories &amp; products', st.products.length+' product'+(st.products.length===1?'':'s'), 'openCategories()')+
-    menuRow(esc(tablesLabel(st)), getTables(st).length+' entr'+(getTables(st).length===1?'y':'ies')+
-      (s.tablesHidden?' \u00B7 hidden':''), 'openTablesManage()')+
+    menuRow(esc(groupsLabel(st)), getGroups(st).length+' group'+(getGroups(st).length===1?'':'s'), 'openTablesManage()')+
     menuRow('Customers','Rename or remove', 'openCustomersManage()')+
     menuRow('Cash flow','Expenses and other income', "openSetPage('cash')")+
     menuRow('Updates','Version '+APP_VERSION, "openSetPage('upd')")+
