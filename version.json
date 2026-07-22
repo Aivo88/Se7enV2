@@ -1,5 +1,5 @@
 {
-  "version": "2.00.25",
-  "cache": "se7env2-v27",
-  "notes": "Month view lists active days first, drilling into a day then a customer; new Customers tab with search and history view; Settings > Customers to rename or remove a name (transactions kept)."
+  "version": "2.00.26",
+  "cache": "se7env2-v28",
+  "notes": "Groups (tables/regulars) sort to the bottom of day and month lists; removing a customer with an open balance clears it as a recorded write-off first; fixed a literal dash in the Customers hint."
 }
