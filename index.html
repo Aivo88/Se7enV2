@@ -526,7 +526,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.00.26';
+var APP_VERSION = '2.00.27';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -541,6 +541,7 @@ var TABLE_DEFS = [
 /* ---------- STATE ---------- */
 function blank(){
   return { customers:[], transactions:[], products:[], categories:[UNCAT],
+    hiddenCustomers:[],
     settings:{dayEnd:2,fontScale:1,cols:3,headerText:'Pub',headerImage:null,
       tablesLabel:'Tables',tablesHidden:false,currency:'\u20AC',lang:'en'},
     _tablesSeeded:false };
@@ -562,6 +563,7 @@ function getState(){
       if(typeof s.cols!=='number') s.cols=3;
       if(typeof s.headerText!=='string') s.headerText='Pub';
       if(typeof s.tablesLabel!=='string') s.tablesLabel='Tables';
+      if(!Array.isArray(st.hiddenCustomers)) st.hiddenCustomers=[];
       if(typeof s.currency!=='string' || !s.currency) s.currency='\u20AC';
       if(typeof s.lang!=='string') s.lang='en';
       if(typeof s.tablesHidden!=='boolean') s.tablesHidden=false;
@@ -692,6 +694,14 @@ function pushTx(st,tx){
   tx.barDate=computeBarDate(tx.ts, st.settings.dayEnd);
   st.transactions.push(tx);
   return tx;
+}
+function hideCustomer(st,id){
+  st.customers=st.customers.filter(function(c){ return c.id!==id; });
+  if(!st.hiddenCustomers) st.hiddenCustomers=[];
+  if(st.hiddenCustomers.indexOf(id)===-1) st.hiddenCustomers.push(id);
+}
+function unhideCustomer(st,id){
+  if(st.hiddenCustomers) st.hiddenCustomers=st.hiddenCustomers.filter(function(x){ return x!==id; });
 }
 function findCustomer(st,id){
   for(var i=0;i<st.customers.length;i++) if(st.customers[i].id===id) return st.customers[i];
@@ -842,6 +852,7 @@ function askNewCustomer(prefill){
 }
 function addCustomer(id,name,restored){
   var st=getState();
+  unhideCustomer(st,id);
   st.customers.push({id:id,name:name});
   if(!saveState(st)) return;
   toast(restored ? (name+' \u2014 history restored') : (name+' added'),'ok');
@@ -1874,8 +1885,12 @@ function allCustomers(st){
     if(!m[c.id]) m[c.id]={id:c.id,name:c.name,last:0};
     m[c.id].permanent=c.permanent; m[c.id].open=true; m[c.id].name=c.name;
   });
+  var hidden=st.hiddenCustomers||[];
   return Object.keys(m).map(function(k){ return m[k]; })
-    .filter(function(c){ return c.id!==CASH_ID && c.id!==CARD_ID && c.id!=='__house__'; })
+    .filter(function(c){
+      if(c.id===CASH_ID || c.id===CARD_ID || c.id==='__house__') return false;
+      return hidden.indexOf(c.id)===-1;
+    })
     .sort(function(a,b){ return a.name.toLowerCase().localeCompare(b.name.toLowerCase()); });
 }
 var custQuery='', custManQuery='';
@@ -1936,7 +1951,7 @@ function removeKnownCustomer(id){
           type: owed?'writeoff':'debt',
           amount:Math.abs(bal),
           note:'Cleared on removal'});
-        st2.customers=st2.customers.filter(function(c){ return c.id!==id; });
+        hideCustomer(st2,id);
         if(saveState(st2)){ renderCustomersManage(); toast(name+' removed','ok'); }
       },
       'Clear & remove');
@@ -1945,7 +1960,7 @@ function removeKnownCustomer(id){
   showConfirm('Remove '+name+'?','Only the name is cleared from the list. Transactions and past reports are kept, and the name returns if used again.',
     function(){
       var st2=getState();
-      st2.customers=st2.customers.filter(function(c){ return c.id!==id; });
+      hideCustomer(st2,id);
       if(saveState(st2)){ renderCustomersManage(); toast('Removed','ok'); }
     });
 }

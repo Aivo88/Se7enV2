@@ -1,5 +1,5 @@
 {
-  "version": "2.00.26",
-  "cache": "se7env2-v28",
-  "notes": "Groups (tables/regulars) sort to the bottom of day and month lists; removing a customer with an open balance clears it as a recorded write-off first; fixed a literal dash in the Customers hint."
+  "version": "2.00.27",
+  "cache": "se7env2-v29",
+  "notes": "Removing a customer now actually hides the name from the lists while keeping transactions; the name reappears if used again."
 }
