@@ -1,5 +1,5 @@
 {
-  "version": "2.00.24",
-  "cache": "se7env2-v26",
-  "notes": "History customer list is sorted alphabetically; table and regular entries are shown in gold."
+  "version": "2.00.25",
+  "cache": "se7env2-v27",
+  "notes": "Month view lists active days first, drilling into a day then a customer; new Customers tab with search and history view; Settings > Customers to rename or remove a name (transactions kept)."
 }

@@ -260,6 +260,7 @@ input:focus,select:focus{border-color:var(--gold);}
     <div class="tabs">
       <button class="tab active" id="rtab-day" onclick="setRepTab('day')">Today</button>
       <button class="tab" id="rtab-month" onclick="setRepTab('month')">Month</button>
+      <button class="tab" id="rtab-cust" onclick="setRepTab('cust')">Customers</button>
       <button class="tab" id="rtab-raw" onclick="setRepTab('raw')">Raw</button>
     </div>
   </div>
@@ -292,6 +293,29 @@ input:focus,select:focus{border-color:var(--gold);}
   <div class="body-scroll" id="set-body"></div>
   <div class="foot">
     <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="goHome()">Back</button>
+  </div>
+</div>
+
+<!-- CUSTOMERS MANAGEMENT -->
+<div class="screen" id="s-custman">
+  <div class="top-bar">
+    <div class="top-row"><div class="screen-title">Customers</div></div>
+    <div class="hint">Removing a name only clears it from the list \u2014 its transactions and past reports are kept.</div>
+  </div>
+  <div class="body-scroll" id="custman-body"></div>
+  <div class="foot">
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openSettings()">Back</button>
+  </div>
+</div>
+
+<!-- MONTH DAY DETAIL -->
+<div class="screen" id="s-mday">
+  <div class="top-bar">
+    <div class="top-row"><div class="screen-title" id="mday-title"></div></div>
+  </div>
+  <div class="body-scroll" id="mday-body"></div>
+  <div class="foot">
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="show('s-rep');setRepTab('month')">Back</button>
   </div>
 </div>
 
@@ -502,7 +526,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.00.24';
+var APP_VERSION = '2.00.25';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -1624,18 +1648,23 @@ function removeTable(id){
 }
 
 /* ---------- HISTORY ---------- */
-var repTab='day', repMonth=null, txdayCtx=null;
+var repTab='day', repMonth=null, txdayCtx=null, monthDayCtx=null;
 var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 function openReports(){ show('s-rep'); setRepTab(repTab||'day'); }
-function backToReports(){ show('s-rep'); setRepTab(repTab); }
+function backToReports(){
+  if(txdayCtx && txdayCtx.scope==='mday'){ openMonthDay(monthDayCtx); return; }
+  if(txdayCtx && txdayCtx.scope==='cust'){ openCustomersList(); return; }
+  show('s-rep'); setRepTab(repTab);
+}
 function setRepTab(t){
   repTab=t;
-  ['day','month','raw'].forEach(function(k){
+  ['day','month','cust','raw'].forEach(function(k){
     document.getElementById('rtab-'+k).classList.toggle('active',k===t);
   });
   if(t==='day') renderDay();
   else if(t==='month') renderMonth();
+  else if(t==='cust') renderCustomersTab();
   else renderRaw();
 }
 
@@ -1732,7 +1761,31 @@ function renderMonth(){
     '<div style="font-weight:700;color:var(--gold2);">'+MONTHS[repMonth.month]+' '+repMonth.year+'</div>'+
     '<button class="qbtn" onclick="shiftMonth(1)">\u203A</button></div>';
   document.getElementById('rep-body').innerHTML=
-    nav+summaryGridHTML(sumRange(txs))+customerRowsHTML(txs,'month');
+    nav+summaryGridHTML(sumRange(txs))+monthDaysHTML(txs);
+}
+/* Each day of the month that saw activity, newest first; tap one to drill into
+   that day's customers. */
+function monthDaysHTML(txs){
+  var by={};
+  txs.forEach(function(t){ var d=txBarDate(t); if(!by[d]) by[d]=[]; by[d].push(t); });
+  var days=Object.keys(by).map(Number).sort(function(a,b){ return b-a; });
+  if(!days.length) return '<div class="empty-hint">No activity this month.</div>';
+  return '<div class="label">Days</div>'+days.map(function(d){
+    var s=sumRange(by[d]);
+    return '<div class="row"><button class="row-main" onclick="openMonthDay('+d+')">'+
+      '<div style="font-weight:600;">'+fmtDate(d)+'</div>'+
+      '<div class="row-sub">'+by[d].length+' transaction'+(by[d].length===1?'':'s')+'</div></button>'+
+      '<div style="color:var(--green);font-weight:700;">+'+f(s.income)+EUR+'</div></div>';
+  }).join('');
+}
+function openMonthDay(bd){
+  var st=getState();
+  var txs=st.transactions.filter(function(t){ return txBarDate(t)===bd; });
+  monthDayCtx=bd;
+  document.getElementById('mday-title').textContent=fmtDate(bd);
+  document.getElementById('mday-body').innerHTML=
+    summaryGridHTML(sumRange(txs))+customerRowsHTML(txs,'mday');
+  show('s-mday');
 }
 /* Stepping past December lands on a year-summary page before continuing into
    January, and the same in reverse. */
@@ -1807,6 +1860,96 @@ function renderYearSummary(){
   document.getElementById('rep-body').innerHTML=
     nav+statement+(rows?stTitle('Months')+rows:'<div class="empty-hint">No income this year.</div>');
 }
+/* Everyone on record \u2014 open tabs, permanents and one-off visitors from the
+   transaction log \u2014 shown alphabetically with a search box on top, so a long
+   list of past visitors stays usable. */
+function allCustomers(st){
+  var m={};
+  knownCustomers(st).forEach(function(k){ m[k.id]={id:k.id,name:k.name,last:k.last}; });
+  st.customers.forEach(function(c){
+    if(!m[c.id]) m[c.id]={id:c.id,name:c.name,last:0};
+    m[c.id].permanent=c.permanent; m[c.id].open=true; m[c.id].name=c.name;
+  });
+  return Object.keys(m).map(function(k){ return m[k]; })
+    .filter(function(c){ return c.id!==CASH_ID && c.id!==CARD_ID && c.id!=='__house__'; })
+    .sort(function(a,b){ return a.name.toLowerCase().localeCompare(b.name.toLowerCase()); });
+}
+var custQuery='', custManQuery='';
+function openCustomersManage(){ renderCustomersManage(); show('s-custman'); }
+function renderCustomersManage(){
+  var st=getState(), all=allCustomers(st).filter(function(c){ return !isPermanentId(c.id); });
+  var q=custManQuery.toLowerCase();
+  var list=all.filter(function(c){ return c.name.toLowerCase().indexOf(q)!==-1; });
+  var search='<div class="search-wrap" style="margin-bottom:0.8em;">'+
+    '<span style="color:var(--text4);">\uD83D\uDD0D</span>'+
+    '<input type="text" placeholder="Search customer..." value="'+esc(custManQuery)+'" '+
+    'oninput="custManQuery=this.value; renderCustomersManage();"></div>';
+  var rows = list.length ? list.map(function(c){
+    var sub = c.open ? 'Open tab' : (c.last?('Last seen '+fmtDate(c.last)):'');
+    return '<div class="row"><button class="row-main" onclick="renameKnownCustomer(\''+c.id+'\')">'+
+      '<div style="font-weight:600;">'+esc(c.name)+' <span style="color:var(--gold);font-size:0.9em;">\u270E</span></div>'+
+      (sub?'<div class="row-sub">'+sub+'</div>':'')+'</button>'+
+      '<button class="qbtn" style="color:var(--red);" onclick="removeKnownCustomer(\''+c.id+'\')">\u2715</button></div>';
+  }).join('') : '<div class="empty-hint">No customers yet.</div>';
+  document.getElementById('custman-body').innerHTML=search+rows;
+}
+function renameKnownCustomer(id){
+  var st=getState(), all=allCustomers(st), cur=null;
+  for(var i=0;i<all.length;i++) if(all[i].id===id) cur=all[i];
+  if(!cur) return;
+  askText('Rename customer',cur.name,function(name){
+    var st2=getState();
+    var open=findCustomer(st2,id);
+    if(open){
+      var clash=st2.customers.some(function(x){ return x.id!==id && x.name.toLowerCase()===name.toLowerCase(); });
+      if(clash){ toast('Another open tab has that name','err'); return; }
+      open.name=name;
+    }
+    st2.transactions.forEach(function(t){ if(t.customerId===id) t.customerName=name; });
+    if(saveState(st2)){ renderCustomersManage(); toast('Renamed','ok'); }
+  });
+}
+/* Only the list entry goes; transactions stay so historical reports are
+   unaffected, and the name returns if it is used again. */
+function removeKnownCustomer(id){
+  var st=getState();
+  var open=findCustomer(st,id);
+  var name = open ? open.name : (function(){
+    var a=allCustomers(st); for(var i=0;i<a.length;i++) if(a[i].id===id) return a[i].name; return '?';
+  })();
+  if(open && balanceOf(st,id)!==0){ toast('Settle the balance first','err'); return; }
+  showConfirm('Remove '+name+'?','Only the name is cleared from the list. Transactions and past reports are kept, and the name returns if used again.',
+    function(){
+      var st2=getState();
+      st2.customers=st2.customers.filter(function(c){ return c.id!==id; });
+      if(saveState(st2)){ renderCustomersManage(); toast('Removed','ok'); }
+    });
+}
+
+function renderCustomersTab(){
+  var st=getState(), all=allCustomers(st);
+  var q=custQuery.toLowerCase();
+  var list=all.filter(function(c){ return c.name.toLowerCase().indexOf(q)!==-1; });
+  var search='<div class="search-wrap" style="margin-bottom:0.8em;">'+
+    '<span style="color:var(--text4);">\uD83D\uDD0D</span>'+
+    '<input id="cust-tab-search" type="text" placeholder="Search customer..." '+
+    'value="'+esc(custQuery)+'" oninput="custQuery=this.value; renderCustomersTab();"></div>';
+  var rows = list.length ? list.map(function(c){
+    var perm=isPermanentId(c.id);
+    var sub = c.open ? 'Open tab' : (c.last?('Last seen '+fmtDate(c.last)):'');
+    return '<div class="row"'+(perm?' style="border-color:var(--gold);"':'')+
+      '><button class="row-main" onclick="openCustHistory(\''+c.id+'\')">'+
+      '<div style="font-weight:600;'+(perm?'color:var(--gold2);':'')+'">'+esc(c.name)+'</div>'+
+      (sub?'<div class="row-sub">'+sub+'</div>':'')+'</button>'+
+      '<div style="color:var(--text3);font-size:1.2em;">\u203A</div></div>';
+  }).join('') : '<div class="empty-hint">No customers.</div>';
+  document.getElementById('rep-body').innerHTML=search+rows;
+  var inp=document.getElementById('cust-tab-search');
+  if(inp && document.activeElement!==inp){} // keep focus if user is typing
+}
+function openCustomersList(){ show('s-rep'); setRepTab('cust'); }
+function openCustHistory(id){ openTxDay('cust',id); }
+
 function renderRaw(){
   var st=getState();
   var txs=st.transactions.slice().sort(function(a,b){ return b.ts-a.ts; }).slice(0,400);
@@ -1816,13 +1959,19 @@ function renderRaw(){
 }
 
 function openTxDay(scope,custId){
-  var st=getState();
-  var txs=(scope==='month'?monthTxs(st):dayTxs(st))
-    .filter(function(t){ return (t.customerId||'?')===custId; })
+  var st=getState(), pool;
+  if(scope==='month') pool=monthTxs(st);
+  else if(scope==='mday') pool=st.transactions.filter(function(t){ return txBarDate(t)===monthDayCtx; });
+  else if(scope==='cust') pool=st.transactions;
+  else pool=dayTxs(st);
+  var txs=pool.filter(function(t){ return (t.customerId||'?')===custId; })
     .sort(function(a,b){ return b.ts-a.ts; });
   txdayCtx={scope:scope,id:custId};
   var name=txs.length?(txs[0].customerName||'?'):'?';
-  var period = scope==='month' ? (MONTHS[repMonth.month]+' '+repMonth.year) : fmtDate(todayBarDate());
+  var period = scope==='month' ? (MONTHS[repMonth.month]+' '+repMonth.year)
+             : scope==='mday' ? fmtDate(monthDayCtx)
+             : scope==='cust' ? 'All history'
+             : fmtDate(todayBarDate());
   document.getElementById('txday-title').textContent=name;
   document.getElementById('txday-sub').textContent=period+' \u00B7 '+txs.length+' transaction'+(txs.length===1?'':'s');
   document.getElementById('txday-body').innerHTML=
@@ -1851,6 +2000,7 @@ function renderSettings(){
     menuRow('Categories &amp; products', st.products.length+' product'+(st.products.length===1?'':'s'), 'openCategories()')+
     menuRow(esc(tablesLabel(st)), getTables(st).length+' entr'+(getTables(st).length===1?'y':'ies')+
       (s.tablesHidden?' \u00B7 hidden':''), 'openTablesManage()')+
+    menuRow('Customers','Rename or remove', 'openCustomersManage()')+
     menuRow('Cash flow','Expenses and other income', "openSetPage('cash')")+
     menuRow('Updates','Version '+APP_VERSION, "openSetPage('upd')")+
     menuRow('Data','Backup and storage', "openSetPage('data')");
