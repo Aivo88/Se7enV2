@@ -1,5 +1,5 @@
 {
-  "version": "2.00.27",
-  "cache": "se7env2-v29",
-  "notes": "Removing a customer now actually hides the name from the lists while keeping transactions; the name reappears if used again."
+  "version": "2.00.28",
+  "cache": "se7env2-v30",
+  "notes": "Customers tab also sorts tables and regulars to the bottom of the list."
 }

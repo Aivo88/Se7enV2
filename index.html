@@ -526,7 +526,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.00.27';
+var APP_VERSION = '2.00.28';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -1891,7 +1891,11 @@ function allCustomers(st){
       if(c.id===CASH_ID || c.id===CARD_ID || c.id==='__house__') return false;
       return hidden.indexOf(c.id)===-1;
     })
-    .sort(function(a,b){ return a.name.toLowerCase().localeCompare(b.name.toLowerCase()); });
+    .sort(function(a,b){
+      var pa=isPermanentId(a.id)?1:0, pb=isPermanentId(b.id)?1:0;
+      if(pa!==pb) return pa-pb;  // groups last
+      return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+    });
 }
 var custQuery='', custManQuery='';
 function openCustomersManage(){ renderCustomersManage(); show('s-custman'); }
