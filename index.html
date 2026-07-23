@@ -537,7 +537,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.01.01';
+var APP_VERSION = '2.01.02';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -2153,6 +2153,21 @@ function renderRaw(){
                : '<div class="empty-hint">No transactions yet.</div>';
 }
 
+/* Grouped under day headers so a long history reads as separate visits rather
+   than one undifferentiated stream; the date then only needs saying once. */
+function txDaysHTML(txs){
+  var groups={};
+  txs.forEach(function(t){ var d=txBarDate(t); if(!groups[d]) groups[d]=[]; groups[d].push(t); });
+  var days=Object.keys(groups).map(Number).sort(function(a,b){ return b-a; });
+  var today=todayBarDate();
+  return days.map(function(d){
+    var g=groups[d], spent=0;
+    g.forEach(function(t){ if(t.type==='debt') spent+=t.amount; });
+    return '<div class="day-hdr"><span class="d">'+(d===today?'Today \u00B7 ':'')+fmtDate(d)+'</span>'+
+      '<span style="color:var(--gold2);">'+f(spent)+EUR+'</span></div>'+
+      g.map(function(t){ return txHTML(t,false,true); }).join('');
+  }).join('');
+}
 function openTxDay(scope,custId){
   var st=getState(), pool;
   if(scope==='month') pool=monthTxs(st);
@@ -2170,8 +2185,7 @@ function openTxDay(scope,custId){
   document.getElementById('txday-title').textContent=name;
   document.getElementById('txday-sub').textContent=period+' \u00B7 '+txs.length+' transaction'+(txs.length===1?'':'s');
   document.getElementById('txday-body').innerHTML=
-    txs.length ? txs.map(function(t){ return txHTML(t,false); }).join('')
-               : '<div class="empty-hint">No transactions.</div>';
+    txs.length ? txDaysHTML(txs) : '<div class="empty-hint">No transactions.</div>';
   show('s-txday');
 }
 

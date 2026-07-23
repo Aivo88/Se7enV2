@@ -1,5 +1,5 @@
 {
-  "version": "2.01.01",
-  "cache": "se7env2-v32",
-  "notes": "Transaction dates now show in the customer history opened from History > Customers, not just the time."
+  "version": "2.01.02",
+  "cache": "se7env2-v33",
+  "notes": "Customer transaction lists are grouped under day headers showing the date and that day's spend."
 }
