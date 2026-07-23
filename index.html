@@ -537,7 +537,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.01.00';
+var APP_VERSION = '2.01.01';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -1143,7 +1143,8 @@ function renderHistory(){
     return '<div><div class="day-hdr" onclick="toggleDay('+d+')">'+
       '<span class="d">'+(d===today?'Today \u00B7 ':'')+fmtDate(d)+'</span>'+
       '<span style="color:var(--gold2);">'+f(spent)+EUR+'</span></div>'+
-      '<div id="day-'+d+'" style="display:'+(open?'':'none')+';">'+g.map(txHTML).join('')+'</div></div>';
+      '<div id="day-'+d+'" style="display:'+(open?'':'none')+';">'+
+      g.map(function(t){ return txHTML(t,false,true); }).join('')+'</div></div>';
   }).join('');
 }
 function toggleDay(d){
@@ -1160,7 +1161,7 @@ function txLabel(t){
   return (t.method==='card'?'Card':'Cash')+' payment';
 }
 function txIsOut(t){ return t.type==='debt'||t.type==='expense'; }
-function txHTML(t,withName){
+function txHTML(t,withName,hideDate){
   var cls='pay', label=txLabel(t);
   if(t.type==='debt'||t.type==='writeoff'||t.type==='expense') cls='debt';
   else if(t.type==='credit') cls='credit';
@@ -1169,7 +1170,7 @@ function txHTML(t,withName){
     ? '<div class="tx-items">'+t.items.map(function(i){ return esc(i.name)+' \u00D7'+i.qty+' \u2014 '+f(i.price*i.qty)+EUR; }).join('<br>')+'</div>'
     : '';
   var head = withName ? (esc(t.customerName||'?')+' \u00B7 '+label) : label;
-  var when = withName ? (fmtDate(txBarDate(t))+' '+fmtTime(t.ts)) : fmtTime(t.ts);
+  var when = hideDate ? fmtTime(t.ts) : (fmtDate(txBarDate(t))+' '+fmtTime(t.ts));
   var note = t.note ? '<div class="tx-items" style="font-style:italic;">'+esc(t.note)+'</div>' : '';
   var edit = '<button class="qbtn" style="width:auto;padding:0 12px;color:var(--gold2);" '+
     'onclick="openTxEdit(\''+t.id+'\')">\u270E</button>';
