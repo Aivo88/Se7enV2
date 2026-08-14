@@ -537,7 +537,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.01.02';
+var APP_VERSION = '2.02.00';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -554,7 +554,8 @@ function blank(){
   return { customers:[], transactions:[], products:[], categories:[UNCAT],
     hiddenCustomers:[], groups:[],
     settings:{dayEnd:2,fontScale:1,cols:3,headerText:'Pub',headerImage:null,
-      tablesLabel:'Tables',tablesHidden:false,groupsLabel:'Groups',currency:'\u20AC',lang:'en'},
+      tablesLabel:'Tables',tablesHidden:false,groupsLabel:'Groups',currency:'\u20AC',lang:'en',
+      autoBackup:{on:false,cycle:'weekly',day:0,hour:15,last:0}},
     _tablesSeeded:false };
 }
 function getState(){
@@ -579,6 +580,8 @@ function getState(){
       migrateGroups(st);
       if(typeof s.currency!=='string' || !s.currency) s.currency='\u20AC';
       if(typeof s.lang!=='string') s.lang='en';
+      if(!s.autoBackup || typeof s.autoBackup!=='object')
+        s.autoBackup={ on:false, cycle:'weekly', day:0, hour:15, last:0 };
       if(typeof s.tablesHidden!=='boolean') s.tablesHidden=false;
       if(typeof s.headerImage==='undefined') s.headerImage=null;
       return st;
@@ -2280,9 +2283,31 @@ function renderSetPage(){
     var yOpts='';
     for(var y2=now.getFullYear(); y2>=minYear; y2--) yOpts+='<option value="'+y2+'">'+y2+'</option>';
 
+    var ab=s.autoBackup;
+    var dayOpts='';
+    var DN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    for(var di=0;di<7;di++) dayOpts+='<option value="'+di+'"'+(ab.day===di?' selected':'')+'>'+DN[di]+'</option>';
+    var hourOpts='';
+    for(var hi=0;hi<24;hi++) hourOpts+='<option value="'+hi+'"'+(ab.hour===hi?' selected':'')+'>'+pad2(hi)+':00</option>';
+    var cycleOpts='';
+    [['daily','Every day'],['2day','Every 2 days'],['weekly','Weekly'],['monthly','Monthly']].forEach(function(o){
+      cycleOpts+='<option value="'+o[0]+'"'+(ab.cycle===o[0]?' selected':'')+'>'+o[1]+'</option>';
+    });
     h='<div class="card-box"><div class="label">Backup</div>'+
       '<button class="btn-full" style="margin-bottom:0.5em;" onclick="doBackup()">Save backup</button>'+
       '<button class="btn-full" style="border-color:var(--text3);color:var(--text2);" onclick="pickRestoreFile()">Load backup</button>'+
+      '</div>'+
+
+      '<div class="card-box"><div class="label">Auto backup</div>'+
+      '<button class="btn-full" style="'+(ab.on?'background:var(--gbg);border-color:var(--green);color:var(--green);':'')+'margin-bottom:0.6em;" onclick="toggleAutoBackup()">'+
+      (ab.on?'On':'Off')+'</button>'+
+      (ab.on?
+        '<div class="label">How often</div><select id="ab-cycle" onchange="saveAutoBackup()" style="margin-bottom:0.6em;">'+cycleOpts+'</select>'+
+        (ab.cycle==='weekly'?'<div class="label">Day</div><select id="ab-day" onchange="saveAutoBackup()" style="margin-bottom:0.6em;">'+dayOpts+'</select>':'')+
+        '<div class="label">Time</div><select id="ab-hour" onchange="saveAutoBackup()">'+hourOpts+'</select>'+
+        '<div class="hint">'+autoBackupDesc(ab)+' A file is downloaded automatically the next time the app is open after that time. '+
+        (ab.last?('Last: '+fmtDate(ab.last)+' '+fmtTime(ab.last)+'.'):'No automatic backup yet.')+'</div>'
+        :'<div class="hint">Downloads a backup on a schedule while the app is open.</div>')+
       '</div>'+
 
       '<div class="card-box"><div class="label">Purge old data</div>'+
@@ -2371,17 +2396,77 @@ function bumpCols(d){
   st.settings.cols=Math.min(6,Math.max(2,st.settings.cols+d));
   if(saveState(st)){ applyAppearance(); renderSetPage(); }
 }
-function doBackup(){
-  var d=new Date();
-  var name='se7env2-backup-'+d.getFullYear()+pad2(d.getMonth()+1)+pad2(d.getDate())+'.json';
+function backupFilename(d){
+  d=d||new Date();
+  return d.getFullYear()+'.'+pad2(d.getMonth()+1)+'.'+pad2(d.getDate())+' Backup.json';
+}
+function downloadBackup(name){
   var blob=new Blob([JSON.stringify(getState(),null,2)],{type:'application/json'});
   var a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download=name;
+  a.download=name||backupFilename();
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  toast('Backup saved','ok');
 }
+function doBackup(){ downloadBackup(); toast('Backup saved','ok'); }
 function pickRestoreFile(){ document.getElementById('restore-file').click(); }
+
+/* Auto backup can only fire while the app is open, so on every launch it checks
+   whether the scheduled moment has passed since the last run and, if so, drops a
+   file silently. */
+function autoBackupDesc(ab){
+  var DN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var t=pad2(ab.hour)+':00';
+  if(ab.cycle==='daily') return 'Every day at '+t+'.';
+  if(ab.cycle==='2day') return 'Every 2 days at '+t+'.';
+  if(ab.cycle==='monthly') return 'On the 1st of each month at '+t+'.';
+  return 'Every '+DN[ab.day]+' at '+t+'.';
+}
+function toggleAutoBackup(){
+  var st=getState(); st.autoBackup=st.settings.autoBackup; // keep pointer
+  var ab=st.settings.autoBackup;
+  ab.on=!ab.on;
+  if(ab.on && !ab.last) ab.last=Date.now(); // don't fire immediately on first enable
+  if(saveState(st)){ renderSetPage(); renderSettings(); toast(ab.on?'Auto backup on':'Auto backup off','ok'); }
+}
+function saveAutoBackup(){
+  var st=getState(), ab=st.settings.autoBackup;
+  var c=document.getElementById('ab-cycle'); if(c) ab.cycle=c.value;
+  var d=document.getElementById('ab-day'); if(d) ab.day=parseInt(d.value,10);
+  var h=document.getElementById('ab-hour'); if(h) ab.hour=parseInt(h.value,10);
+  if(saveState(st)){ renderSetPage(); toast('Saved','ok'); }
+}
+/* Returns the most recent scheduled timestamp at or before `now`. */
+function lastDueTime(ab,now){
+  var d=new Date(now); d.setHours(ab.hour,0,0,0);
+  if(ab.cycle==='monthly'){
+    var m=new Date(now); m.setDate(1); m.setHours(ab.hour,0,0,0);
+    if(m.getTime()>now){ m.setMonth(m.getMonth()-1); }
+    return m.getTime();
+  }
+  if(ab.cycle==='weekly'){
+    // step back to the chosen weekday at the chosen hour
+    while(d.getDay()!==ab.day || d.getTime()>now){ d.setDate(d.getDate()-1); d.setHours(ab.hour,0,0,0); }
+    return d.getTime();
+  }
+  // daily / 2day: today's slot, or yesterday's if today's hasn't arrived
+  if(d.getTime()>now) d.setDate(d.getDate()-1);
+  return d.getTime();
+}
+function runAutoBackupCheck(){
+  var st=getState(), ab=st.settings.autoBackup;
+  if(!ab || !ab.on) return;
+  var now=Date.now(), due=lastDueTime(ab,now);
+  if(ab.cycle==='2day'){
+    // only every other day: skip if the due slot is <2 days after the last run
+    if(ab.last && (due-ab.last) < (36*3600*1000)) return;
+  }
+  if(due>(ab.last||0)){
+    try{ downloadBackup(backupFilename(new Date(due))); }catch(e){ return; }
+    ab.last=now;
+    saveState(st);
+    toast('Auto backup saved','ok');
+  }
+}
 
 /* A V2 backup always carries a settings object. Anything else with customers
    and transactions is treated as an old SE7EN file and converted. */
@@ -2517,6 +2602,7 @@ function applyUpdate(){
 /* ---------- INIT ---------- */
 applyAppearance();
 renderHome();
+setTimeout(runAutoBackupCheck, 1500);
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
     navigator.serviceWorker.register('sw.js',{scope:'./'})['catch'](function(){});

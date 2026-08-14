@@ -1,6 +1,6 @@
 // SE7EN V2 service worker
 // Bump CACHE on every release.
-const CACHE = 'se7env2-v33';
+const CACHE = 'se7env2-v34';
 const ASSETS = ['./', './index.html', './manifest.json', './header-default.png',
                 './icon-192.png', './icon-512.png'];
 

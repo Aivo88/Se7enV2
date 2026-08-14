@@ -1,5 +1,5 @@
 {
-  "version": "2.01.02",
-  "cache": "se7env2-v33",
-  "notes": "Customer transaction lists are grouped under day headers showing the date and that day's spend."
+  "version": "2.02.00",
+  "cache": "se7env2-v34",
+  "notes": "Auto backup in Settings > Backup & reset: on/off, cycle (daily / every 2 days / weekly / monthly) and time, default weekly Sunday 15:00. A dated backup file downloads automatically the next time the app is open after the scheduled moment."
 }
