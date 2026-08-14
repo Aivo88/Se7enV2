@@ -249,6 +249,10 @@ input:focus,select:focus{border-color:var(--gold);}
     </div>
   </div>
   <div class="foot">
+    <div class="btn-row" style="margin-bottom:0.57em;">
+      <input type="text" id="wi-custom" inputmode="decimal" placeholder="Custom amount" autocomplete="off" style="flex:1;">
+      <button class="btn-full" style="flex:0 0 34%;min-height:48px;padding:0.6em;" onclick="addCustomWalkin()">Add</button>
+    </div>
     <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="goHome()">Back</button>
   </div>
 </div>
@@ -537,7 +541,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.02.00';
+var APP_VERSION = '2.02.01';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -1451,6 +1455,19 @@ function renderWiCart(){
   w.style.display='';
   document.getElementById('wi-cart-lines').innerHTML=cartLinesHTML();
   document.getElementById('wi-pay').textContent='Pay \u00B7 '+f(cartTotal())+EUR;
+}
+var customSeq=0;
+/* A free-typed amount becomes an ordinary cart line so it flows through the same
+   cash / card / split payment, for when a drink has no product button. */
+function addCustomWalkin(){
+  var el=document.getElementById('wi-custom');
+  var v=parseAmt(el.value);
+  if(isNaN(v)||v<=0){ toast('Enter an amount','err'); return; }
+  var id='__custom_'+(customSeq++)+'__';
+  cart[id]={ id:id, name:'Custom', price:v, qty:1 };
+  el.value='';
+  renderProds('wi-prod-grid'); renderWiCart();
+  toast('Added '+f(v)+EUR,'ok');
 }
 function openWalkinPay(){
   if(!cartLines().length) return;
