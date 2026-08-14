@@ -1,5 +1,5 @@
 {
-  "version": "2.02.01",
-  "cache": "se7env2-v35",
-  "notes": "Walk-in screen has a custom-amount field above Back for charging a price that has no product button."
+  "version": "2.02.02",
+  "cache": "se7env2-v36",
+  "notes": "Custom-amount field on the customer/group tab screen too (Add tab), adding a manual charge straight to the tab."
 }
