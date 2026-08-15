@@ -225,10 +225,7 @@ input:focus,select:focus{border-color:var(--gold);}
     </div>
   </div>
   <div class="foot">
-    <div class="btn-row" id="cust-custom-row" style="margin-bottom:0.57em;">
-      <input type="text" id="cust-custom" inputmode="decimal" placeholder="Custom amount" autocomplete="off" style="flex:1;">
-      <button class="btn-full" style="flex:0 0 34%;min-height:48px;padding:0.6em;" onclick="addCustomCust()">Add</button>
-    </div>
+    <button class="btn-full" id="cust-custom-row" style="margin-bottom:0.57em;" onclick="promptCustomCust()">+ Custom amount</button>
     <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="backFromCustomer()">Back</button>
   </div>
 </div>
@@ -253,10 +250,7 @@ input:focus,select:focus{border-color:var(--gold);}
     </div>
   </div>
   <div class="foot">
-    <div class="btn-row" style="margin-bottom:0.57em;">
-      <input type="text" id="wi-custom" inputmode="decimal" placeholder="Custom amount" autocomplete="off" style="flex:1;">
-      <button class="btn-full" style="flex:0 0 34%;min-height:48px;padding:0.6em;" onclick="addCustomWalkin()">Add</button>
-    </div>
+    <button class="btn-full" style="margin-bottom:0.57em;" onclick="promptCustomWalkin()">+ Custom amount</button>
     <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="goHome()">Back</button>
   </div>
 </div>
@@ -545,7 +539,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.02.02';
+var APP_VERSION = '2.02.03';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -1125,17 +1119,23 @@ function renderCart(){
   document.getElementById('cart-lines').innerHTML=cartLinesHTML();
   document.getElementById('cart-confirm').textContent='Add to tab \u00B7 '+f(cartTotal())+EUR;
 }
-/* Same free-amount shortcut as walk-in, but the line is added to this
-   customer's tab instead of being paid immediately. */
-function addCustomCust(){
-  var el=document.getElementById('cust-custom');
-  var v=parseAmt(el.value);
-  if(isNaN(v)||v<=0){ toast('Enter an amount','err'); return; }
+/* The amount modal is used instead of an inline field, so the on-screen keyboard
+   opens over a centred dialog rather than hiding a field pinned to the footer. */
+function addCustomLine(v,grid,render){
   var id='__custom_'+(customSeq++)+'__';
   cart[id]={ id:id, name:'Custom', price:v, qty:1 };
-  el.value='';
-  renderProds('prod-grid'); renderCart();
+  renderProds(grid); render();
   toast('Added '+f(v)+EUR,'ok');
+}
+function promptCustomCust(){
+  openAmount('Custom amount','A charge with no product button.',false,function(v){
+    addCustomLine(v,'prod-grid',renderCart);
+  });
+}
+function promptCustomWalkin(){
+  openAmount('Custom amount','A charge with no product button.',false,function(v){
+    addCustomLine(v,'wi-prod-grid',renderWiCart);
+  });
 }
 function commitCart(){
   if(!cartLines().length) return;
@@ -1475,16 +1475,6 @@ function renderWiCart(){
 }
 /* A free-typed amount becomes an ordinary cart line so it flows through the same
    cash / card / split payment, for when a drink has no product button. */
-function addCustomWalkin(){
-  var el=document.getElementById('wi-custom');
-  var v=parseAmt(el.value);
-  if(isNaN(v)||v<=0){ toast('Enter an amount','err'); return; }
-  var id='__custom_'+(customSeq++)+'__';
-  cart[id]={ id:id, name:'Custom', price:v, qty:1 };
-  el.value='';
-  renderProds('wi-prod-grid'); renderWiCart();
-  toast('Added '+f(v)+EUR,'ok');
-}
 function openWalkinPay(){
   if(!cartLines().length) return;
   document.getElementById('wi-total-text').textContent=f(cartTotal())+EUR;

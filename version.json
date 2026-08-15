@@ -1,5 +1,5 @@
 {
-  "version": "2.02.02",
-  "cache": "se7env2-v36",
-  "notes": "Custom-amount field on the customer/group tab screen too (Add tab), adding a manual charge straight to the tab."
+  "version": "2.02.03",
+  "cache": "se7env2-v37",
+  "notes": "Custom-amount is now entered in a centred dialog, so the on-screen keyboard no longer hides the field behind the footer."
 }
