@@ -1,5 +1,5 @@
 {
-  "version": "2.04.00",
-  "cache": "se7env2-v43",
-  "notes": "History now opens a Money / Products chooser. Money keeps Today/Month/Customers/Raw. Products adds Top sellers and a per-customer product breakdown, both with a month stepper and All time. Custom charges shown as their own line; walk-in sales included; sorted by quantity with euro totals."
+  "version": "2.04.01",
+  "cache": "se7env2-v44",
+  "notes": "Back from the Money reports returns to the History chooser instead of the home screen."
 }
