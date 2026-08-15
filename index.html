@@ -448,7 +448,12 @@ input:focus,select:focus{border-color:var(--gold);}
   <div class="modal">
     <div class="modal-title" id="ma-title"></div>
     <div class="hint" id="ma-hint" style="text-align:center;margin-bottom:0.8em;"></div>
-    <div class="field"><div class="label">Amount</div><input type="text" id="ma-amount" inputmode="decimal" autocomplete="off"></div>
+    <div id="ma-quickwrap" style="display:none;">
+      <div style="text-align:center;color:var(--gold2);font-size:1.8em;font-weight:700;margin-bottom:0.5em;" id="ma-running"></div>
+      <div class="prod-grid" id="ma-quick" style="--cols:3;margin-bottom:0.6em;"></div>
+      <button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);margin-bottom:0.8em;" onclick="quickClear()">Clear</button>
+    </div>
+    <div class="field"><div class="label" id="ma-amount-label">Amount</div><input type="text" id="ma-amount" inputmode="decimal" autocomplete="off" oninput="quickTyped()"></div>
     <div class="field"><div class="label">Reason (optional)</div><input type="text" id="ma-note" autocomplete="off"></div>
     <div id="ma-methods" class="btn-row" style="margin-bottom:0.6em;">
       <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="amountOk('cash')">Cash</button>
@@ -539,7 +544,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.02.04';
+var APP_VERSION = '2.03.00';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -554,7 +559,7 @@ var TABLE_DEFS = [
 /* ---------- STATE ---------- */
 function blank(){
   return { customers:[], transactions:[], products:[], categories:[UNCAT],
-    hiddenCustomers:[], groups:[],
+    hiddenCustomers:[], groups:[], quickAmounts:[5,2,1,0.5,0.1],
     settings:{dayEnd:2,fontScale:1,cols:3,headerText:'Pub',headerImage:null,
       tablesLabel:'Tables',tablesHidden:false,groupsLabel:'Groups',currency:'\u20AC',lang:'en',
       autoBackup:{on:false,cycle:'weekly',day:0,hour:15,last:0}},
@@ -579,6 +584,7 @@ function getState(){
       if(typeof s.tablesLabel!=='string') s.tablesLabel='Tables';
       if(typeof s.groupsLabel!=='string') s.groupsLabel='Groups';
       if(!Array.isArray(st.hiddenCustomers)) st.hiddenCustomers=[];
+      if(!Array.isArray(st.quickAmounts)) st.quickAmounts=[5,2,1,0.5,0.1];
       migrateGroups(st);
       if(typeof s.currency!=='string' || !s.currency) s.currency='\u20AC';
       if(typeof s.lang!=='string') s.lang='en';
@@ -1127,10 +1133,23 @@ function addCustomLine(v,grid,render){
   renderProds(grid); render();
   toast('Added '+f(v)+EUR,'ok');
 }
+/* A quick way to put a charge on the tab when the item has no product button:
+   it is booked immediately as debt named "Custom" (with an optional reason), so
+   the customer is not kept waiting for a product to be created. */
 function promptCustomCust(){
-  openAmount('Custom amount','A charge with no product button.',false,function(v){
-    addCustomLine(v,'prod-grid',renderCart);
-  });
+  var c=findCustomer(getState(),activeCustomerId);
+  if(!c) return;
+  openAmount('Custom amount','Charged straight to the tab.',false,function(v,note){
+    var st=getState(), cc=findCustomer(st,activeCustomerId);
+    if(!cc) return;
+    var tx={customerId:cc.id,customerName:cc.name,type:'debt',amount:v,
+      items:[{name:'Custom',qty:1,price:v}]};
+    if(note) tx.note=note;
+    pushTx(st,tx);
+    if(!saveState(st)) return;
+    toast('Custom '+f(v)+EUR+' added','ok');
+    goHome();
+  }, true);
 }
 function promptCustomWalkin(){
   openAmount('Custom amount','A charge with no product button.',false,function(v){
@@ -1252,7 +1271,8 @@ function finishSettle(st,c){
 
 /* ---------- AMOUNT MODAL ---------- */
 var amountCtx=null;
-function openAmount(title,hint,needMethod,onOk){
+var quickRunning=0, quickActive=false;
+function openAmount(title,hint,needMethod,onOk,useQuick){
   amountCtx={onOk:onOk,needMethod:needMethod};
   document.getElementById('ma-title').textContent=title;
   document.getElementById('ma-hint').textContent=hint||'';
@@ -1260,12 +1280,47 @@ function openAmount(title,hint,needMethod,onOk){
   document.getElementById('ma-note').value='';
   document.getElementById('ma-methods').style.display=needMethod?'':'none';
   document.getElementById('ma-save').style.display=needMethod?'none':'';
+  quickActive=!!useQuick; quickRunning=0;
+  var qw=document.getElementById('ma-quickwrap');
+  if(quickActive){
+    qw.style.display='';
+    document.getElementById('ma-amount-label').textContent='Or type an exact amount';
+    renderQuickButtons();
+    updateRunning();
+  } else {
+    qw.style.display='none';
+    document.getElementById('ma-amount-label').textContent='Amount';
+  }
   openModal('m-amount');
-  setTimeout(function(){ document.getElementById('ma-amount').focus(); },100);
+  if(!quickActive) setTimeout(function(){ document.getElementById('ma-amount').focus(); },100);
+}
+function renderQuickButtons(){
+  var st=getState(), qs=st.quickAmounts||[];
+  document.getElementById('ma-quick').innerHTML=qs.map(function(a){
+    return '<div class="prod-card" onclick="quickAdd('+a+')"><div class="prod-price" style="font-size:1.1em;">+'+f(a)+EUR+'</div></div>';
+  }).join('');
+}
+function updateRunning(){
+  document.getElementById('ma-running').textContent=f(quickRunning)+EUR;
+}
+/* Tapping buttons accumulates; typing an exact amount replaces the running
+   total, since the two ways of entering a figure should not silently add up. */
+function quickAdd(a){
+  document.getElementById('ma-amount').value='';
+  quickRunning=Math.round((quickRunning+a)*100)/100;
+  updateRunning();
+}
+function quickClear(){ quickRunning=0; document.getElementById('ma-amount').value=''; updateRunning(); }
+function quickTyped(){
+  if(!quickActive) return;
+  var v=parseAmt(document.getElementById('ma-amount').value);
+  quickRunning = isNaN(v) ? 0 : v;
+  updateRunning();
 }
 function amountOk(method){
   if(!amountCtx) return;
-  var v=parseAmt(document.getElementById('ma-amount').value);
+  var typed=parseAmt(document.getElementById('ma-amount').value);
+  var v = quickActive ? (isNaN(typed)?quickRunning:typed) : typed;
   if(isNaN(v)||v<=0){ toast('Enter an amount','err'); return; }
   var note=document.getElementById('ma-note').value.trim();
   var cb=amountCtx.onOk;
@@ -1531,8 +1586,47 @@ function openCategories(){
         '<button class="qbtn" style="color:var(--red);" onclick="deleteCategory(\''+encodeURIComponent(cat)+'\')">\u2715</button>')+
       '</div>';
   }).join('')+
-  '<div style="margin-top:1em;"><button class="btn-full" onclick="addCategory()">+ New category</button></div>';
+  '<div style="margin-top:1em;"><button class="btn-full" onclick="addCategory()">+ New category</button></div>'+
+  quickAmountsSection(st);
   show('s-cats');
+}
+function quickAmountsSection(st){
+  var qs=st.quickAmounts||[];
+  return '<div class="label" style="margin-top:1.4em;">Custom amount buttons</div>'+
+    '<div class="hint" style="margin:0 0 0.6em;">Shown in the Custom amount dialog for quick tapping.</div>'+
+    (qs.length ? qs.map(function(a,i){
+      return '<div class="row"><div class="row-main"><div style="font-weight:600;">+'+f(a)+EUR+'</div></div>'+
+        '<button class="qbtn" style="color:var(--gold2);" onclick="editQuickAmount('+i+')">\u270E</button>'+
+        '<button class="qbtn" style="color:var(--red);" onclick="removeQuickAmount('+i+')">\u2715</button></div>';
+    }).join('') : '<div class="hint">No buttons yet.</div>')+
+    '<div style="margin-top:0.6em;"><button class="btn-full" onclick="addQuickAmount()">+ New button</button></div>';
+}
+function addQuickAmount(){
+  askText('New button amount','',function(v){
+    var n=parseAmt(v);
+    if(isNaN(n)||n<=0){ toast('Enter an amount','err'); return; }
+    var st=getState();
+    st.quickAmounts.push(Math.round(n*100)/100);
+    st.quickAmounts.sort(function(a,b){ return b-a; });
+    if(saveState(st)){ openCategories(); toast('Button added','ok'); }
+  });
+}
+function editQuickAmount(i){
+  var st=getState(), cur=st.quickAmounts[i];
+  if(cur===undefined) return;
+  askText('Button amount',f(cur),function(v){
+    var n=parseAmt(v);
+    if(isNaN(n)||n<=0){ toast('Enter an amount','err'); return; }
+    var st2=getState();
+    st2.quickAmounts[i]=Math.round(n*100)/100;
+    st2.quickAmounts.sort(function(a,b){ return b-a; });
+    if(saveState(st2)){ openCategories(); toast('Saved','ok'); }
+  });
+}
+function removeQuickAmount(i){
+  var st=getState();
+  st.quickAmounts.splice(i,1);
+  if(saveState(st)){ openCategories(); toast('Removed','ok'); }
 }
 function addCategory(){
   askText('New category','',function(name){

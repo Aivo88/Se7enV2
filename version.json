@@ -1,5 +1,5 @@
 {
-  "version": "2.02.04",
-  "cache": "se7env2-v38",
-  "notes": "Dialogs open from the top and can scroll, so the on-screen keyboard no longer covers their lower fields and buttons."
+  "version": "2.03.00",
+  "cache": "se7env2-v40",
+  "notes": "Custom amount dialog has tappable quick-amount buttons with a running total; typing an exact amount overrides it. Buttons are managed under Settings > Categories & products (default 5/2/1/0.50/0.10)."
 }
