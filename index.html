@@ -146,7 +146,7 @@ input:focus,select:focus{border-color:var(--gold);}
     <div class="top-row">
       <div id="hdr-slot"></div>
       <div class="top-actions">
-        <button class="btn-icon" onclick="openReports()">History</button>
+        <button class="btn-icon" onclick="openHistoryHub()">History</button>
         <button class="btn-icon" onclick="openSettings()">Settings</button>
       </div>
     </div>
@@ -256,6 +256,37 @@ input:focus,select:focus{border-color:var(--gold);}
 </div>
 
 <!-- REPORTS / HISTORY -->
+<!-- HISTORY HUB -->
+<div class="screen" id="s-hub">
+  <div class="top-bar">
+    <div class="top-row"><div class="screen-title">History</div></div>
+  </div>
+  <div class="body-scroll">
+    <button class="btn-full" style="min-height:90px;font-size:1.3em;margin-bottom:1em;background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="openReports()">Money</button>
+    <div class="hint" style="margin:-0.6em 0 1.2em;">Sales, cash, tabs and reports.</div>
+    <button class="btn-full" style="min-height:90px;font-size:1.3em;margin-bottom:1em;background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openProducts()">Products</button>
+    <div class="hint" style="margin:-0.6em 0 0;">Top sellers and what each customer has bought.</div>
+  </div>
+  <div class="foot">
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="goHome()">Back</button>
+  </div>
+</div>
+
+<!-- PRODUCTS REPORT -->
+<div class="screen" id="s-prod">
+  <div class="top-bar">
+    <div class="top-row"><div class="screen-title">Products</div></div>
+    <div class="tabs">
+      <button class="tab active" id="ptab-top" onclick="setProdTab('top')">Top sellers</button>
+      <button class="tab" id="ptab-cust" onclick="setProdTab('cust')">Customers</button>
+    </div>
+  </div>
+  <div class="body-scroll" id="prod-report-body"></div>
+  <div class="foot">
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openHistoryHub()">Back</button>
+  </div>
+</div>
+
 <div class="screen" id="s-rep">
   <div class="top-bar">
     <div class="top-row"><div class="screen-title">History</div></div>
@@ -544,7 +575,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.03.02';
+var APP_VERSION = '2.04.00';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -1935,7 +1966,122 @@ function removeTable(id){
 var repTab='day', repMonth=null, txdayCtx=null, monthDayCtx=null;
 var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
+function openHistoryHub(){ show('s-hub'); }
 function openReports(){ show('s-rep'); setRepTab(repTab||'day'); }
+
+/* ---------- PRODUCTS REPORT ---------- */
+var prodTab='top', prodMonth=null; // prodMonth null = All time
+function openProducts(){ prodCustId=null; show('s-prod'); setProdTab(prodTab||'top'); }
+function setProdTab(t){
+  prodTab=t;
+  ['top','cust'].forEach(function(k){ document.getElementById('ptab-'+k).classList.toggle('active',k===t); });
+  if(t==='top') renderTopSellers(); else renderProdCustomers();
+}
+/* A month stepper shared by both product tabs; null means the whole history. */
+function prodMonthBar(onchange){
+  var label = prodMonth ? (MONTHS[prodMonth.month]+' '+prodMonth.year) : 'All time';
+  return '<div class="row" style="justify-content:space-between;">'+
+    '<button class="qbtn" onclick="'+onchange+'(-1)">\u2039</button>'+
+    '<button class="row-main" style="text-align:center;" onclick="'+onchange+'(0)">'+
+    '<div style="font-weight:700;color:var(--gold2);">'+label+'</div>'+
+    '<div class="row-sub" style="text-align:center;">tap for all time</div></button>'+
+    '<button class="qbtn" onclick="'+onchange+'(1)">\u203A</button></div>';
+}
+function stepProdMonth(dir){
+  if(dir===0){ prodMonth=null; }
+  else if(!prodMonth){
+    var n=new Date(); prodMonth={year:n.getFullYear(),month:n.getMonth()};
+  } else {
+    var m=prodMonth.month+dir, y=prodMonth.year;
+    if(m<0){ m=11; y--; } else if(m>11){ m=0; y++; }
+    prodMonth={year:y,month:m};
+  }
+  if(prodTab==='top') renderTopSellers(); else renderProdCustomers();
+}
+/* Product lines from tab orders (items[]) and walk-in sales, within the current
+   month filter. Custom charges are folded into one "Custom" line. */
+function productTotals(txs){
+  var map={}, custom={qty:0,sum:0};
+  txs.forEach(function(t){
+    if(t.type!=='debt' && t.type!=='pay') return;
+    // walk-in sales are 'pay' with items; tab orders are 'debt' with items
+    if(!t.items || !t.items.length){ return; }
+    t.items.forEach(function(it){
+      if(it.name==='Custom'){ custom.qty+=(it.qty||1); custom.sum+=(it.price*(it.qty||1)); return; }
+      if(!map[it.name]) map[it.name]={name:it.name,qty:0,sum:0};
+      map[it.name].qty+=(it.qty||1);
+      map[it.name].sum+=(it.price*(it.qty||1));
+    });
+  });
+  var arr=Object.keys(map).map(function(k){ return map[k]; });
+  arr.sort(function(a,b){ return b.qty-a.qty || b.sum-a.sum; });
+  if(custom.qty>0) arr.push({name:'Custom',qty:custom.qty,sum:custom.sum,isCustom:true});
+  return arr;
+}
+function filteredTxs(st){
+  if(!prodMonth) return st.transactions;
+  return st.transactions.filter(function(t){
+    var d=new Date(txBarDate(t));
+    return d.getFullYear()===prodMonth.year && d.getMonth()===prodMonth.month;
+  });
+}
+function renderTopSellers(){
+  var st=getState();
+  var rows=productTotals(filteredTxs(st));
+  var body=prodMonthBar('stepProdMonth');
+  if(!rows.length){ body+='<div class="empty-hint">No sales in this period.</div>'; }
+  else{
+    body+='<div class="label" style="margin-top:0.4em;">Sold</div>'+rows.map(function(r){
+      return '<div class="row"'+(r.isCustom?' style="border-color:var(--text3);"':'')+'>'+
+        '<div class="row-main"><div style="font-weight:600;'+(r.isCustom?'color:var(--text2);':'')+'">'+esc(r.name)+'</div></div>'+
+        '<div style="text-align:right;"><div style="font-weight:700;">'+r.qty+' pcs</div>'+
+        '<div class="row-sub" style="color:var(--gold2);">'+f(r.sum)+EUR+'</div></div></div>';
+    }).join('');
+  }
+  document.getElementById('prod-report-body').innerHTML=body;
+}
+/* Customer list -> tap a name -> that customer's product breakdown for the
+   selected month or all time. */
+var prodCustId=null;
+function renderProdCustomers(){
+  if(prodCustId){ renderProdCustDetail(); return; }
+  var st=getState(), all=allCustomers(st);
+  var q=prodCustQuery.toLowerCase();
+  var list=all.filter(function(c){ return c.name.toLowerCase().indexOf(q)!==-1; });
+  var search='<div class="search-wrap" style="margin-bottom:0.8em;">'+
+    '<span style="color:var(--text4);">\uD83D\uDD0D</span>'+
+    '<input type="text" placeholder="Search customer..." value="'+esc(prodCustQuery)+'" '+
+    'oninput="prodCustQuery=this.value; renderProdCustomers();"></div>';
+  var rows = list.length ? list.map(function(c){
+    var perm=isPermanentId(c.id);
+    return '<div class="row"'+(perm?' style="border-color:var(--gold);"':'')+
+      '><button class="row-main" onclick="openProdCust(\''+c.id+'\')">'+
+      '<div style="font-weight:600;'+(perm?'color:var(--gold2);':'')+'">'+esc(c.name)+'</div></button>'+
+      '<div style="color:var(--text3);font-size:1.2em;">\u203A</div></div>';
+  }).join('') : '<div class="empty-hint">No customers.</div>';
+  document.getElementById('prod-report-body').innerHTML=search+rows;
+}
+function openProdCust(id){ prodCustId=id; renderProdCustDetail(); }
+function renderProdCustDetail(){
+  var st=getState();
+  var who=allCustomers(st).filter(function(c){ return c.id===prodCustId; })[0]
+        || {name:'?'};
+  var txs=filteredTxs(st).filter(function(t){ return t.customerId===prodCustId; });
+  var rows=productTotals(txs);
+  var back='<button class="btn-full" style="margin-bottom:0.8em;border-color:var(--text3);color:var(--text2);" onclick="prodCustId=null; renderProdCustomers();">\u2039 All customers</button>';
+  var head='<div class="modal-title" style="text-align:left;">'+esc(who.name)+'</div>';
+  var body=back+head+prodMonthBar('stepProdMonth');
+  if(!rows.length){ body+='<div class="empty-hint">Nothing bought in this period.</div>'; }
+  else{
+    body+='<div class="label" style="margin-top:0.4em;">Bought</div>'+rows.map(function(r){
+      return '<div class="row"'+(r.isCustom?' style="border-color:var(--text3);"':'')+'>'+
+        '<div class="row-main"><div style="font-weight:600;'+(r.isCustom?'color:var(--text2);':'')+'">'+esc(r.name)+'</div></div>'+
+        '<div style="text-align:right;"><div style="font-weight:700;">'+r.qty+' pcs</div>'+
+        '<div class="row-sub" style="color:var(--gold2);">'+f(r.sum)+EUR+'</div></div></div>';
+    }).join('');
+  }
+  document.getElementById('prod-report-body').innerHTML=body;
+}
 function backToReports(){
   if(txdayCtx && txdayCtx.scope==='mday'){ openMonthDay(monthDayCtx); return; }
   if(txdayCtx && txdayCtx.scope==='cust'){ openCustomersList(); return; }
@@ -2170,7 +2316,7 @@ function allCustomers(st){
       return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
     });
 }
-var custQuery='', custManQuery='';
+var custQuery='', custManQuery='', prodCustQuery='';
 function openCustomersManage(){ renderCustomersManage(); show('s-custman'); }
 function renderCustomersManage(){
   var st=getState(), all=allCustomers(st).filter(function(c){ return !isPermanentId(c.id); });
