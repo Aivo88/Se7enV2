@@ -1,5 +1,5 @@
 {
-  "version": "2.03.01",
-  "cache": "se7env2-v41",
-  "notes": "Settings > Customers can merge any two customers, whether their tabs are open or already closed, fixing a misspelled name after the fact. Balances combine on the kept name."
+  "version": "2.03.02",
+  "cache": "se7env2-v42",
+  "notes": "After a custom charge the app stays on the customer's tab instead of returning home, so another item can be added in the same visit."
 }

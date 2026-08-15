@@ -544,7 +544,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.03.01';
+var APP_VERSION = '2.03.02';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -1148,7 +1148,8 @@ function promptCustomCust(){
     pushTx(st,tx);
     if(!saveState(st)) return;
     toast('Custom '+f(v)+EUR+' added','ok');
-    goHome();
+    // stay on the tab so another item can be added in the same visit
+    openCustomer(cc.id);
   }, true);
 }
 function promptCustomWalkin(){
