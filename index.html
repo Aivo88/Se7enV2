@@ -544,7 +544,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.03.00';
+var APP_VERSION = '2.03.01';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -2184,9 +2184,55 @@ function renderCustomersManage(){
     return '<div class="row"><button class="row-main" onclick="renameKnownCustomer(\''+c.id+'\')">'+
       '<div style="font-weight:600;">'+esc(c.name)+' <span style="color:var(--gold);font-size:0.9em;">\u270E</span></div>'+
       (sub?'<div class="row-sub">'+sub+'</div>':'')+'</button>'+
+      '<button class="qbtn" style="color:var(--gold2);" title="Merge" onclick="mergeKnownCustomer(\''+c.id+'\')">\u21C4</button>'+
       '<button class="qbtn" style="color:var(--red);" onclick="removeKnownCustomer(\''+c.id+'\')">\u2715</button></div>';
   }).join('') : '<div class="empty-hint">No customers yet.</div>';
   document.getElementById('custman-body').innerHTML=search+rows;
+}
+/* Works for anyone in the list, open tab or long gone, because it operates on
+   the transaction log rather than the open-tabs list. All of the chosen name's
+   transactions move to the target and the chosen name disappears; any balances
+   simply add together on the target. */
+function mergeKnownCustomer(id){
+  var st=getState();
+  var from=allCustomers(st).filter(function(c){ return c.id===id; })[0];
+  if(!from) return;
+  var others=allCustomers(st).filter(function(c){ return c.id!==id && !isPermanentId(c.id); });
+  if(!others.length){ toast('No other customer to merge into','err'); return; }
+  document.getElementById('mg-hint').textContent='Keep which name? All of '+from.name+'\u2019s history moves to the one you pick, and '+from.name+' disappears.';
+  document.getElementById('mg-list').innerHTML=others.map(function(k){
+    var sub=k.open?'Open tab':(k.last?('Last seen '+fmtDate(k.last)):'');
+    return '<div class="row"><button class="row-main" onclick="doMergeKnown(\''+id+'\',\''+k.id+'\')">'+
+      '<div style="font-weight:600;">'+esc(k.name)+'</div>'+
+      (sub?'<div class="row-sub">'+sub+'</div>':'')+'</button></div>';
+  }).join('');
+  openModal('m-merge');
+}
+function doMergeKnown(fromId,targetId){
+  var st=getState();
+  var from=allCustomers(st).filter(function(c){ return c.id===fromId; })[0];
+  var target=allCustomers(st).filter(function(c){ return c.id===targetId; })[0];
+  if(!from || !target || fromId===targetId) return;
+  closeModal('m-merge');
+  showConfirm('Merge customers?',
+    from.name+' will be merged into '+target.name+'. Everything moves to '+target.name+
+    ' and '+from.name+' disappears. This cannot be undone.',
+    function(){
+      var st2=getState();
+      st2.transactions.forEach(function(t){
+        if(t.customerId===fromId){ t.customerId=targetId; t.customerName=target.name; }
+      });
+      // if the source had an open tab, remove it; ensure target is present if it had one
+      var openTarget=findCustomer(st2,targetId);
+      st2.customers=st2.customers.filter(function(c){ return c.id!==fromId; });
+      if(!openTarget && findCustomer(st2,fromId)===null){
+        // target had no open tab; leave it as history only (no customers entry needed)
+      }
+      // clear any hidden flag on the target so it stays visible
+      unhideCustomer(st2,targetId);
+      if(saveState(st2)){ renderCustomersManage(); toast('Merged into '+target.name,'ok'); }
+    },
+    'Merge','background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.6em;');
 }
 function renameKnownCustomer(id){
   var st=getState(), all=allCustomers(st), cur=null;
