@@ -110,9 +110,9 @@ input:focus,select:focus{border-color:var(--gold);}
 .card-box{background:var(--bg2);border:1.5px solid var(--border2);border-radius:14px;padding:1em;margin-bottom:0.85em;}
 .hint{color:var(--text3);font-size:0.85em;line-height:1.5;margin-top:0.5em;}
 
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;align-items:center;justify-content:center;padding:1em;}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;align-items:flex-start;justify-content:center;padding:1em;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .modal-bg.open{display:flex;}
-.modal{background:var(--bg2);border:2px solid var(--border2);border-radius:16px;padding:1.2em;width:100%;max-width:440px;max-height:88vh;overflow-y:auto;}
+.modal{background:var(--bg2);border:2px solid var(--border2);border-radius:16px;padding:1.2em;width:100%;max-width:440px;margin:calc(1em + var(--safe-top)) 0 2em;}
 .modal-title{font-family:'Palatino Linotype','Palatino','Book Antiqua',Georgia,serif;color:var(--gold2);font-size:1.35em;font-weight:700;text-align:center;margin-bottom:0.7em;}
 .btn-modal-cancel{width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:0.85em;color:var(--text2);font-size:1em;font-weight:600;text-align:center;min-height:48px;}
 
@@ -539,7 +539,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.02.03';
+var APP_VERSION = '2.02.04';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
