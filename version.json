@@ -1,5 +1,5 @@
 {
-  "version": "2.04.01",
-  "cache": "se7env2-v44",
-  "notes": "Back from the Money reports returns to the History chooser instead of the home screen."
+  "version": "2.05.00",
+  "cache": "se7env2-v45",
+  "notes": "Export for accountant: pick any date range (or quick quarter/year/month presets) on the Money side and generate a PDF sales report with income (cash/card), expenses, write-offs, net and a daily breakdown. PDF is written offline with no external library."
 }

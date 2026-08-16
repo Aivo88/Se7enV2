@@ -299,7 +299,20 @@ input:focus,select:focus{border-color:var(--gold);}
   </div>
   <div class="body-scroll" id="rep-body"></div>
   <div class="foot">
+    <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.57em;" onclick="openExport()">Export for accountant</button>
     <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openHistoryHub()">Back</button>
+  </div>
+</div>
+
+<!-- EXPORT -->
+<div class="screen" id="s-export">
+  <div class="top-bar">
+    <div class="top-row"><div class="screen-title">Export for accountant</div></div>
+    <div class="hint">Pick a date range. A PDF summary is generated for that period.</div>
+  </div>
+  <div class="body-scroll" id="export-body"></div>
+  <div class="foot">
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openReports()">Back</button>
   </div>
 </div>
 
@@ -575,7 +588,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.04.01';
+var APP_VERSION = '2.05.00';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -1967,6 +1980,171 @@ var repTab='day', repMonth=null, txdayCtx=null, monthDayCtx=null;
 var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 function openHistoryHub(){ show('s-hub'); }
+
+/* ---------- EXPORT FOR ACCOUNTANT ---------- */
+var expFrom=null, expTo=null;
+function openExport(){
+  var now=new Date();
+  if(!expFrom){ // default to the current quarter
+    var q=Math.floor(now.getMonth()/3);
+    expFrom=new Date(now.getFullYear(), q*3, 1);
+    expTo=new Date(now.getFullYear(), q*3+3, 0);
+  }
+  renderExport(); show('s-export');
+}
+function isoDate(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+function renderExport(){
+  var presets='<div class="label">Quick ranges</div>'+
+    '<div class="prod-grid" style="--cols:2;margin-bottom:1em;">'+
+    '<div class="prod-card" onclick="expQuarter(0)"><div class="prod-name">This quarter</div></div>'+
+    '<div class="prod-card" onclick="expQuarter(-1)"><div class="prod-name">Last quarter</div></div>'+
+    '<div class="prod-card" onclick="expYear(0)"><div class="prod-name">This year</div></div>'+
+    '<div class="prod-card" onclick="expMonthRange()"><div class="prod-name">This month</div></div></div>';
+  var range='<div class="card-box"><div class="label">From</div>'+
+    '<input type="date" id="exp-from" value="'+isoDate(expFrom)+'" onchange="expSet()">'+
+    '<div class="label" style="margin-top:0.6em;">To</div>'+
+    '<input type="date" id="exp-to" value="'+isoDate(expTo)+'" onchange="expSet()"></div>';
+  var st=getState();
+  var txs=rangeTxs(st,expFrom,expTo), sum=sumRange(txs);
+  var preview='<div class="card-box"><div class="label">Preview \u2014 '+fmtDate(expFrom.getTime())+' to '+fmtDate(expTo.getTime())+'</div>'+
+    expLine('Income total',f(sum.income)+EUR)+
+    expLine('&nbsp;&nbsp;Cash',f(sum.cash)+EUR)+
+    expLine('&nbsp;&nbsp;Card',f(sum.card)+EUR)+
+    expLine('Expenses',f(sum.exp)+EUR)+
+    expLine('Write-offs (loss)',f(sum.loss)+EUR)+
+    expLine('Net (income \u2212 expenses)',f(sum.income-sum.exp)+EUR)+
+    expLine('Transactions',String(txs.length))+
+    '</div>';
+  var btn='<button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="generatePDF()">Generate PDF</button>';
+  document.getElementById('export-body').innerHTML=presets+range+preview+btn;
+}
+function expLine(a,b){
+  return '<div style="display:flex;justify-content:space-between;padding:0.25em 0;border-bottom:1px solid var(--border);">'+
+    '<span style="color:var(--text2);">'+a+'</span><span style="font-weight:600;">'+b+'</span></div>';
+}
+function expSet(){
+  var f0=document.getElementById('exp-from').value, t0=document.getElementById('exp-to').value;
+  if(f0) expFrom=new Date(f0+'T00:00:00');
+  if(t0) expTo=new Date(t0+'T00:00:00');
+  renderExport();
+}
+function expQuarter(off){
+  var now=new Date(); var q=Math.floor(now.getMonth()/3)+off;
+  var y=now.getFullYear(); while(q<0){ q+=4; y--; } while(q>3){ q-=4; y++; }
+  expFrom=new Date(y,q*3,1); expTo=new Date(y,q*3+3,0); renderExport();
+}
+function expYear(off){
+  var y=new Date().getFullYear()+off;
+  expFrom=new Date(y,0,1); expTo=new Date(y,11,31); renderExport();
+}
+function expMonthRange(){
+  var n=new Date(); expFrom=new Date(n.getFullYear(),n.getMonth(),1);
+  expTo=new Date(n.getFullYear(),n.getMonth()+1,0); renderExport();
+}
+/* Range is inclusive of both days, compared on the bar date so it lines up with
+   every other report in the app. */
+function rangeTxs(st,from,to){
+  var a=computeBarDate(from.getTime(),st.settings.dayEnd);
+  var b=computeBarDate(to.getTime(),st.settings.dayEnd);
+  return st.transactions.filter(function(t){ var d=txBarDate(t); return d>=a && d<=b; });
+}
+/* Per-day breakdown for the body of the report. */
+function rangeDays(txs){
+  var by={};
+  txs.forEach(function(t){ var d=txBarDate(t); if(!by[d]) by[d]=[]; by[d].push(t); });
+  return Object.keys(by).map(Number).sort(function(a,b){ return a-b; }).map(function(d){
+    var s=sumRange(by[d]);
+    return {date:d, cash:s.cash, card:s.card, exp:s.exp, loss:s.loss, income:s.income};
+  });
+}
+
+/* ---------- minimal PDF writer ----------
+   A pub till report is plain text in a table, so instead of shipping a large PDF
+   library the app writes the handful of PDF objects it needs by hand: one page,
+   one built-in font (Helvetica), and a text stream. Fully offline. */
+function pdfEsc(str){ return String(str).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)'); }
+function buildPDF(lines){
+  // lines: array of {text, x, y, size, bold}
+  var H=842, W=595; // A4 in points
+  var parts=[];
+  parts.push('BT');
+  var curFont='';
+  lines.forEach(function(l){
+    var font=l.bold?'/F2':'/F1';
+    parts.push(font+' '+(l.size||11)+' Tf');
+    parts.push('1 0 0 1 '+l.x+' '+(H-l.y)+' Tm');
+    parts.push('('+pdfEsc(l.text)+') Tj');
+  });
+  parts.push('ET');
+  var stream=parts.join('\n');
+  var objs=[];
+  objs.push('<< /Type /Catalog /Pages 2 0 R >>');
+  objs.push('<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
+  objs.push('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+W+' '+H+'] '+
+            '/Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 4 0 R >>');
+  objs.push('<< /Length '+stream.length+' >>\nstream\n'+stream+'\nendstream');
+  objs.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
+  objs.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>');
+  var pdf='%PDF-1.4\n', offsets=[];
+  for(var i=0;i<objs.length;i++){
+    offsets.push(pdf.length);
+    pdf+=(i+1)+' 0 obj\n'+objs[i]+'\nendobj\n';
+  }
+  var xref=pdf.length;
+  pdf+='xref\n0 '+(objs.length+1)+'\n0000000000 65535 f \n';
+  offsets.forEach(function(o){ pdf+=('0000000000'+o).slice(-10)+' 00000 n \n'; });
+  pdf+='trailer\n<< /Size '+(objs.length+1)+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF';
+  return pdf;
+}
+function generatePDF(){
+  var st=getState();
+  var txs=rangeTxs(st,expFrom,expTo), sum=sumRange(txs), days=rangeDays(txs);
+  var title=(st.settings.headerText && st.settings.headerText!=='Pub') ? st.settings.headerText : 'Pub';
+  var cur=(st.settings.currency||'\u20AC');
+  var L=[], y=60;
+  function line(text,opts){ opts=opts||{}; L.push({text:text,x:opts.x||50,y:y,size:opts.size,bold:opts.bold}); }
+  function money(n){ return n.toFixed(2)+' '+cur; }
+  line(title+' \u2014 Sales report',{size:18,bold:true}); y+=26;
+  line('Period: '+fmtDate(expFrom.getTime())+' \u2013 '+fmtDate(expTo.getTime()),{size:11}); y+=16;
+  line('Generated: '+fmtDate(Date.now())+' '+fmtTime(Date.now()),{size:9}); y+=28;
+
+  line('Summary',{size:13,bold:true}); y+=20;
+  function row(a,b,bold){ L.push({text:a,x:50,y:y,size:11,bold:bold}); L.push({text:b,x:360,y:y,size:11,bold:bold}); y+=16; }
+  row('Income total',money(sum.income),true);
+  row('   Cash',money(sum.cash));
+  row('   Card',money(sum.card));
+  row('Expenses',money(sum.exp));
+  row('Write-offs (loss)',money(sum.loss));
+  row('Net (income - expenses)',money(sum.income-sum.exp),true);
+  row('Transactions',String(txs.length));
+  y+=16;
+
+  line('Daily breakdown',{size:13,bold:true}); y+=20;
+  L.push({text:'Date',x:50,y:y,size:10,bold:true});
+  L.push({text:'Cash',x:250,y:y,size:10,bold:true});
+  L.push({text:'Card',x:330,y:y,size:10,bold:true});
+  L.push({text:'Expenses',x:410,y:y,size:10,bold:true});
+  L.push({text:'Loss',x:500,y:y,size:10,bold:true});
+  y+=15;
+  days.forEach(function(d){
+    if(y>800){ return; } // one page; long ranges are summarised above
+    L.push({text:fmtDate(d.date),x:50,y:y,size:10});
+    L.push({text:d.cash.toFixed(2),x:250,y:y,size:10});
+    L.push({text:d.card.toFixed(2),x:330,y:y,size:10});
+    L.push({text:d.exp.toFixed(2),x:410,y:y,size:10});
+    L.push({text:d.loss.toFixed(2),x:500,y:y,size:10});
+    y+=14;
+  });
+  if(days.length && y>800){ L.push({text:'(more days omitted \u2014 see summary above)',x:50,y:815,size:9}); }
+
+  var pdf=buildPDF(L);
+  var blob=new Blob([pdf],{type:'application/pdf'});
+  var name='Sales '+isoDate(expFrom)+' to '+isoDate(expTo)+'.pdf';
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  toast('PDF created','ok');
+}
 function openReports(){ show('s-rep'); setRepTab(repTab||'day'); }
 
 /* ---------- PRODUCTS REPORT ---------- */
