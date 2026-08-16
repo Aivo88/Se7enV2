@@ -1,5 +1,5 @@
 {
-  "version": "2.05.00",
-  "cache": "se7env2-v45",
-  "notes": "Export for accountant: pick any date range (or quick quarter/year/month presets) on the Money side and generate a PDF sales report with income (cash/card), expenses, write-offs, net and a daily breakdown. PDF is written offline with no external library."
+  "version": "2.05.01",
+  "cache": "se7env2-v46",
+  "notes": "Cash-and-card split now auto-fills the other field with the remaining amount when you type one side. Accountant PDF gains an Open tabs at period end section (money owed as of the end date, shown as reference, not income)."
 }

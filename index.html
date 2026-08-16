@@ -465,8 +465,8 @@ input:focus,select:focus{border-color:var(--gold);}
   <div class="modal">
     <div class="modal-title">Cash and card</div>
     <div style="text-align:center;color:var(--gold2);font-size:1.4em;font-weight:700;margin-bottom:14px;" id="split-total"></div>
-    <div class="field"><div class="label">Cash</div><input type="text" id="split-cash" inputmode="decimal" autocomplete="off" oninput="updateSplitInfo()"></div>
-    <div class="field"><div class="label">Card</div><input type="text" id="split-card" inputmode="decimal" autocomplete="off" oninput="updateSplitInfo()"></div>
+    <div class="field"><div class="label">Cash</div><input type="text" id="split-cash" inputmode="decimal" autocomplete="off" oninput="splitTyped('cash')"></div>
+    <div class="field"><div class="label">Card</div><input type="text" id="split-card" inputmode="decimal" autocomplete="off" oninput="splitTyped('card')"></div>
     <div style="text-align:center;font-size:0.95em;margin-bottom:0.8em;" id="split-info"></div>
     <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.6em;" id="split-ok" onclick="confirmSplit()">Confirm</button>
     <button class="btn-modal-cancel" onclick="closeModal('m-split')">Cancel</button>
@@ -588,7 +588,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.05.00';
+var APP_VERSION = '2.05.01';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -1515,11 +1515,26 @@ function openSplit(total,onDone){
   document.getElementById('split-ok').disabled=true;
   openModal('m-split');
 }
+/* Type one side and the other is filled with whatever is left of the total, so
+   "20 on card" instantly shows 11.50 in cash. The field being typed in is never
+   overwritten under the cursor \u2014 only the opposite one is set. */
+function splitTyped(which){
+  if(!splitCtx) return;
+  var cashEl=document.getElementById('split-cash'), cardEl=document.getElementById('split-card');
+  var typedEl = which==='cash' ? cashEl : cardEl;
+  var otherEl = which==='cash' ? cardEl : cashEl;
+  var typed=parseAmt(typedEl.value);
+  if(isNaN(typed)){ otherEl.value=''; updateSplitInfo(); return; }
+  var rem=Math.round((splitCtx.total-typed)*100)/100;
+  if(rem<0) rem=0;
+  otherEl.value = rem>0 ? f(rem) : '0.00';
+  updateSplitInfo();
+}
 function updateSplitInfo(){
   if(!splitCtx) return;
   var cash=parseAmt(document.getElementById('split-cash').value)||0;
   var card=parseAmt(document.getElementById('split-card').value)||0;
-  var sum=cash+card, rem=splitCtx.total-sum;
+  var sum=Math.round((cash+card)*100)/100, rem=Math.round((splitCtx.total-sum)*100)/100;
   var info=document.getElementById('split-info'), btn=document.getElementById('split-ok');
   if(sum>splitCtx.total+0.001){
     info.textContent='Too much by '+f(sum-splitCtx.total)+EUR;
@@ -2014,6 +2029,10 @@ function renderExport(){
     expLine('Write-offs (loss)',f(sum.loss)+EUR)+
     expLine('Net (income \u2212 expenses)',f(sum.income-sum.exp)+EUR)+
     expLine('Transactions',String(txs.length))+
+    (function(){
+      var open=openTabsAsOf(st,expTo), t=0; open.forEach(function(r){ t+=r.owed; });
+      return open.length ? expLine('Open tabs at period end',f(t)+EUR+' ('+open.length+')') : '';
+    })()+
     '</div>';
   var btn='<button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="generatePDF()">Generate PDF</button>';
   document.getElementById('export-body').innerHTML=presets+range+preview+btn;
@@ -2096,6 +2115,36 @@ function buildPDF(lines){
   pdf+='trailer\n<< /Size '+(objs.length+1)+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF';
   return pdf;
 }
+/* Balance from transactions on or before a given bar date, for the period-end
+   snapshot of who still owed money. */
+function balanceAsOf(st,custId,barDateMax){
+  var b=0;
+  st.transactions.forEach(function(t){
+    if((t.customerId||'?')!==custId) return;
+    if(txBarDate(t)>barDateMax) return;
+    if(t.type==='debt') b-=t.amount;
+    else if(t.type==='pay'||t.type==='credit') b+=t.amount;
+    // writeoff zeroes below
+    else if(t.type==='writeoff') b+=t.amount;
+  });
+  return Math.round(b*100)/100;
+}
+function openTabsAsOf(st,to){
+  var bmax=computeBarDate(to.getTime(),st.settings.dayEnd);
+  var ids={};
+  st.transactions.forEach(function(t){
+    var id=t.customerId||'?';
+    if(id===CASH_ID||id===CARD_ID||id==='__house__') return;
+    if(txBarDate(t)<=bmax) ids[id]=t.customerName||'?';
+  });
+  var rows=[];
+  Object.keys(ids).forEach(function(id){
+    var bal=balanceAsOf(st,id,bmax);
+    if(bal<-0.001) rows.push({name:ids[id],owed:-bal});
+  });
+  rows.sort(function(a,b){ return b.owed-a.owed; });
+  return rows;
+}
 function generatePDF(){
   var st=getState();
   var txs=rangeTxs(st,expFrom,expTo), sum=sumRange(txs), days=rangeDays(txs);
@@ -2136,6 +2185,25 @@ function generatePDF(){
     y+=14;
   });
   if(days.length && y>800){ L.push({text:'(more days omitted \u2014 see summary above)',x:50,y:815,size:9}); }
+
+  // Open tabs at the end of the period: money owed, NOT income.
+  var open=openTabsAsOf(st,expTo);
+  if(open.length && y<720){
+    y+=22;
+    line('Open tabs at period end',{size:13,bold:true}); y+=8;
+    line('Money still owed on this date \u2014 not income, shown for reference.',{size:9}); y+=18;
+    var totOwed=0;
+    open.forEach(function(r){
+      if(y>815) return;
+      totOwed+=r.owed;
+      L.push({text:r.name,x:50,y:y,size:10});
+      L.push({text:money(r.owed),x:360,y:y,size:10});
+      y+=14;
+    });
+    y+=2;
+    L.push({text:'Total owed',x:50,y:y,size:11,bold:true});
+    L.push({text:money(totOwed),x:360,y:y,size:11,bold:true});
+  }
 
   var pdf=buildPDF(L);
   var blob=new Blob([pdf],{type:'application/pdf'});
