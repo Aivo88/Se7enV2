@@ -1,5 +1,5 @@
 {
-  "version": "2.05.02",
-  "cache": "se7env2-v47",
-  "notes": "Accountant PDF is back to a clean tax report with no open-tab data. A separate Open tabs report (PDF) button lists who owes money right now, with names, for personal use."
+  "version": "2.05.03",
+  "cache": "se7env2-v48",
+  "notes": "Accountant PDF has an optional Include open tabs toggle (off by default), listing tabs as Customer 1, 2, 3 with amounts and a total; a second toggle swaps in real names when needed."
 }

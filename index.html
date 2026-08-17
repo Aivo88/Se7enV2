@@ -588,7 +588,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.05.02';
+var APP_VERSION = '2.05.03';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -1997,7 +1997,7 @@ var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','D
 function openHistoryHub(){ show('s-hub'); }
 
 /* ---------- EXPORT FOR ACCOUNTANT ---------- */
-var expFrom=null, expTo=null;
+var expFrom=null, expTo=null, expOpenTabs=false, expNames=false;
 function openExport(){
   var now=new Date();
   if(!expFrom){ // default to the current quarter
@@ -2029,12 +2029,30 @@ function renderExport(){
     expLine('Write-offs (loss)',f(sum.loss)+EUR)+
     expLine('Net (income \u2212 expenses)',f(sum.income-sum.exp)+EUR)+
     expLine('Transactions',String(txs.length))+
+    (expOpenTabs ? (function(){
+      var open=openTabsAsOf(st,expTo), t=0; open.forEach(function(r){ t+=r.owed; });
+      return expLine('Open tabs (included)',f(t)+EUR+' \u00B7 '+open.length+' tab'+(open.length===1?'':'s'));
+    })() : '')+
+    '</div>';
+  var toggles='<div class="card-box"><div class="label">Options</div>'+
+    '<button class="btn-full" style="'+(expOpenTabs?'border-color:var(--gold);color:var(--gold2);':'')+'margin-bottom:0.5em;" onclick="expToggle(\'tabs\')">'+
+    (expOpenTabs?'\u2713 ':'')+'Include open tabs at period end</button>'+
+    (expOpenTabs?
+      '<button class="btn-full" style="'+(expNames?'border-color:var(--gold);color:var(--gold2);':'')+'" onclick="expToggle(\'names\')">'+
+      (expNames?'\u2713 ':'')+'Show customer names</button>'+
+      '<div class="hint">Off: listed as Customer 1, 2, 3\u2026 On: real names.</div>'
+      :'<div class="hint">Adds a section showing how many tabs are open and the amounts owed.</div>')+
     '</div>';
   var btn='<button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.8em;" onclick="generatePDF()">Generate PDF</button>';
   var owed='<div class="card-box"><div class="label">Personal report</div>'+
     '<div class="hint" style="margin:0 0 0.6em;">Who still owes money right now, with names \u2014 for your own use, not the accountant.</div>'+
     '<button class="btn-full" style="border-color:var(--gold);color:var(--gold2);" onclick="generateOpenTabsPDF()">Open tabs report (PDF)</button></div>';
-  document.getElementById('export-body').innerHTML=presets+range+preview+btn+owed;
+  document.getElementById('export-body').innerHTML=presets+range+preview+toggles+btn+owed;
+}
+function expToggle(which){
+  if(which==='tabs'){ expOpenTabs=!expOpenTabs; if(!expOpenTabs) expNames=false; }
+  else expNames=!expNames;
+  renderExport();
 }
 function expLine(a,b){
   return '<div style="display:flex;justify-content:space-between;padding:0.25em 0;border-bottom:1px solid var(--border);">'+
@@ -2219,6 +2237,27 @@ function generatePDF(){
     y+=14;
   });
   if(days.length && y>800){ L.push({text:'(more days omitted \u2014 see summary above)',x:50,y:815,size:9}); }
+
+  if(expOpenTabs){
+    var open=openTabsAsOf(st,expTo);
+    if(y<720){ y+=22; } 
+    line('Open tabs at period end',{size:13,bold:true}); y+=8;
+    line('Money owed on this date \u2014 not income, shown for reference.',{size:9}); y+=18;
+    if(!open.length){ line('No open tabs.',{size:10}); }
+    else{
+      var tot=0;
+      open.forEach(function(r,i){
+        if(y>815) return;
+        tot+=r.owed;
+        L.push({text: expNames ? r.name : ('Customer '+(i+1)), x:50,y:y,size:10});
+        L.push({text:money(r.owed),x:360,y:y,size:10});
+        y+=14;
+      });
+      y+=2;
+      L.push({text:'Total owed ('+open.length+')',x:50,y:y,size:11,bold:true});
+      L.push({text:money(tot),x:360,y:y,size:11,bold:true});
+    }
+  }
 
   var pdf=buildPDF(L);
   var blob=new Blob([pdf],{type:'application/pdf'});
