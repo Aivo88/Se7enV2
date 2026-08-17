@@ -1,5 +1,5 @@
 {
-  "version": "2.05.09",
-  "cache": "se7env2-v54",
-  "notes": "Report title moved clear of the logo; euro sign shown as EUR in PDFs (the base PDF font can't render the symbol reliably)."
+  "version": "2.05.10",
+  "cache": "se7env2-v55",
+  "notes": "PDF reports now print the real currency symbol (euro, pound) using WinAnsi encoding, honouring the currency set in Settings."
 }

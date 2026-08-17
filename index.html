@@ -588,7 +588,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.05.09';
+var APP_VERSION = '2.05.10';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -2102,15 +2102,19 @@ function pdfBytes(str){
   for(var i=0;i<n;i++){ arr[i]=str.charCodeAt(i) & 0xff; }
   return arr;
 }
-/* The base-14 fonts use WinAnsi where the euro glyph is unreliable, so a plain
-   currency code is printed instead of the symbol in PDFs. */
-function pdfCur(sym){
-  if(sym==='\u20AC') return 'EUR';
-  if(sym==='$') return 'USD';
-  if(sym==='\u00A3') return 'GBP';
-  return sym; // short codes like kr, z\u0142 print fine
+/* With WinAnsiEncoding the common symbols map to real glyphs; anything exotic
+   falls back to itself and simply may not render, which is acceptable. */
+function pdfCur(sym){ return sym; }
+/* WinAnsi places some glyphs at high byte positions; map the ones we use so the
+   euro and pound print as real symbols. */
+function pdfEsc(str){
+  str=String(str)
+    .replace(/\u20AC/g,'\x80')   // euro
+    .replace(/\u2013/g,'\x96')   // en dash
+    .replace(/\u2014/g,'\x97')   // em dash
+    .replace(/\u2212/g,'-');      // minus -> hyphen
+  return str.replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)');
 }
-function pdfEsc(str){ return String(str).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)'); }
 /* buildPDF(lines, img) \u2014 img optional: {jpeg,w,h,x,y,dw,dh} where jpeg is a
    binary (latin1) JPEG string. A logo is drawn as an XObject above the text. */
 function buildPDF(lines,img){
@@ -2139,8 +2143,8 @@ function buildPDF(lines,img){
   objs.push('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+W+' '+H+'] '+
             '/Resources << /Font << /F1 5 0 R /F2 6 0 R >>'+xobj+' >> /Contents 4 0 R >>');
   objs.push('<< /Length '+stream.length+' >>\nstream\n'+stream+'\nendstream');
-  objs.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
-  objs.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>');
+  objs.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+  objs.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
   if(img){
     objs.push('<< /Type /XObject /Subtype /Image /Width '+img.w+' /Height '+img.h+
       ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+img.jpeg.length+' >>\nstream\n'+
