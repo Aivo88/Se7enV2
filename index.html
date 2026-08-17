@@ -201,17 +201,17 @@ input:focus,select:focus{border-color:var(--gold);}
     <div id="pane-bal" style="display:none;">
       <div class="card-box">
         <div class="label">Customer hands over money</div>
-        <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.5em;" onclick="balAction('credit')">Add credit</button>
+        <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.5em;" onclick="balAction('credit')" data-t="add_credit">Add credit</button>
         <div class="hint">Money taken now and held against future purchases.</div>
       </div>
       <div class="card-box">
         <div class="label">Payment towards the tab</div>
-        <button class="btn-full" style="background:var(--bbg);border-color:var(--blue);color:var(--blue);" onclick="balAction('pay')">Add payment</button>
+        <button class="btn-full" style="background:var(--bbg);border-color:var(--blue);color:var(--blue);" onclick="balAction('pay')" data-t="add_payment">Add payment</button>
         <div class="hint">Reduces what is currently owed.</div>
       </div>
       <div class="card-box">
         <div class="label">Charge without products</div>
-        <button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);" onclick="balAction('debt')">Add debt</button>
+        <button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);" onclick="balAction('debt')" data-t="add_debt">Add debt</button>
         <div class="hint">A manual charge, for example a broken glass.</div>
       </div>
     </div>
@@ -220,12 +220,12 @@ input:focus,select:focus{border-color:var(--gold);}
   <div class="cart" id="cart-wrap" style="display:none;">
     <div class="cart-lines" id="cart-lines"></div>
     <div class="btn-row">
-      <button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);flex:0 0 34%;" onclick="clearCart()">Clear</button>
+      <button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);flex:0 0 34%;" onclick="clearCart()" data-t="clear">Clear</button>
       <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" id="cart-confirm" onclick="commitCart()"></button>
     </div>
   </div>
   <div class="foot">
-    <button class="btn-full" id="cust-custom-row" style="margin-bottom:0.57em;" onclick="promptCustomCust()">+ Custom amount</button>
+    <button class="btn-full" id="cust-custom-row" style="margin-bottom:0.57em;" onclick="promptCustomCust()" data-t="custom_amount">+ Custom amount</button>
     <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="backFromCustomer()" data-t="back">Back</button>
   </div>
 </div>
@@ -245,12 +245,12 @@ input:focus,select:focus{border-color:var(--gold);}
   <div class="cart" id="wi-cart-wrap" style="display:none;">
     <div class="cart-lines" id="wi-cart-lines"></div>
     <div class="btn-row">
-      <button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);flex:0 0 34%;" onclick="clearCart()">Clear</button>
+      <button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);flex:0 0 34%;" onclick="clearCart()" data-t="clear">Clear</button>
       <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" id="wi-pay" onclick="openWalkinPay()"></button>
     </div>
   </div>
   <div class="foot">
-    <button class="btn-full" style="margin-bottom:0.57em;" onclick="promptCustomWalkin()">+ Custom amount</button>
+    <button class="btn-full" style="margin-bottom:0.57em;" onclick="promptCustomWalkin()" data-t="custom_amount">+ Custom amount</button>
     <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="goHome()" data-t="back">Back</button>
   </div>
 </div>
@@ -410,7 +410,7 @@ input:focus,select:focus{border-color:var(--gold);}
         <button class="btn-icon" onclick="editProduct(null)">+ New</button>
       </div>
     </div>
-    <div class="hint">Tap a product to edit &middot; star toggles Favorites</div>
+    <div class="hint" data-t="tap_edit_star">Tap a product to edit &middot; star toggles Favorites</div>
   </div>
   <div class="body-scroll" id="catprod-body"></div>
   <div class="foot">
@@ -439,11 +439,11 @@ input:focus,select:focus{border-color:var(--gold);}
     <div style="text-align:center;color:var(--text2);font-size:1.1em;" id="set-cust-text"></div>
     <div style="text-align:center;color:var(--gold2);font-size:1.45em;font-weight:700;margin:4px 0 16px;" id="set-amount-text"></div>
     <div class="btn-row" style="margin-bottom:0.6em;">
-      <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="settlePayment('cash')">Cash</button>
-      <button class="btn-full" style="background:var(--bbg);border-color:var(--blue);color:var(--blue);" onclick="settlePayment('card')">Card</button>
+      <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="settlePayment('cash')" data-t="cash">Cash</button>
+      <button class="btn-full" style="background:var(--bbg);border-color:var(--blue);color:var(--blue);" onclick="settlePayment('card')" data-t="card">Card</button>
     </div>
-    <button class="btn-full" style="margin-bottom:0.6em;" onclick="openSettleSplit()">Cash and card</button>
-    <button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);margin-bottom:0.6em;" onclick="writeOffDebt()">Write off (loss)</button>
+    <button class="btn-full" style="margin-bottom:0.6em;" onclick="openSettleSplit()" data-t="cash_and_card">Cash and card</button>
+    <button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);margin-bottom:0.6em;" onclick="writeOffDebt()" data-t="write_off">Write off (loss)</button>
     <button class="btn-modal-cancel" onclick="closeModal('m-settled')">Cancel</button>
   </div>
 </div>
@@ -453,17 +453,17 @@ input:focus,select:focus{border-color:var(--gold);}
     <div class="modal-title">Payment</div>
     <div style="text-align:center;color:var(--gold2);font-size:1.6em;font-weight:700;margin-bottom:16px;" id="wi-total-text"></div>
     <div class="btn-row" style="margin-bottom:0.6em;">
-      <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="walkinPay('cash')">Cash</button>
-      <button class="btn-full" style="background:var(--bbg);border-color:var(--blue);color:var(--blue);" onclick="walkinPay('card')">Card</button>
+      <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="walkinPay('cash')" data-t="cash">Cash</button>
+      <button class="btn-full" style="background:var(--bbg);border-color:var(--blue);color:var(--blue);" onclick="walkinPay('card')" data-t="card">Card</button>
     </div>
-    <button class="btn-full" style="margin-bottom:0.6em;" onclick="openWalkinSplit()">Cash and card</button>
+    <button class="btn-full" style="margin-bottom:0.6em;" onclick="openWalkinSplit()" data-t="cash_and_card">Cash and card</button>
     <button class="btn-modal-cancel" onclick="closeModal('m-wipay')">Cancel</button>
   </div>
 </div>
 
 <div class="modal-bg" id="m-split">
   <div class="modal">
-    <div class="modal-title">Cash and card</div>
+    <div class="modal-title" data-t="cash_and_card">Cash and card</div>
     <div style="text-align:center;color:var(--gold2);font-size:1.4em;font-weight:700;margin-bottom:14px;" id="split-total"></div>
     <div class="field"><div class="label">Cash</div><input type="text" id="split-cash" inputmode="decimal" autocomplete="off" oninput="splitTyped('cash')"></div>
     <div class="field"><div class="label">Card</div><input type="text" id="split-card" inputmode="decimal" autocomplete="off" oninput="splitTyped('card')"></div>
@@ -588,7 +588,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.06.00';
+var APP_VERSION = '2.06.01';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -629,7 +629,25 @@ var LANG={
   money:     {en:'Money', fi:'Rahat', es:'Dinero', de:'Geld', sv:'Pengar'},
   products:  {en:'Products', fi:'Tuotteet', es:'Productos', de:'Produkte', sv:'Produkter'},
   hub_money_hint:{en:'Sales, cash, tabs and reports.', fi:'Myynti, k\u00E4teinen, piikit ja raportit.', es:'Ventas, efectivo, cuentas e informes.', de:'Verk\u00E4ufe, Bargeld, Deckel und Berichte.', sv:'F\u00F6rs\u00E4ljning, kontanter, notor och rapporter.'},
-  hub_products_hint:{en:'Top sellers and what each customer has bought.', fi:'Myydyimm\u00E4t ja mit\u00E4 kukin asiakas on ostanut.', es:'M\u00E1s vendidos y lo que ha comprado cada cliente.', de:'Bestseller und was jeder Kunde gekauft hat.', sv:'B\u00E4sts\u00E4ljare och vad varje kund har k\u00F6pt.'}
+  hub_products_hint:{en:'Top sellers and what each customer has bought.', fi:'Myydyimm\u00E4t ja mit\u00E4 kukin asiakas on ostanut.', es:'M\u00E1s vendidos y lo que ha comprado cada cliente.', de:'Bestseller und was jeder Kunde gekauft hat.', sv:'B\u00E4sts\u00E4ljare och vad varje kund har k\u00F6pt.'},
+  // --- customer / cart / walk-in / settle ---
+  favorites:  {en:'Favorites', fi:'Suosikit', es:'Favoritos', de:'Favoriten', sv:'Favoriter'},
+  clear:      {en:'Clear', fi:'Tyhjenn\u00E4', es:'Vaciar', de:'Leeren', sv:'Rensa'},
+  custom_amount:{en:'+ Custom amount', fi:'+ Oma summa', es:'+ Importe libre', de:'+ Freier Betrag', sv:'+ Eget belopp'},
+  add_credit: {en:'Add credit', fi:'Lis\u00E4\u00E4 saldoa', es:'A\u00F1adir cr\u00E9dito', de:'Guthaben', sv:'L\u00E4gg till kredit'},
+  add_payment:{en:'Add payment', fi:'Lis\u00E4\u00E4 maksu', es:'A\u00F1adir pago', de:'Zahlung', sv:'L\u00E4gg till betalning'},
+  add_debt:   {en:'Add debt', fi:'Lis\u00E4\u00E4 velkaa', es:'A\u00F1adir deuda', de:'Schuld', sv:'L\u00E4gg till skuld'},
+  cash_and_card:{en:'Cash and card', fi:'K\u00E4teinen ja kortti', es:'Efectivo y tarjeta', de:'Bar und Karte', sv:'Kontant och kort'},
+  write_off:  {en:'Write off (loss)', fi:'Kirjaa tappioksi', es:'Cancelar (p\u00E9rdida)', de:'Abschreiben (Verlust)', sv:'Avskriv (f\u00F6rlust)'},
+  no_products:{en:'No products yet.', fi:'Ei tuotteita viel\u00E4.', es:'A\u00Fan no hay productos.', de:'Noch keine Produkte.', sv:'Inga produkter \u00E4nnu.'},
+  add_in_settings:{en:'Add them in Settings \u2192 Categories.', fi:'Lis\u00E4\u00E4 ne kohdassa Asetukset \u2192 Kategoriat.', es:'A\u00F1\u00E1delos en Ajustes \u2192 Categor\u00EDas.', de:'F\u00FCge sie unter Einstellungen \u2192 Kategorien hinzu.', sv:'L\u00E4gg till dem i Inst\u00E4llningar \u2192 Kategorier.'},
+  add_to_tab: {en:'Add to tab', fi:'Lis\u00E4\u00E4 piikkiin', es:'A\u00F1adir a la cuenta', de:'Auf den Deckel', sv:'L\u00E4gg till nota'},
+  pay:        {en:'Pay', fi:'Maksa', es:'Pagar', de:'Zahlen', sv:'Betala'},
+  old_debt_collect:{en:'Old debt {a} \u2014 tap to collect', fi:'Vanha velka {a} \u2014 napauta peri\u00E4ksesi', es:'Deuda antigua {a} \u2014 toca para cobrar', de:'Alte Schuld {a} \u2014 zum Einziehen tippen', sv:'Gammal skuld {a} \u2014 tryck f\u00F6r att inkassera'},
+  tap_edit_star:{en:'Tap a product to edit \u00B7 star toggles Favorites', fi:'Napauta tuotetta muokataksesi \u00B7 t\u00E4hti vaihtaa suosikin', es:'Toca un producto para editar \u00B7 la estrella marca Favoritos', de:'Produkt zum Bearbeiten tippen \u00B7 Stern schaltet Favoriten', sv:'Tryck p\u00E5 en produkt f\u00F6r att redigera \u00B7 stj\u00E4rnan v\u00E4xlar favoriter'},
+  add_credit_hint:{en:'Money handed over now, held against future purchases.', fi:'Nyt annettu raha, s\u00E4ilytet\u00E4\u00E4n tulevia ostoja varten.', es:'Dinero entregado ahora, guardado para compras futuras.', de:'Jetzt \u00FCbergebenes Geld, f\u00FCr k\u00FCnftige Eink\u00E4ufe.', sv:'Pengar som l\u00E4mnas nu, sparas f\u00F6r framtida k\u00F6p.'},
+  add_payment_hint:{en:'Reduces what is currently owed.', fi:'V\u00E4hent\u00E4\u00E4 nykyist\u00E4 velkaa.', es:'Reduce lo que se debe actualmente.', de:'Verringert die aktuelle Schuld.', sv:'Minskar nuvarande skuld.'},
+  add_debt_hint:{en:'A manual charge with no products attached.', fi:'Manuaalinen veloitus ilman tuotteita.', es:'Un cargo manual sin productos.', de:'Manuelle Belastung ohne Produkte.', sv:'En manuell debitering utan produkter.'}
 };
 function curLang(){
   try{ return (getState().settings.lang)||'en'; }catch(e){ return 'en'; }
@@ -1125,7 +1143,7 @@ function renderCustBalance(){
   el.textContent=balText(b);
   el.style.color = b<-0.001?'var(--red)':(b>0.001?'var(--green)':'var(--text3)');
   var w=writtenOffOf(st,activeCustomerId), ob=document.getElementById('cust-olddebt');
-  if(w>0){ ob.style.display=''; ob.textContent='Old debt '+f(w)+EUR+' \u2014 tap to collect'; }
+  if(w>0){ ob.style.display=''; ob.textContent=t('old_debt_collect').replace('{a}',f(w)+EUR); }
   else ob.style.display='none';
 }
 function setCustTab(t){
@@ -1153,7 +1171,7 @@ function renderCats(elId){
   var st=getState();
   var cats=['__fav__'].concat(usedCategories(st));
   document.getElementById(elId).innerHTML=cats.map(function(c){
-    var lbl = c==='__fav__' ? '\u2605 Favorites' : esc(c);
+    var lbl = c==='__fav__' ? '\u2605 '+t('favorites') : esc(c);
     return '<button class="chip '+(activeCat===c?'active':'')+'" onclick="pickCat(\''+encodeURIComponent(c)+'\')">'+lbl+'</button>';
   }).join('');
 }
@@ -1166,7 +1184,7 @@ function pickCat(c){
 function renderProds(elId){
   var st=getState(), el=document.getElementById(elId);
   if(!st.products.length){
-    el.innerHTML='<div class="empty-hint" style="grid-column:1/-1;">No products yet.<br>Add them in Settings &rarr; Categories.</div>';
+    el.innerHTML='<div class="empty-hint" style="grid-column:1/-1;">'+t('no_products')+'<br>'+t('add_in_settings')+'</div>';
     return;
   }
   var ps = activeCat==='__fav__'
@@ -1225,7 +1243,7 @@ function renderCart(){
   if(!cartLines().length || custTab!=='add'){ w.style.display='none'; return; }
   w.style.display='';
   document.getElementById('cart-lines').innerHTML=cartLinesHTML();
-  document.getElementById('cart-confirm').textContent='Add to tab \u00B7 '+f(cartTotal())+EUR;
+  document.getElementById('cart-confirm').textContent=t('add_to_tab')+' \u00B7 '+f(cartTotal())+EUR;
 }
 /* The amount modal is used instead of an inline field, so the on-screen keyboard
    opens over a centred dialog rather than hiding a field pinned to the footer. */
@@ -1436,13 +1454,13 @@ function balAction(kind){
   var st=getState(), c=findCustomer(st,activeCustomerId);
   if(!c) return;
   if(kind==='credit'){
-    openAmount('Add credit','Money handed over now, held against future purchases.',true,
+    openAmount(t('add_credit'),t('add_credit_hint'),true,
       function(v,note,method){ addBalanceTx('credit',v,note,method); });
   } else if(kind==='pay'){
-    openAmount('Add payment','Reduces what is currently owed.',true,
+    openAmount(t('add_payment'),t('add_payment_hint'),true,
       function(v,note,method){ addBalanceTx('pay',v,note,method); });
   } else {
-    openAmount('Add debt','A manual charge with no products attached.',false,
+    openAmount(t('add_debt'),t('add_debt_hint'),false,
       function(v,note){ addBalanceTx('debt',v,note,null); });
   }
 }
@@ -1644,7 +1662,7 @@ function renderWiCart(){
   if(!cartLines().length){ w.style.display='none'; return; }
   w.style.display='';
   document.getElementById('wi-cart-lines').innerHTML=cartLinesHTML();
-  document.getElementById('wi-pay').textContent='Pay \u00B7 '+f(cartTotal())+EUR;
+  document.getElementById('wi-pay').textContent=t('pay')+' \u00B7 '+f(cartTotal())+EUR;
 }
 /* A free-typed amount becomes an ordinary cart line so it flows through the same
    cash / card / split payment, for when a drink has no product button. */
