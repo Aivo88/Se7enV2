@@ -588,7 +588,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.05.10';
+var APP_VERSION = '2.05.11';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -2300,9 +2300,9 @@ function generatePDF(){
   days.forEach(function(d){
     if(y>815) return;
     L.push({text:fmtDate(d.date),x:50,y:y,size:10});
-    L.push({text:d.cash.toFixed(2),x:300,y:y,size:10});
-    L.push({text:d.card.toFixed(2),x:390,y:y,size:10});
-    L.push({text:(d.cash+d.card).toFixed(2),x:480,y:y,size:10});
+    L.push({text:money(d.cash),x:300,y:y,size:10});
+    L.push({text:money(d.card),x:390,y:y,size:10});
+    L.push({text:money(d.cash+d.card),x:480,y:y,size:10});
     y+=14;
   });
 
@@ -2322,12 +2322,12 @@ function generatePDF(){
       etot+=t.amount;
       L.push({text:fmtDate(txBarDate(t)),x:50,y:y,size:10});
       L.push({text:(t.note||'Expense').slice(0,45),x:150,y:y,size:10});
-      L.push({text:t.amount.toFixed(2),x:470,y:y,size:10});
+      L.push({text:money(t.amount),x:470,y:y,size:10});
       y+=14;
     });
     y+=2;
     L.push({text:'Total expenses',x:50,y:y,size:11,bold:true});
-    L.push({text:etot.toFixed(2),x:470,y:y,size:11,bold:true});
+    L.push({text:money(etot),x:470,y:y,size:11,bold:true});
     y+=14;
   }
 

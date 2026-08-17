@@ -1,5 +1,5 @@
 {
-  "version": "2.05.10",
-  "cache": "se7env2-v55",
-  "notes": "PDF reports now print the real currency symbol (euro, pound) using WinAnsi encoding, honouring the currency set in Settings."
+  "version": "2.05.11",
+  "cache": "se7env2-v56",
+  "notes": "Currency symbol added to the daily income rows and the expenses section in the PDF."
 }
