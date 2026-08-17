@@ -588,7 +588,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.05.03';
+var APP_VERSION = '2.05.04';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -2044,10 +2044,7 @@ function renderExport(){
       :'<div class="hint">Adds a section showing how many tabs are open and the amounts owed.</div>')+
     '</div>';
   var btn='<button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.8em;" onclick="generatePDF()">Generate PDF</button>';
-  var owed='<div class="card-box"><div class="label">Personal report</div>'+
-    '<div class="hint" style="margin:0 0 0.6em;">Who still owes money right now, with names \u2014 for your own use, not the accountant.</div>'+
-    '<button class="btn-full" style="border-color:var(--gold);color:var(--gold2);" onclick="generateOpenTabsPDF()">Open tabs report (PDF)</button></div>';
-  document.getElementById('export-body').innerHTML=presets+range+preview+toggles+btn+owed;
+  document.getElementById('export-body').innerHTML=presets+range+preview+toggles+btn;
 }
 function expToggle(which){
   if(which==='tabs'){ expOpenTabs=!expOpenTabs; if(!expOpenTabs) expNames=false; }
@@ -2413,7 +2410,8 @@ function sumRange(txs){
 }
 function summaryGridHTML(s){
   return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6em;margin-bottom:0.9em;">'+
-    box('Total','+'+f(s.income)+EUR,'green')+box('Net total','+'+f(s.net)+EUR,'green')+
+    box('Total','+'+f(s.income)+EUR,'green')+
+    box('Net total',(s.net<0?'\u2212'+f(-s.net):'+'+f(s.net))+EUR, s.net<0?'red':'green')+
     box('Cash',f(s.cash)+EUR,'green')+box('Expenses',f(s.exp)+EUR,'gold')+
     box('Card',f(s.card)+EUR,'blue')+box('Loss',f(s.loss)+EUR,'red')+'</div>';
 }

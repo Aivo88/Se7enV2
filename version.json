@@ -1,5 +1,5 @@
 {
-  "version": "2.05.03",
-  "cache": "se7env2-v48",
-  "notes": "Accountant PDF has an optional Include open tabs toggle (off by default), listing tabs as Customer 1, 2, 3 with amounts and a total; a second toggle swaps in real names when needed."
+  "version": "2.05.04",
+  "cache": "se7env2-v49",
+  "notes": "Net total shows red with a proper minus sign when negative. Removed the standalone personal Open tabs report button; open tabs remain available as an optional toggle in the accountant export."
 }
