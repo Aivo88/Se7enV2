@@ -588,7 +588,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.05.08';
+var APP_VERSION = '2.05.09';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -2102,6 +2102,14 @@ function pdfBytes(str){
   for(var i=0;i<n;i++){ arr[i]=str.charCodeAt(i) & 0xff; }
   return arr;
 }
+/* The base-14 fonts use WinAnsi where the euro glyph is unreliable, so a plain
+   currency code is printed instead of the symbol in PDFs. */
+function pdfCur(sym){
+  if(sym==='\u20AC') return 'EUR';
+  if(sym==='$') return 'USD';
+  if(sym==='\u00A3') return 'GBP';
+  return sym; // short codes like kr, z\u0142 print fine
+}
 function pdfEsc(str){ return String(str).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)'); }
 /* buildPDF(lines, img) \u2014 img optional: {jpeg,w,h,x,y,dw,dh} where jpeg is a
    binary (latin1) JPEG string. A logo is drawn as an XObject above the text. */
@@ -2221,9 +2229,9 @@ function generateOpenTabsPDF(){
   var cur=(st.settings.currency||'\u20AC');
   var L=[], y=60;
   function line(text,opts){ opts=opts||{}; L.push({text:text,x:opts.x||50,y:y,size:opts.size,bold:opts.bold}); }
-  function money(n){ return n.toFixed(2)+' '+cur; }
+  function money(n){ return n.toFixed(2)+' '+pdfCur(cur); }
   var hasImg=!!st.settings.headerImage;
-  if(hasImg){ y+=54; }
+  if(hasImg){ y+=64; }
   line(hasImg?'Open tabs':(title+' \u2014 Open tabs'),{size:18,bold:true}); y+=26;
   line('As of '+fmtDate(now.getTime())+' '+fmtTime(now.getTime()),{size:10}); y+=26;
   if(!open.length){
@@ -2260,9 +2268,9 @@ function generatePDF(){
   var cur=(st.settings.currency||'\u20AC');
   var L=[], y=60;
   function line(text,opts){ opts=opts||{}; L.push({text:text,x:opts.x||50,y:y,size:opts.size,bold:opts.bold}); }
-  function money(n){ return n.toFixed(2)+' '+cur; }
+  function money(n){ return n.toFixed(2)+' '+pdfCur(cur); }
   var hasImg=!!st.settings.headerImage;
-  if(hasImg){ y+=54; }  // leave room for the logo drawn at the top
+  if(hasImg){ y+=64; }  // leave room for the logo drawn at the top
   line(hasImg?'Sales report':(title+' \u2014 Sales report'),{size:18,bold:true}); y+=26;
   line('Period: '+fmtDate(expFrom.getTime())+' \u2013 '+fmtDate(expTo.getTime()),{size:11}); y+=16;
   line('Generated: '+fmtDate(Date.now())+' '+fmtTime(Date.now()),{size:9}); y+=28;

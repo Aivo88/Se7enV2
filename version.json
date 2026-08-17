@@ -1,5 +1,5 @@
 {
-  "version": "2.05.08",
-  "cache": "se7env2-v53",
-  "notes": "Fixed the header logo not appearing in PDF reports: binary JPEG data was being corrupted by UTF-8 encoding when building the file. The logo now renders."
+  "version": "2.05.09",
+  "cache": "se7env2-v54",
+  "notes": "Report title moved clear of the logo; euro sign shown as EUR in PDFs (the base PDF font can't render the symbol reliably)."
 }
