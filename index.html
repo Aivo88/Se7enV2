@@ -588,7 +588,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.05.06';
+var APP_VERSION = '2.05.07';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -2098,12 +2098,19 @@ function rangeDays(txs){
    library the app writes the handful of PDF objects it needs by hand: one page,
    one built-in font (Helvetica), and a text stream. Fully offline. */
 function pdfEsc(str){ return String(str).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)'); }
-function buildPDF(lines){
-  // lines: array of {text, x, y, size, bold}
+/* buildPDF(lines, img) \u2014 img optional: {jpeg,w,h,x,y,dw,dh} where jpeg is a
+   binary (latin1) JPEG string. A logo is drawn as an XObject above the text. */
+function buildPDF(lines,img){
   var H=842, W=595; // A4 in points
   var parts=[];
+  if(img){
+    // place image: q, scale matrix, draw, Q  (PDF y is bottom-up)
+    parts.push('q');
+    parts.push(img.dw+' 0 0 '+img.dh+' '+img.x+' '+(H-img.y-img.dh)+' cm');
+    parts.push('/Im0 Do');
+    parts.push('Q');
+  }
   parts.push('BT');
-  var curFont='';
   lines.forEach(function(l){
     var font=l.bold?'/F2':'/F1';
     parts.push(font+' '+(l.size||11)+' Tf');
@@ -2113,13 +2120,19 @@ function buildPDF(lines){
   parts.push('ET');
   var stream=parts.join('\n');
   var objs=[];
+  var xobj = img ? ' /XObject << /Im0 7 0 R >>' : '';
   objs.push('<< /Type /Catalog /Pages 2 0 R >>');
   objs.push('<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
   objs.push('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+W+' '+H+'] '+
-            '/Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 4 0 R >>');
+            '/Resources << /Font << /F1 5 0 R /F2 6 0 R >>'+xobj+' >> /Contents 4 0 R >>');
   objs.push('<< /Length '+stream.length+' >>\nstream\n'+stream+'\nendstream');
   objs.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
   objs.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>');
+  if(img){
+    objs.push('<< /Type /XObject /Subtype /Image /Width '+img.w+' /Height '+img.h+
+      ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+img.jpeg.length+' >>\nstream\n'+
+      img.jpeg+'\nendstream');
+  }
   var pdf='%PDF-1.4\n', offsets=[];
   for(var i=0;i<objs.length;i++){
     offsets.push(pdf.length);
@@ -2130,6 +2143,32 @@ function buildPDF(lines){
   offsets.forEach(function(o){ pdf+=('0000000000'+o).slice(-10)+' 00000 n \n'; });
   pdf+='trailer\n<< /Size '+(objs.length+1)+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF';
   return pdf;
+}
+/* Turn the stored header image into JPEG bytes plus draw dimensions. Async
+   because it goes through an <img> and a canvas. Falls back to null on any
+   problem so the report still generates as text-only. */
+function headerLogoForPDF(st,cb){
+  var src=st.settings.headerImage;
+  if(!src){ cb(null); return; }
+  var img=new Image();
+  img.onload=function(){
+    try{
+      var maxW=200, maxH=70; // points on the page
+      var scale=Math.min(maxW/img.width, maxH/img.height);
+      var cw=img.width, ch=img.height;
+      var cv=document.createElement('canvas');
+      cv.width=cw; cv.height=ch;
+      var ctx=cv.getContext('2d');
+      ctx.fillStyle='#000'; ctx.fillRect(0,0,cw,ch); // JPEG has no alpha
+      ctx.drawImage(img,0,0);
+      var dataUrl=cv.toDataURL('image/jpeg',0.9);
+      var b64=dataUrl.split(',')[1];
+      var bin=atob(b64);
+      cb({ jpeg:bin, w:cw, h:ch, dw:Math.round(img.width*scale), dh:Math.round(img.height*scale) });
+    }catch(e){ cb(null); }
+  };
+  img.onerror=function(){ cb(null); };
+  img.src=src;
 }
 /* Balance from transactions on or before a given bar date, for the period-end
    snapshot of who still owed money. */
@@ -2178,7 +2217,9 @@ function generateOpenTabsPDF(){
   var L=[], y=60;
   function line(text,opts){ opts=opts||{}; L.push({text:text,x:opts.x||50,y:y,size:opts.size,bold:opts.bold}); }
   function money(n){ return n.toFixed(2)+' '+cur; }
-  line(title+' \u2014 Open tabs',{size:18,bold:true}); y+=26;
+  var hasImg=!!st.settings.headerImage;
+  if(hasImg){ y+=54; }
+  line(hasImg?'Open tabs':(title+' \u2014 Open tabs'),{size:18,bold:true}); y+=26;
   line('As of '+fmtDate(now.getTime())+' '+fmtTime(now.getTime()),{size:10}); y+=26;
   if(!open.length){
     line('No open tabs \u2014 everyone is settled.',{size:12});
@@ -2197,12 +2238,15 @@ function generateOpenTabsPDF(){
     L.push({text:'Total owed',x:50,y:y,size:12,bold:true});
     L.push({text:money(tot),x:360,y:y,size:12,bold:true});
   }
-  var blob=new Blob([buildPDF(L)],{type:'application/pdf'});
   var name='Open tabs '+isoDate(now)+'.pdf';
-  var a=document.createElement('a');
-  a.href=URL.createObjectURL(blob); a.download=name;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  toast('PDF created','ok');
+  headerLogoForPDF(st,function(logo){
+    if(logo){ logo.x=50; logo.y=40; }
+    var blob=new Blob([buildPDF(L,logo)],{type:'application/pdf'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download=name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    toast('PDF created','ok');
+  });
 }
 function generatePDF(){
   var st=getState();
@@ -2212,7 +2256,9 @@ function generatePDF(){
   var L=[], y=60;
   function line(text,opts){ opts=opts||{}; L.push({text:text,x:opts.x||50,y:y,size:opts.size,bold:opts.bold}); }
   function money(n){ return n.toFixed(2)+' '+cur; }
-  line(title+' \u2014 Sales report',{size:18,bold:true}); y+=26;
+  var hasImg=!!st.settings.headerImage;
+  if(hasImg){ y+=54; }  // leave room for the logo drawn at the top
+  line(hasImg?'Sales report':(title+' \u2014 Sales report'),{size:18,bold:true}); y+=26;
   line('Period: '+fmtDate(expFrom.getTime())+' \u2013 '+fmtDate(expTo.getTime()),{size:11}); y+=16;
   line('Generated: '+fmtDate(Date.now())+' '+fmtTime(Date.now()),{size:9}); y+=28;
 
@@ -2289,13 +2335,16 @@ function generatePDF(){
     }
   }
 
-  var pdf=buildPDF(L);
-  var blob=new Blob([pdf],{type:'application/pdf'});
   var name='Sales '+isoDate(expFrom)+' to '+isoDate(expTo)+'.pdf';
-  var a=document.createElement('a');
-  a.href=URL.createObjectURL(blob); a.download=name;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  toast('PDF created','ok');
+  headerLogoForPDF(st,function(logo){
+    if(logo){ logo.x=50; logo.y=40; }
+    var pdf=buildPDF(L, logo);
+    var blob=new Blob([pdf],{type:'application/pdf'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download=name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    toast('PDF created','ok');
+  });
 }
 function openReports(){ show('s-rep'); setRepTab(repTab||'day'); }
 

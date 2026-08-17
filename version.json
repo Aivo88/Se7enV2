@@ -1,5 +1,5 @@
 {
-  "version": "2.05.06",
-  "cache": "se7env2-v51",
-  "notes": "Report heading uses the header text when one is set, and falls back to Pub for an image header, the default, or an empty header."
+  "version": "2.05.07",
+  "cache": "se7env2-v52",
+  "notes": "When the header is a custom image, the PDF reports now show that logo at the top instead of the text title. Text headers and the default still print as a heading. Logo is embedded as JPEG, fully offline."
 }
