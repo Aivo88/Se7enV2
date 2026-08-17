@@ -1,5 +1,5 @@
 {
-  "version": "2.05.07",
-  "cache": "se7env2-v52",
-  "notes": "When the header is a custom image, the PDF reports now show that logo at the top instead of the text title. Text headers and the default still print as a heading. Logo is embedded as JPEG, fully offline."
+  "version": "2.05.08",
+  "cache": "se7env2-v53",
+  "notes": "Fixed the header logo not appearing in PDF reports: binary JPEG data was being corrupted by UTF-8 encoding when building the file. The logo now renders."
 }

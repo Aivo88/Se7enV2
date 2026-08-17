@@ -588,7 +588,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.05.07';
+var APP_VERSION = '2.05.08';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -2097,6 +2097,11 @@ function rangeDays(txs){
    A pub till report is plain text in a table, so instead of shipping a large PDF
    library the app writes the handful of PDF objects it needs by hand: one page,
    one built-in font (Helvetica), and a text stream. Fully offline. */
+function pdfBytes(str){
+  var n=str.length, arr=new Uint8Array(n);
+  for(var i=0;i<n;i++){ arr[i]=str.charCodeAt(i) & 0xff; }
+  return arr;
+}
 function pdfEsc(str){ return String(str).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)'); }
 /* buildPDF(lines, img) \u2014 img optional: {jpeg,w,h,x,y,dw,dh} where jpeg is a
    binary (latin1) JPEG string. A logo is drawn as an XObject above the text. */
@@ -2241,7 +2246,7 @@ function generateOpenTabsPDF(){
   var name='Open tabs '+isoDate(now)+'.pdf';
   headerLogoForPDF(st,function(logo){
     if(logo){ logo.x=50; logo.y=40; }
-    var blob=new Blob([buildPDF(L,logo)],{type:'application/pdf'});
+    var blob=new Blob([pdfBytes(buildPDF(L,logo))],{type:'application/pdf'});
     var a=document.createElement('a');
     a.href=URL.createObjectURL(blob); a.download=name;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
@@ -2339,7 +2344,7 @@ function generatePDF(){
   headerLogoForPDF(st,function(logo){
     if(logo){ logo.x=50; logo.y=40; }
     var pdf=buildPDF(L, logo);
-    var blob=new Blob([pdf],{type:'application/pdf'});
+    var blob=new Blob([pdfBytes(pdf)],{type:'application/pdf'});
     var a=document.createElement('a');
     a.href=URL.createObjectURL(blob); a.download=name;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
