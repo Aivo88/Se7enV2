@@ -588,7 +588,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.05.01';
+var APP_VERSION = '2.05.02';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -2029,13 +2029,12 @@ function renderExport(){
     expLine('Write-offs (loss)',f(sum.loss)+EUR)+
     expLine('Net (income \u2212 expenses)',f(sum.income-sum.exp)+EUR)+
     expLine('Transactions',String(txs.length))+
-    (function(){
-      var open=openTabsAsOf(st,expTo), t=0; open.forEach(function(r){ t+=r.owed; });
-      return open.length ? expLine('Open tabs at period end',f(t)+EUR+' ('+open.length+')') : '';
-    })()+
     '</div>';
-  var btn='<button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="generatePDF()">Generate PDF</button>';
-  document.getElementById('export-body').innerHTML=presets+range+preview+btn;
+  var btn='<button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.8em;" onclick="generatePDF()">Generate PDF</button>';
+  var owed='<div class="card-box"><div class="label">Personal report</div>'+
+    '<div class="hint" style="margin:0 0 0.6em;">Who still owes money right now, with names \u2014 for your own use, not the accountant.</div>'+
+    '<button class="btn-full" style="border-color:var(--gold);color:var(--gold2);" onclick="generateOpenTabsPDF()">Open tabs report (PDF)</button></div>';
+  document.getElementById('export-body').innerHTML=presets+range+preview+btn+owed;
 }
 function expLine(a,b){
   return '<div style="display:flex;justify-content:space-between;padding:0.25em 0;border-bottom:1px solid var(--border);">'+
@@ -2145,6 +2144,41 @@ function openTabsAsOf(st,to){
   rows.sort(function(a,b){ return b.owed-a.owed; });
   return rows;
 }
+function generateOpenTabsPDF(){
+  var st=getState();
+  var now=new Date();
+  var open=openTabsAsOf(st,now);
+  var title=(st.settings.headerText && st.settings.headerText!=='Pub') ? st.settings.headerText : 'Pub';
+  var cur=(st.settings.currency||'\u20AC');
+  var L=[], y=60;
+  function line(text,opts){ opts=opts||{}; L.push({text:text,x:opts.x||50,y:y,size:opts.size,bold:opts.bold}); }
+  function money(n){ return n.toFixed(2)+' '+cur; }
+  line(title+' \u2014 Open tabs',{size:18,bold:true}); y+=26;
+  line('As of '+fmtDate(now.getTime())+' '+fmtTime(now.getTime()),{size:10}); y+=26;
+  if(!open.length){
+    line('No open tabs \u2014 everyone is settled.',{size:12});
+  } else {
+    L.push({text:'Customer',x:50,y:y,size:11,bold:true});
+    L.push({text:'Owes',x:360,y:y,size:11,bold:true}); y+=16;
+    var tot=0;
+    open.forEach(function(r){
+      if(y>815) return;
+      tot+=r.owed;
+      L.push({text:r.name,x:50,y:y,size:11});
+      L.push({text:money(r.owed),x:360,y:y,size:11});
+      y+=15;
+    });
+    y+=4;
+    L.push({text:'Total owed',x:50,y:y,size:12,bold:true});
+    L.push({text:money(tot),x:360,y:y,size:12,bold:true});
+  }
+  var blob=new Blob([buildPDF(L)],{type:'application/pdf'});
+  var name='Open tabs '+isoDate(now)+'.pdf';
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  toast('PDF created','ok');
+}
 function generatePDF(){
   var st=getState();
   var txs=rangeTxs(st,expFrom,expTo), sum=sumRange(txs), days=rangeDays(txs);
@@ -2185,25 +2219,6 @@ function generatePDF(){
     y+=14;
   });
   if(days.length && y>800){ L.push({text:'(more days omitted \u2014 see summary above)',x:50,y:815,size:9}); }
-
-  // Open tabs at the end of the period: money owed, NOT income.
-  var open=openTabsAsOf(st,expTo);
-  if(open.length && y<720){
-    y+=22;
-    line('Open tabs at period end',{size:13,bold:true}); y+=8;
-    line('Money still owed on this date \u2014 not income, shown for reference.',{size:9}); y+=18;
-    var totOwed=0;
-    open.forEach(function(r){
-      if(y>815) return;
-      totOwed+=r.owed;
-      L.push({text:r.name,x:50,y:y,size:10});
-      L.push({text:money(r.owed),x:360,y:y,size:10});
-      y+=14;
-    });
-    y+=2;
-    L.push({text:'Total owed',x:50,y:y,size:11,bold:true});
-    L.push({text:money(totOwed),x:360,y:y,size:11,bold:true});
-  }
 
   var pdf=buildPDF(L);
   var blob=new Blob([pdf],{type:'application/pdf'});

@@ -1,5 +1,5 @@
 {
-  "version": "2.05.01",
-  "cache": "se7env2-v46",
-  "notes": "Cash-and-card split now auto-fills the other field with the remaining amount when you type one side. Accountant PDF gains an Open tabs at period end section (money owed as of the end date, shown as reference, not income)."
+  "version": "2.05.02",
+  "cache": "se7env2-v47",
+  "notes": "Accountant PDF is back to a clean tax report with no open-tab data. A separate Open tabs report (PDF) button lists who owes money right now, with names, for personal use."
 }
