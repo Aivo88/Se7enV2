@@ -146,19 +146,19 @@ input:focus,select:focus{border-color:var(--gold);}
     <div class="top-row">
       <div id="hdr-slot"></div>
       <div class="top-actions">
-        <button class="btn-icon" onclick="openHistoryHub()">History</button>
-        <button class="btn-icon" onclick="openSettings()">Settings</button>
+        <button class="btn-icon" onclick="openHistoryHub()" data-t="history">History</button>
+        <button class="btn-icon" onclick="openSettings()" data-t="settings">Settings</button>
       </div>
     </div>
   </div>
   <div class="body-scroll">
-    <button class="cust-add-btn" onclick="askNewCustomer()">+ New customer</button>
+    <button class="cust-add-btn" onclick="askNewCustomer()" data-t="new_customer">+ New customer</button>
     <div id="home-list"></div>
   </div>
   <div class="foot">
     <div class="totals-row" id="home-totals"></div>
     <div class="totals-row" id="home-totals2"></div>
-    <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="openWalkin()">Walk-in</button>
+    <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="openWalkin()" data-t="walk_in">Walk-in</button>
   </div>
 </div>
 
@@ -172,7 +172,7 @@ input:focus,select:focus{border-color:var(--gold);}
   </div>
   <div class="body-scroll" id="tables-list"></div>
   <div class="foot">
-    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="goHome()">Back</button>
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="goHome()" data-t="back">Back</button>
   </div>
 </div>
 
@@ -188,9 +188,9 @@ input:focus,select:focus{border-color:var(--gold);}
 
     </div>
     <div class="tabs">
-      <button class="tab active" id="tab-add" onclick="setCustTab('add')">Add</button>
-      <button class="tab" id="tab-bal" onclick="setCustTab('bal')">Balance</button>
-      <button class="tab" id="tab-hist" onclick="setCustTab('hist')">History</button>
+      <button class="tab active" id="tab-add" onclick="setCustTab('add')" data-t="add">Add</button>
+      <button class="tab" id="tab-bal" onclick="setCustTab('bal')" data-t="balance">Balance</button>
+      <button class="tab" id="tab-hist" onclick="setCustTab('hist')" data-t="history">History</button>
     </div>
   </div>
   <div class="body-scroll" style="padding-top:0.5em;">
@@ -226,7 +226,7 @@ input:focus,select:focus{border-color:var(--gold);}
   </div>
   <div class="foot">
     <button class="btn-full" id="cust-custom-row" style="margin-bottom:0.57em;" onclick="promptCustomCust()">+ Custom amount</button>
-    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="backFromCustomer()">Back</button>
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="backFromCustomer()" data-t="back">Back</button>
   </div>
 </div>
 
@@ -234,7 +234,7 @@ input:focus,select:focus{border-color:var(--gold);}
 <div class="screen" id="s-walkin">
   <div class="top-bar">
     <div class="top-row">
-      <div class="screen-title">Walk-in</div>
+      <div class="screen-title" data-t="walk_in">Walk-in</div>
       
     </div>
   </div>
@@ -251,7 +251,7 @@ input:focus,select:focus{border-color:var(--gold);}
   </div>
   <div class="foot">
     <button class="btn-full" style="margin-bottom:0.57em;" onclick="promptCustomWalkin()">+ Custom amount</button>
-    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="goHome()">Back</button>
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="goHome()" data-t="back">Back</button>
   </div>
 </div>
 
@@ -262,13 +262,13 @@ input:focus,select:focus{border-color:var(--gold);}
     <div class="top-row"><div class="screen-title">History</div></div>
   </div>
   <div class="body-scroll">
-    <button class="btn-full" style="min-height:90px;font-size:1.3em;margin-bottom:1em;background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="openReports()">Money</button>
-    <div class="hint" style="margin:-0.6em 0 1.2em;">Sales, cash, tabs and reports.</div>
-    <button class="btn-full" style="min-height:90px;font-size:1.3em;margin-bottom:1em;background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openProducts()">Products</button>
-    <div class="hint" style="margin:-0.6em 0 0;">Top sellers and what each customer has bought.</div>
+    <button class="btn-full" style="min-height:90px;font-size:1.3em;margin-bottom:1em;background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="openReports()" data-t="money">Money</button>
+    <div class="hint" style="margin:-0.6em 0 1.2em;" data-t="hub_money_hint">Sales, cash, tabs and reports.</div>
+    <button class="btn-full" style="min-height:90px;font-size:1.3em;margin-bottom:1em;background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openProducts()" data-t="products">Products</button>
+    <div class="hint" style="margin:-0.6em 0 0;" data-t="hub_products_hint">Top sellers and what each customer has bought.</div>
   </div>
   <div class="foot">
-    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="goHome()">Back</button>
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="goHome()" data-t="back">Back</button>
   </div>
 </div>
 
@@ -283,7 +283,7 @@ input:focus,select:focus{border-color:var(--gold);}
   </div>
   <div class="body-scroll" id="prod-report-body"></div>
   <div class="foot">
-    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openHistoryHub()">Back</button>
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openHistoryHub()" data-t="back">Back</button>
   </div>
 </div>
 
@@ -300,7 +300,7 @@ input:focus,select:focus{border-color:var(--gold);}
   <div class="body-scroll" id="rep-body"></div>
   <div class="foot">
     <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.57em;" onclick="openExport()">Export for accountant</button>
-    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openHistoryHub()">Back</button>
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openHistoryHub()" data-t="back">Back</button>
   </div>
 </div>
 
@@ -312,7 +312,7 @@ input:focus,select:focus{border-color:var(--gold);}
   </div>
   <div class="body-scroll" id="export-body"></div>
   <div class="foot">
-    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openReports()">Back</button>
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openReports()" data-t="back">Back</button>
   </div>
 </div>
 
@@ -324,7 +324,7 @@ input:focus,select:focus{border-color:var(--gold);}
   </div>
   <div class="body-scroll" id="txday-body"></div>
   <div class="foot">
-    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="backToReports()">Back</button>
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="backToReports()" data-t="back">Back</button>
   </div>
 </div>
 
@@ -332,13 +332,13 @@ input:focus,select:focus{border-color:var(--gold);}
 <div class="screen" id="s-set">
   <div class="top-bar">
     <div class="top-row">
-      <div class="screen-title">Settings</div>
+      <div class="screen-title" data-t="settings">Settings</div>
       
     </div>
   </div>
   <div class="body-scroll" id="set-body"></div>
   <div class="foot">
-    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="goHome()">Back</button>
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="goHome()" data-t="back">Back</button>
   </div>
 </div>
 
@@ -350,7 +350,7 @@ input:focus,select:focus{border-color:var(--gold);}
   </div>
   <div class="body-scroll" id="custman-body"></div>
   <div class="foot">
-    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openSettings()">Back</button>
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openSettings()" data-t="back">Back</button>
   </div>
 </div>
 
@@ -361,7 +361,7 @@ input:focus,select:focus{border-color:var(--gold);}
   </div>
   <div class="body-scroll" id="grpman-body"></div>
   <div class="foot">
-    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openTablesManage()">Back</button>
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openTablesManage()" data-t="back">Back</button>
   </div>
 </div>
 
@@ -372,7 +372,7 @@ input:focus,select:focus{border-color:var(--gold);}
   </div>
   <div class="body-scroll" id="mday-body"></div>
   <div class="foot">
-    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="show('s-rep');setRepTab('month')">Back</button>
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="show('s-rep');setRepTab('month')" data-t="back">Back</button>
   </div>
 </div>
 
@@ -383,7 +383,7 @@ input:focus,select:focus{border-color:var(--gold);}
   </div>
   <div class="body-scroll" id="sp-body"></div>
   <div class="foot">
-    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openSettings()">Back</button>
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openSettings()" data-t="back">Back</button>
   </div>
 </div>
 
@@ -397,7 +397,7 @@ input:focus,select:focus{border-color:var(--gold);}
   </div>
   <div class="body-scroll" id="cats-body"></div>
   <div class="foot">
-    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openSettings()">Back</button>
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openSettings()" data-t="back">Back</button>
   </div>
 </div>
 
@@ -414,7 +414,7 @@ input:focus,select:focus{border-color:var(--gold);}
   </div>
   <div class="body-scroll" id="catprod-body"></div>
   <div class="foot">
-    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openCategories()">Back</button>
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openCategories()" data-t="back">Back</button>
   </div>
 </div>
 
@@ -428,7 +428,7 @@ input:focus,select:focus{border-color:var(--gold);}
   </div>
   <div class="body-scroll" id="tabman-body"></div>
   <div class="foot">
-    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openSettings()">Back</button>
+    <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openSettings()" data-t="back">Back</button>
   </div>
 </div>
 
@@ -588,11 +588,58 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.05.11';
+var APP_VERSION = '2.06.00';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
 var EUR = ' \u20AC';   // rewritten from settings on load and on change
+
+/* ---------- TRANSLATIONS ----------
+   Every user-facing string has an id here with the five supported languages.
+   t(id) returns the string for the current language, falling back to English
+   when a translation is missing \u2014 so a new English string added during
+   development works everywhere immediately and can be translated later. */
+var LANGS=[['en','English'],['fi','Suomi'],['es','Espa\u00F1ol'],['de','Deutsch'],['sv','Svenska']];
+var LANG={
+  // --- language / settings page ---
+  language:        {en:'Language', fi:'Kieli', es:'Idioma', de:'Sprache', sv:'Spr\u00E5k'},
+  currency_symbol: {en:'Currency symbol', fi:'Valuuttasymboli', es:'S\u00EDmbolo de moneda', de:'W\u00E4hrungssymbol', sv:'Valutasymbol'},
+  currency_and_language: {en:'Currency & language', fi:'Valuutta ja kieli', es:'Moneda e idioma', de:'W\u00E4hrung & Sprache', sv:'Valuta & spr\u00E5k'},
+  save:            {en:'Save', fi:'Tallenna', es:'Guardar', de:'Speichern', sv:'Spara'},
+  lang_hint:       {en:'The whole app switches to the chosen language.',
+                    fi:'Koko sovellus vaihtuu valitulle kielelle.',
+                    es:'Toda la aplicaci\u00F3n cambia al idioma elegido.',
+                    de:'Die gesamte App wechselt zur gew\u00E4hlten Sprache.',
+                    sv:'Hela appen byter till det valda spr\u00E5ket.'},
+  // --- global nav / common ---
+  back:      {en:'Back', fi:'Takaisin', es:'Atr\u00E1s', de:'Zur\u00FCck', sv:'Tillbaka'},
+  history:   {en:'History', fi:'Historia', es:'Historial', de:'Verlauf', sv:'Historik'},
+  settings:  {en:'Settings', fi:'Asetukset', es:'Ajustes', de:'Einstellungen', sv:'Inst\u00E4llningar'},
+  cancel:    {en:'Cancel', fi:'Peruuta', es:'Cancelar', de:'Abbrechen', sv:'Avbryt'},
+  confirm:   {en:'Confirm', fi:'Vahvista', es:'Confirmar', de:'Best\u00E4tigen', sv:'Bekr\u00E4fta'},
+  cash:      {en:'Cash', fi:'K\u00E4teinen', es:'Efectivo', de:'Bar', sv:'Kontant'},
+  card:      {en:'Card', fi:'Kortti', es:'Tarjeta', de:'Karte', sv:'Kort'},
+  add:       {en:'Add', fi:'Lis\u00E4\u00E4', es:'A\u00F1adir', de:'Hinzuf\u00FCgen', sv:'L\u00E4gg till'},
+  balance:   {en:'Balance', fi:'Saldo', es:'Saldo', de:'Saldo', sv:'Saldo'},
+  walk_in:   {en:'Walk-in', fi:'Ohikulkija', es:'Sin cuenta', de:'Laufkundschaft', sv:'Direktk\u00F6p'},
+  settled:   {en:'Settled', fi:'Maksettu', es:'Pagado', de:'Bezahlt', sv:'Betald'},
+  new_customer: {en:'+ New customer', fi:'+ Uusi asiakas', es:'+ Nuevo cliente', de:'+ Neuer Kunde', sv:'+ Ny kund'},
+  total:     {en:'Total', fi:'Yhteens\u00E4', es:'Total', de:'Gesamt', sv:'Totalt'},
+  total_owed:{en:'Total owed', fi:'Velkaa yhteens\u00E4', es:'Total adeudado', de:'Offen gesamt', sv:'Skuld totalt'},
+  money:     {en:'Money', fi:'Rahat', es:'Dinero', de:'Geld', sv:'Pengar'},
+  products:  {en:'Products', fi:'Tuotteet', es:'Productos', de:'Produkte', sv:'Produkter'},
+  hub_money_hint:{en:'Sales, cash, tabs and reports.', fi:'Myynti, k\u00E4teinen, piikit ja raportit.', es:'Ventas, efectivo, cuentas e informes.', de:'Verk\u00E4ufe, Bargeld, Deckel und Berichte.', sv:'F\u00F6rs\u00E4ljning, kontanter, notor och rapporter.'},
+  hub_products_hint:{en:'Top sellers and what each customer has bought.', fi:'Myydyimm\u00E4t ja mit\u00E4 kukin asiakas on ostanut.', es:'M\u00E1s vendidos y lo que ha comprado cada cliente.', de:'Bestseller und was jeder Kunde gekauft hat.', sv:'B\u00E4sts\u00E4ljare och vad varje kund har k\u00F6pt.'}
+};
+function curLang(){
+  try{ return (getState().settings.lang)||'en'; }catch(e){ return 'en'; }
+}
+function t(id){
+  var e=LANG[id];
+  if(!e) return id;
+  var l=curLang();
+  return (e[l]!==undefined ? e[l] : e.en);
+}
 function applyCurrency(st){ EUR=' '+((st.settings && st.settings.currency) || '\u20AC'); }
 var TABLE_DEFS = [
   {id:'__table1__',name:'Table 1'},{id:'__table2__',name:'Table 2'},
@@ -677,6 +724,15 @@ function normaliseAmountInput(e){
 }
 document.addEventListener('input',normaliseAmountInput,true);
 function pad2(n){ return ('0'+n).slice(-2); }
+/* Static HTML carries data-t="id"; this rewrites those nodes to the current
+   language. Called on load and whenever the language changes. */
+function applyStaticText(){
+  var els=document.querySelectorAll('[data-t]');
+  for(var i=0;i<els.length;i++){
+    var id=els[i].getAttribute('data-t');
+    els[i].textContent=t(id);
+  }
+}
 function show(id){
   var ss=document.querySelectorAll('.screen');
   for(var i=0;i<ss.length;i++) ss[i].classList.remove('active');
@@ -876,9 +932,9 @@ function renderHome(){
   st.customers.forEach(function(c){ var b=balanceOf(st,c.id); if(b<0) owed+=Math.abs(b); });
 
   document.getElementById('home-totals').innerHTML=
-    box('Total',f(cash+card)+EUR,'green')+box('Total owed',f(owed)+EUR,'gold');
+    box(t('total'),f(cash+card)+EUR,'green')+box(t('total_owed'),f(owed)+EUR,'gold');
   document.getElementById('home-totals2').innerHTML=
-    box('Cash',f(cash)+EUR,'green')+box('Card',f(card)+EUR,'blue');
+    box(t('cash'),f(cash)+EUR,'green')+box(t('card'),f(card)+EUR,'blue');
 }
 
 /* Everyone who has ever had a transaction, newest visit first. Walk-in
@@ -2915,7 +2971,7 @@ function renderSettings(){
     menuRow('Header', s.headerImage?'Custom image':((s.headerText&&s.headerText!=='Pub')?s.headerText:'Default logo'), "openSetPage('header')")+
     menuRow('Appearance','Text size '+Math.round(s.fontScale*100)+'% \u00B7 '+s.cols+' cards per row', "openSetPage('look')")+
     menuRow('Bar day','Ends at '+pad2(s.dayEnd)+':00', "openSetPage('day')")+
-    menuRow('Currency &amp; language', s.currency+' \u00B7 English', "openSetPage('region')")+
+    menuRow(t('currency_and_language'), s.currency+' \u00B7 '+(function(){var n='English';LANGS.forEach(function(L){if(L[0]===s.lang)n=L[1];});return n;})(), "openSetPage('region')")+
     menuRow('Categories &amp; products', st.products.length+' product'+(st.products.length===1?'':'s'), 'openCategories()')+
     menuRow(esc(groupsLabel(st)), getGroups(st).length+' group'+(getGroups(st).length===1?'':'s'), 'openTablesManage()')+
     menuRow('Customers','Rename or remove', 'openCustomersManage()')+
@@ -2955,14 +3011,16 @@ function renderSetPage(){
       '<select onchange="setDayEnd(this.value)">'+hours+'</select>'+
       '<div class="hint">Sales before this hour count towards the previous day. Each transaction stores its bar day when created, so changing this only affects new entries \u2014 past reports stay as they were.</div></div>';
   } else if(setPage==='region'){
-    title='Currency & language';
-    h='<div class="card-box"><div class="label">Currency symbol</div>'+
+    title=t('currency_and_language');
+    h='<div class="card-box"><div class="label">'+t('currency_symbol')+'</div>'+
       '<div class="field"><input type="text" id="set-currency" value="'+esc(s.currency)+'" placeholder="\u20AC" maxlength="4"></div>'+
       '<button class="btn-full" onclick="saveCurrency()">Save</button>'+
       '<div class="hint">Shown after every amount. Anything short works \u2014 \u20AC, $, kr, z\u0142.</div></div>'+
-      '<div class="card-box"><div class="label">Language</div>'+
-      '<select id="set-lang" onchange="saveLang(this.value)"><option value="en" selected>English</option></select>'+
-      '<div class="hint">Only English for now. More languages will appear here.</div></div>';
+      '<div class="card-box"><div class="label">'+t('language')+'</div>'+
+      '<select id="set-lang" onchange="saveLang(this.value)">'+
+      LANGS.map(function(L){ return '<option value="'+L[0]+'"'+(s.lang===L[0]?' selected':'')+'>'+L[1]+'</option>'; }).join('')+
+      '</select>'+
+      '<div class="hint">'+t('lang_hint')+'</div></div>';
   } else if(setPage==='cash'){
     title='Cash flow';
     h='<div class="card-box">'+
@@ -3087,7 +3145,7 @@ function saveCurrency(){
 function saveLang(v){
   var st=getState();
   st.settings.lang=v;
-  saveState(st);
+  if(saveState(st)){ applyAppearance(); applyStaticText(); renderSetPage(); renderSettings(); }
 }
 function setDayEnd(v){
   var st=getState(); st.settings.dayEnd=parseInt(v,10);
@@ -3308,6 +3366,7 @@ function applyUpdate(){
 
 /* ---------- INIT ---------- */
 applyAppearance();
+applyStaticText();
 renderHome();
 setTimeout(runAutoBackupCheck, 1500);
 if('serviceWorker' in navigator){

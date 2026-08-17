@@ -1,5 +1,5 @@
 {
-  "version": "2.05.11",
-  "cache": "se7env2-v56",
-  "notes": "Currency symbol added to the daily income rows and the expenses section in the PDF."
+  "version": "2.06.00",
+  "cache": "se7env2-v57",
+  "notes": "Groundwork for multiple languages: translation system with English, Finnish, Spanish, German and Swedish; language picker in Settings. Home screen, navigation and common buttons translated; remaining screens fall back to English until translated."
 }
