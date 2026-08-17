@@ -1,5 +1,5 @@
 {
-  "version": "2.05.05",
-  "cache": "se7env2-v50",
-  "notes": "Returning customers with uncollected old debt show a red ! after their name on the home screen. Accountant PDF now lists income by day (cash/card/total) and a separate Expenses by day section with each expense's description. Confirmed recovered old debt counts as recovery cash/card income."
+  "version": "2.05.06",
+  "cache": "se7env2-v51",
+  "notes": "Report heading uses the header text when one is set, and falls back to Pub for an image header, the default, or an empty header."
 }

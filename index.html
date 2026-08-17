@@ -588,7 +588,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.05.05';
+var APP_VERSION = '2.05.06';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -2161,11 +2161,19 @@ function openTabsAsOf(st,to){
   rows.sort(function(a,b){ return b.owed-a.owed; });
   return rows;
 }
+/* The report heading follows the header text if the owner set one; an image
+   header or the default both fall back to Pub. */
+function reportTitle(st){
+  var t=st.settings.headerText;
+  if(st.settings.headerImage) return 'Pub';
+  if(typeof t==='string'){ t=t.trim(); if(t && t!=='Pub') return t; }
+  return 'Pub';
+}
 function generateOpenTabsPDF(){
   var st=getState();
   var now=new Date();
   var open=openTabsAsOf(st,now);
-  var title=(st.settings.headerText && st.settings.headerText!=='Pub') ? st.settings.headerText : 'Pub';
+  var title=reportTitle(st);
   var cur=(st.settings.currency||'\u20AC');
   var L=[], y=60;
   function line(text,opts){ opts=opts||{}; L.push({text:text,x:opts.x||50,y:y,size:opts.size,bold:opts.bold}); }
@@ -2199,7 +2207,7 @@ function generateOpenTabsPDF(){
 function generatePDF(){
   var st=getState();
   var txs=rangeTxs(st,expFrom,expTo), sum=sumRange(txs), days=rangeDays(txs);
-  var title=(st.settings.headerText && st.settings.headerText!=='Pub') ? st.settings.headerText : 'Pub';
+  var title=reportTitle(st);
   var cur=(st.settings.currency||'\u20AC');
   var L=[], y=60;
   function line(text,opts){ opts=opts||{}; L.push({text:text,x:opts.x||50,y:y,size:opts.size,bold:opts.bold}); }
