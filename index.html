@@ -588,7 +588,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.05.04';
+var APP_VERSION = '2.05.05';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -858,9 +858,11 @@ function renderHome(){
   document.getElementById('home-list').innerHTML='<div class="cust-grid">'+groupCards+
     open.map(function(c){
       var b=balanceOf(st,c.id);
+      var od=writtenOffOf(st,c.id);
+      var mark=od>0?' <span style="color:var(--red);font-weight:800;" title="Old debt">!</span>':'';
       return '<div class="cust-item">'+
         '<button class="cust-item-tap" onclick="openCustomer(\''+c.id+'\')">'+
-        '<div class="cust-name">'+esc(c.name)+'</div>'+
+        '<div class="cust-name">'+esc(c.name)+mark+'</div>'+
         '<div class="cust-bal '+balClass(b)+'">'+balText(b)+'</div></button>'+
         '<button class="btn-settled-list" onclick="askBillSettled(\''+c.id+'\')">Settled</button></div>';
     }).join('')+'</div>';
@@ -2217,23 +2219,46 @@ function generatePDF(){
   row('Transactions',String(txs.length));
   y+=16;
 
-  line('Daily breakdown',{size:13,bold:true}); y+=20;
+  // ----- Income per day -----
+  line('Income by day',{size:13,bold:true}); y+=18;
   L.push({text:'Date',x:50,y:y,size:10,bold:true});
-  L.push({text:'Cash',x:250,y:y,size:10,bold:true});
-  L.push({text:'Card',x:330,y:y,size:10,bold:true});
-  L.push({text:'Expenses',x:410,y:y,size:10,bold:true});
-  L.push({text:'Loss',x:500,y:y,size:10,bold:true});
+  L.push({text:'Cash',x:300,y:y,size:10,bold:true});
+  L.push({text:'Card',x:390,y:y,size:10,bold:true});
+  L.push({text:'Total',x:480,y:y,size:10,bold:true});
   y+=15;
   days.forEach(function(d){
-    if(y>800){ return; } // one page; long ranges are summarised above
+    if(y>815) return;
     L.push({text:fmtDate(d.date),x:50,y:y,size:10});
-    L.push({text:d.cash.toFixed(2),x:250,y:y,size:10});
-    L.push({text:d.card.toFixed(2),x:330,y:y,size:10});
-    L.push({text:d.exp.toFixed(2),x:410,y:y,size:10});
-    L.push({text:d.loss.toFixed(2),x:500,y:y,size:10});
+    L.push({text:d.cash.toFixed(2),x:300,y:y,size:10});
+    L.push({text:d.card.toFixed(2),x:390,y:y,size:10});
+    L.push({text:(d.cash+d.card).toFixed(2),x:480,y:y,size:10});
     y+=14;
   });
-  if(days.length && y>800){ L.push({text:'(more days omitted \u2014 see summary above)',x:50,y:815,size:9}); }
+
+  // ----- Expenses per day, each with its note -----
+  var expTx=txs.filter(function(t){ return t.type==='expense'; })
+    .sort(function(a,b){ return txBarDate(a)-txBarDate(b) || a.ts-b.ts; });
+  if(expTx.length){
+    y+=18;
+    line('Expenses by day',{size:13,bold:true}); y+=18;
+    L.push({text:'Date',x:50,y:y,size:10,bold:true});
+    L.push({text:'Description',x:150,y:y,size:10,bold:true});
+    L.push({text:'Amount',x:470,y:y,size:10,bold:true});
+    y+=15;
+    var etot=0;
+    expTx.forEach(function(t){
+      if(y>815) return;
+      etot+=t.amount;
+      L.push({text:fmtDate(txBarDate(t)),x:50,y:y,size:10});
+      L.push({text:(t.note||'Expense').slice(0,45),x:150,y:y,size:10});
+      L.push({text:t.amount.toFixed(2),x:470,y:y,size:10});
+      y+=14;
+    });
+    y+=2;
+    L.push({text:'Total expenses',x:50,y:y,size:11,bold:true});
+    L.push({text:etot.toFixed(2),x:470,y:y,size:11,bold:true});
+    y+=14;
+  }
 
   if(expOpenTabs){
     var open=openTabsAsOf(st,expTo);

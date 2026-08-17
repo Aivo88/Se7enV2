@@ -1,5 +1,5 @@
 {
-  "version": "2.05.04",
-  "cache": "se7env2-v49",
-  "notes": "Net total shows red with a proper minus sign when negative. Removed the standalone personal Open tabs report button; open tabs remain available as an optional toggle in the accountant export."
+  "version": "2.05.05",
+  "cache": "se7env2-v50",
+  "notes": "Returning customers with uncollected old debt show a red ! after their name on the home screen. Accountant PDF now lists income by day (cash/card/total) and a separate Expenses by day section with each expense's description. Confirmed recovered old debt counts as recovery cash/card income."
 }
