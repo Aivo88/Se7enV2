@@ -588,7 +588,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.06.03';
+var APP_VERSION = '2.06.04';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -741,7 +741,69 @@ var LANG={
   cyc_daily:{en:'Every day', fi:'Joka p\u00E4iv\u00E4', es:'Cada d\u00EDa', de:'T\u00E4glich', sv:'Varje dag'},
   cyc_2day:{en:'Every 2 days', fi:'Joka toinen p\u00E4iv\u00E4', es:'Cada 2 d\u00EDas', de:'Alle 2 Tage', sv:'Varannan dag'},
   cyc_weekly:{en:'Weekly', fi:'Viikoittain', es:'Semanal', de:'W\u00F6chentlich', sv:'Varje vecka'},
-  cyc_monthly:{en:'Monthly', fi:'Kuukausittain', es:'Mensual', de:'Monatlich', sv:'Varje m\u00E5nad'}
+  cyc_monthly:{en:'Monthly', fi:'Kuukausittain', es:'Mensual', de:'Monatlich', sv:'Varje m\u00E5nad'},
+  // --- batch 6: toast messages ---
+  ts_storage_full:{en:'Save failed \u2014 storage full', fi:'Tallennus ep\u00E4onnistui \u2014 muisti t\u00E4ynn\u00E4', es:'Error al guardar \u2014 almacenamiento lleno', de:'Speichern fehlgeschlagen \u2014 Speicher voll', sv:'Sparandet misslyckades \u2014 lagringen full'},
+  ts_history_restored:{en:'{a} \u2014 history restored', fi:'{a} \u2014 historia palautettu', es:'{a} \u2014 historial restaurado', de:'{a} \u2014 Verlauf wiederhergestellt', sv:'{a} \u2014 historik \u00E5terst\u00E4lld'},
+  ts_added:{en:'{a} added', fi:'{a} lis\u00E4tty', es:'{a} a\u00F1adido', de:'{a} hinzugef\u00FCgt', sv:'{a} tillagd'},
+  ts_dup_tab:{en:'Another open tab has that name', fi:'Toisella avoimella piikill\u00E4 on sama nimi', es:'Otra cuenta abierta tiene ese nombre', de:'Ein anderer offener Deckel hat diesen Namen', sv:'En annan \u00F6ppen nota har det namnet'},
+  ts_renamed:{en:'Renamed', fi:'Nimetty uudelleen', es:'Renombrado', de:'Umbenannt', sv:'Omd\u00F6pt'},
+  ts_no_merge_group:{en:'Group members cannot be merged', fi:'Ryhm\u00E4n j\u00E4seni\u00E4 ei voi yhdist\u00E4\u00E4', es:'Los miembros de un grupo no se pueden combinar', de:'Gruppenmitglieder k\u00F6nnen nicht zusammengef\u00FChrt werden', sv:'Gruppmedlemmar kan inte sl\u00E5s samman'},
+  ts_merged_into:{en:'Merged into {a}', fi:'Yhdistetty kohteeseen {a}', es:'Combinado en {a}', de:'Zusammengef\u00FChrt in {a}', sv:'Sammanslagen till {a}'},
+  ts_amount_added:{en:'{a} added', fi:'{a} lis\u00E4tty', es:'{a} a\u00F1adido', de:'{a} hinzugef\u00FCgt', sv:'{a} tillagt'},
+  ts_custom_added:{en:'Custom {a} added', fi:'Oma summa {a} lis\u00E4tty', es:'Importe libre {a} a\u00F1adido', de:'Freier Betrag {a} hinzugef\u00FCgt', sv:'Eget belopp {a} tillagt'},
+  ts_added_to:{en:'Added to {a}', fi:'Lis\u00E4tty: {a}', es:'A\u00F1adido a {a}', de:'Hinzugef\u00FCgt zu {a}', sv:'Tillagt till {a}'},
+  ts_settled:{en:'{a} \u2014 settled ({b})', fi:'{a} \u2014 maksettu ({b})', es:'{a} \u2014 pagado ({b})', de:'{a} \u2014 bezahlt ({b})', sv:'{a} \u2014 betald ({b})'},
+  ts_nothing_writeoff:{en:'Nothing to write off', fi:'Ei mit\u00E4\u00E4n kirjattavaa tappioksi', es:'Nada que cancelar', de:'Nichts abzuschreiben', sv:'Inget att avskriva'},
+  ts_written_off:{en:'{a} \u2014 written off', fi:'{a} \u2014 kirjattu tappioksi', es:'{a} \u2014 cancelado', de:'{a} \u2014 abgeschrieben', sv:'{a} \u2014 avskriven'},
+  ts_enter_amount:{en:'Enter an amount', fi:'Sy\u00F6t\u00E4 summa', es:'Introduce un importe', de:'Betrag eingeben', sv:'Ange ett belopp'},
+  ts_saved:{en:'Saved', fi:'Tallennettu', es:'Guardado', de:'Gespeichert', sv:'Sparat'},
+  ts_tx_updated:{en:'Transaction updated', fi:'Tapahtuma p\u00E4ivitetty', es:'Transacci\u00F3n actualizada', de:'Buchung aktualisiert', sv:'Transaktion uppdaterad'},
+  ts_tx_deleted:{en:'Transaction deleted', fi:'Tapahtuma poistettu', es:'Transacci\u00F3n eliminada', de:'Buchung gel\u00F6scht', sv:'Transaktion raderad'},
+  ts_olddebt_collected:{en:'Old debt collected', fi:'Vanha velka peritty', es:'Deuda antigua cobrada', de:'Alte Schuld eingezogen', sv:'Gammal skuld inkasserad'},
+  ts_enter_amounts:{en:'Enter amounts', fi:'Sy\u00F6t\u00E4 summat', es:'Introduce importes', de:'Betr\u00E4ge eingeben', sv:'Ange belopp'},
+  ts_exceeds_total:{en:'Amount exceeds total', fi:'Summa ylitt\u00E4\u00E4 kokonaissumman', es:'El importe supera el total', de:'Betrag \u00FCbersteigt Gesamtsumme', sv:'Beloppet \u00F6verstiger totalen'},
+  ts_nothing_owed:{en:'Nothing owed', fi:'Ei velkaa', es:'No se debe nada', de:'Nichts offen', sv:'Ingen skuld'},
+  ts_split_settled:{en:'{a} \u2014 split settled', fi:'{a} \u2014 jaettu maksu suoritettu', es:'{a} \u2014 pago dividido liquidado', de:'{a} \u2014 geteilt bezahlt', sv:'{a} \u2014 delad betalning klar'},
+  ts_walkin_recorded:{en:'Walk-in {a} recorded', fi:'Ohikulkija {a} kirjattu', es:'Sin cuenta {a} registrado', de:'Laufkundschaft {a} erfasst', sv:'Direktk\u00F6p {a} registrerat'},
+  ts_walkin_split:{en:'Walk-in split recorded', fi:'Ohikulkijan jaettu maksu kirjattu', es:'Pago dividido sin cuenta registrado', de:'Laufkundschaft geteilt erfasst', sv:'Direktk\u00F6p delat registrerat'},
+  ts_button_added:{en:'Button added', fi:'Painike lis\u00E4tty', es:'Bot\u00F3n a\u00F1adido', de:'Schaltfl\u00E4che hinzugef\u00FCgt', sv:'Knapp tillagd'},
+  ts_removed:{en:'Removed', fi:'Poistettu', es:'Eliminado', de:'Entfernt', sv:'Borttagen'},
+  ts_already_exists:{en:'Already exists', fi:'On jo olemassa', es:'Ya existe', de:'Existiert bereits', sv:'Finns redan'},
+  ts_category_added:{en:'Category added', fi:'Kategoria lis\u00E4tty', es:'Categor\u00EDa a\u00F1adida', de:'Kategorie hinzugef\u00FCgt', sv:'Kategori tillagd'},
+  ts_moved_to:{en:'{a} moved to {b}', fi:'{a} siirretty: {b}', es:'{a} movido a {b}', de:'{a} verschoben nach {b}', sv:'{a} flyttad till {b}'},
+  ts_category_deleted:{en:'Category deleted', fi:'Kategoria poistettu', es:'Categor\u00EDa eliminada', de:'Kategorie gel\u00F6scht', sv:'Kategori raderad'},
+  ts_name_required:{en:'Name is required', fi:'Nimi vaaditaan', es:'El nombre es obligatorio', de:'Name erforderlich', sv:'Namn kr\u00E4vs'},
+  ts_check_price:{en:'Check the price', fi:'Tarkista hinta', es:'Revisa el precio', de:'Preis pr\u00FCfen', sv:'Kontrollera priset'},
+  ts_deleted:{en:'Deleted', fi:'Poistettu', es:'Eliminado', de:'Gel\u00F6scht', sv:'Raderad'},
+  ts_group_exists:{en:'That group exists', fi:'Ryhm\u00E4 on jo olemassa', es:'Ese grupo ya existe', de:'Diese Gruppe existiert', sv:'Gruppen finns redan'},
+  ts_hidden_home:{en:'Hidden from home screen', fi:'Piilotettu kotin\u00E4yt\u00F6lt\u00E4', es:'Oculto de la pantalla de inicio', de:'Vom Startbildschirm ausgeblendet', sv:'D\u00F6ld fr\u00E5n startsk\u00E4rmen'},
+  ts_shown_home:{en:'Shown on home screen', fi:'N\u00E4kyy kotin\u00E4yt\u00F6ll\u00E4', es:'Visible en la pantalla de inicio', de:'Auf Startbildschirm angezeigt', sv:'Visas p\u00E5 startsk\u00E4rmen'},
+  ts_no_delete_default:{en:'The default group cannot be deleted', fi:'Oletusryhm\u00E4\u00E4 ei voi poistaa', es:'El grupo predeterminado no se puede eliminar', de:'Die Standardgruppe kann nicht gel\u00F6scht werden', sv:'Standardgruppen kan inte raderas'},
+  ts_group_deleted:{en:'Group deleted', fi:'Ryhm\u00E4 poistettu', es:'Grupo eliminado', de:'Gruppe gel\u00F6scht', sv:'Grupp raderad'},
+  ts_name_here:{en:'That name is already here', fi:'Nimi on jo t\u00E4\u00E4ll\u00E4', es:'Ese nombre ya est\u00E1 aqu\u00ED', de:'Dieser Name ist schon hier', sv:'Namnet finns redan h\u00E4r'},
+  ts_moved_in:{en:'{a} moved in', fi:'{a} siirretty t\u00E4nne', es:'{a} trasladado aqu\u00ED', de:'{a} hierher verschoben', sv:'{a} flyttad hit'},
+  ts_removed_name:{en:'{a} removed', fi:'{a} poistettu', es:'{a} eliminado', de:'{a} entfernt', sv:'{a} borttagen'},
+  ts_pdf_created:{en:'PDF created', fi:'PDF luotu', es:'PDF creado', de:'PDF erstellt', sv:'PDF skapad'},
+  ts_no_merge_target:{en:'No other customer to merge into', fi:'Ei toista asiakasta johon yhdist\u00E4\u00E4', es:'No hay otro cliente con quien combinar', de:'Kein anderer Kunde zum Zusammenf\u00FChren', sv:'Ingen annan kund att sl\u00E5 samman med'},
+  ts_currency_set:{en:'Currency set to {a}', fi:'Valuutta asetettu: {a}', es:'Moneda establecida en {a}', de:'W\u00E4hrung auf {a} gesetzt', sv:'Valuta satt till {a}'},
+  ts_barday_ends:{en:'Bar day ends {a}', fi:'Baarip\u00E4iv\u00E4 p\u00E4\u00E4ttyy {a}', es:'El d\u00EDa de barra termina {a}', de:'Bartag endet {a}', sv:'Bardagen slutar {a}'},
+  ts_header_updated:{en:'Header updated', fi:'Otsikko p\u00E4ivitetty', es:'Encabezado actualizado', de:'Kopfzeile aktualisiert', sv:'Rubrik uppdaterad'},
+  ts_logo_restored:{en:'Default logo restored', fi:'Oletuslogo palautettu', es:'Logo predeterminado restaurado', de:'Standardlogo wiederhergestellt', sv:'Standardlogga \u00E5terst\u00E4lld'},
+  ts_image_removed:{en:'Image removed', fi:'Kuva poistettu', es:'Imagen eliminada', de:'Bild entfernt', sv:'Bild borttagen'},
+  ts_header_img_set:{en:'Header image set', fi:'Otsikkokuva asetettu', es:'Imagen de encabezado establecida', de:'Kopfbild festgelegt', sv:'Rubrikbild inst\u00E4lld'},
+  ts_img_read_fail:{en:'Could not read that image', fi:'Kuvaa ei voitu lukea', es:'No se pudo leer esa imagen', de:'Bild konnte nicht gelesen werden', sv:'Kunde inte l\u00E4sa bilden'},
+  ts_backup_saved:{en:'Backup saved', fi:'Varmuuskopio tallennettu', es:'Copia guardada', de:'Sicherung gespeichert', sv:'S\u00E4kerhetskopia sparad'},
+  ts_autobackup_on:{en:'Auto backup on', fi:'Automaattinen varmuuskopio p\u00E4\u00E4ll\u00E4', es:'Copia autom\u00E1tica activada', de:'Auto-Sicherung an', sv:'Automatisk s\u00E4kerhetskopia p\u00E5'},
+  ts_autobackup_off:{en:'Auto backup off', fi:'Automaattinen varmuuskopio pois', es:'Copia autom\u00E1tica desactivada', de:'Auto-Sicherung aus', sv:'Automatisk s\u00E4kerhetskopia av'},
+  ts_autobackup_saved:{en:'Auto backup saved', fi:'Automaattinen varmuuskopio tallennettu', es:'Copia autom\u00E1tica guardada', de:'Auto-Sicherung gespeichert', sv:'Automatisk s\u00E4kerhetskopia sparad'},
+  ts_file_read_fail:{en:'Could not read that file', fi:'Tiedostoa ei voitu lukea', es:'No se pudo leer ese archivo', de:'Datei konnte nicht gelesen werden', sv:'Kunde inte l\u00E4sa filen'},
+  ts_not_valid_backup:{en:'Not a valid backup', fi:'Ei kelvollinen varmuuskopio', es:'No es una copia v\u00E1lida', de:'Keine g\u00FCltige Sicherung', sv:'Ingen giltig s\u00E4kerhetskopia'},
+  ts_old_imported:{en:'Old backup imported', fi:'Vanha varmuuskopio tuotu', es:'Copia antigua importada', de:'Alte Sicherung importiert', sv:'Gammal s\u00E4kerhetskopia importerad'},
+  ts_backup_restored:{en:'Backup restored', fi:'Varmuuskopio palautettu', es:'Copia restaurada', de:'Sicherung wiederhergestellt', sv:'S\u00E4kerhetskopia \u00E5terst\u00E4lld'},
+  ts_nothing_before:{en:'Nothing before {a}', fi:'Ei mit\u00E4\u00E4n ennen {a}', es:'Nada antes de {a}', de:'Nichts vor {a}', sv:'Inget f\u00F6re {a}'},
+  ts_tx_deleted_n:{en:'{a} transactions deleted', fi:'{a} tapahtumaa poistettu', es:'{a} transacciones eliminadas', de:'{a} Buchungen gel\u00F6scht', sv:'{a} transaktioner raderade'},
+  ts_history_cleared:{en:'History cleared', fi:'Historia tyhjennetty', es:'Historial borrado', de:'Verlauf gel\u00F6scht', sv:'Historik rensad'}
 };
 function curLang(){
   try{ return (getState().settings.lang)||'en'; }catch(e){ return 'en'; }
@@ -810,7 +872,7 @@ function saveState(st){
     var w=document.getElementById('quota-warn');
     w.textContent='STORAGE FULL \u2014 nothing is being saved. Export a backup and purge old data in Settings.';
     w.style.display='block';
-    toast('Save failed \u2014 storage full','err');
+    toast(t('ts_storage_full'),'err');
   }
   return ok;
 }
@@ -1121,7 +1183,7 @@ function addCustomer(id,name,restored){
   unhideCustomer(st,id);
   st.customers.push({id:id,name:name});
   if(!saveState(st)) return;
-  toast(restored ? (name+' \u2014 history restored') : (name+' added'),'ok');
+  toast(restored ? t('ts_history_restored').replace('{a}',name) : t('ts_added').replace('{a}',name),'ok');
   goHome();
 }
 
@@ -1144,18 +1206,18 @@ function renameCustomer(){
     var clash=st2.customers.some(function(x){
       return x.id!==c2.id && x.name.toLowerCase()===name.toLowerCase();
     });
-    if(clash){ toast('Another open tab has that name','err'); return; }
+    if(clash){ toast(t('ts_dup_tab'),'err'); return; }
     c2.name=name;
     st2.transactions.forEach(function(t){ if(t.customerId===c2.id) t.customerName=name; });
     if(!saveState(st2)) return;
     setCustTitle(name);
-    toast('Renamed','ok');
+    toast(t('ts_renamed'),'ok');
   });
 }
 function openMergePicker(){
   var st=getState(), c=findCustomer(st,activeCustomerId);
   if(!c) return;
-  if(c.permanent){ toast('Group members cannot be merged','err'); return; }
+  if(c.permanent){ toast(t('ts_no_merge_group'),'err'); return; }
   closeModal('m-cmenu');
   /* Only open tabs are offered: over time the historical list would grow into
    hundreds of one-off visitors and become useless to scroll. */
@@ -1190,7 +1252,7 @@ function doMerge(targetId){
       st2.customers=st2.customers.filter(function(x){ return x.id!==f.id; });
       if(!findCustomer(st2,targetId)) st2.customers.push({id:targetId,name:target.name});
       if(!saveState(st2)) return;
-      toast('Merged into '+target.name,'ok');
+      toast(t('ts_merged_into').replace('{a}',target.name),'ok');
       goHome();
     });
 }
@@ -1345,7 +1407,7 @@ function addCustomLine(v,grid,render){
   var id='__custom_'+(customSeq++)+'__';
   cart[id]={ id:id, name:'Custom', price:v, qty:1 };
   renderProds(grid); render();
-  toast('Added '+f(v)+EUR,'ok');
+  toast(t('ts_amount_added').replace('{a}',f(v)+EUR),'ok');
 }
 /* A quick way to put a charge on the tab when the item has no product button:
    it is booked immediately as debt named "Custom" (with an optional reason), so
@@ -1361,7 +1423,7 @@ function promptCustomCust(){
     if(note) tx.note=note;
     pushTx(st,tx);
     if(!saveState(st)) return;
-    toast('Custom '+f(v)+EUR+' added','ok');
+    toast(t('ts_custom_added').replace('{a}',f(v)+EUR),'ok');
     // stay on the tab so another item can be added in the same visit
     openCustomer(cc.id);
   }, true);
@@ -1378,7 +1440,7 @@ function commitCart(){
   pushTx(st,{customerId:c.id,customerName:c.name,type:'debt',amount:cartTotal(),items:cartItems()});
   if(!saveState(st)) return;
   cart={};
-  toast('Added to '+c.name,'ok');
+  toast(t('ts_added_to').replace('{a}',c.name),'ok');
   // Order is done: back to the home screen so the next customer can be served.
   goHome();
 }
@@ -1455,20 +1517,20 @@ function settlePayment(method){
   if(owed>0) pushTx(st,{customerId:c.id,customerName:c.name,type:'pay',method:method,amount:owed,note:'Bill settled'});
   var res=finishSettle(st,c);
   closeModal('m-settled');
-  toast(c.name+' \u2014 settled ('+method+')','ok');
+  toast(t('ts_settled').replace('{a}',c.name).replace('{b}',t(method==='card'?'card':'cash')),'ok');
 }
 function writeOffDebt(){
   var st=getState(), c=findCustomer(st,activeCustomerId);
   if(!c){ closeModal('m-settled'); return; }
   var b=balanceOf(st,c.id), owed=b<0?Math.abs(b):0;
-  if(owed<=0){ closeModal('m-settled'); toast('Nothing to write off','err'); return; }
+  if(owed<=0){ closeModal('m-settled'); toast(t('ts_nothing_writeoff'),'err'); return; }
   closeModal('m-settled');
   showConfirm('Write off debt?', c.name+' \u2014 '+f(owed)+EUR+' will be cleared as a loss (no income recorded).', function(){
     var st2=getState(), c2=findCustomer(st2,activeCustomerId);
     if(!c2) return;
     pushTx(st2,{customerId:c2.id,customerName:c2.name,type:'writeoff',amount:owed,note:'Written off (loss)'});
     finishSettle(st2,c2);
-    toast(c2.name+' \u2014 written off','ok');
+    toast(t('ts_written_off').replace('{a}',c2.name),'ok');
   });
 }
 /* A permanent table is kept (balance simply returns to zero). A normal
@@ -1536,7 +1598,7 @@ function amountOk(method){
   if(!amountCtx) return;
   var typed=parseAmt(document.getElementById('ma-amount').value);
   var v = quickActive ? (isNaN(typed)?quickRunning:typed) : typed;
-  if(isNaN(v)||v<=0){ toast('Enter an amount','err'); return; }
+  if(isNaN(v)||v<=0){ toast(t('ts_enter_amount'),'err'); return; }
   var note=document.getElementById('ma-note').value.trim();
   var cb=amountCtx.onOk;
   closeModal('m-amount'); amountCtx=null;
@@ -1567,7 +1629,7 @@ function addBalanceTx(type,amount,note,method){
   pushTx(st,tx);
   if(!saveState(st)) return;
   renderCustBalance();
-  toast('Saved','ok');
+  toast(t('ts_saved'),'ok');
   goHome();
 }
 
@@ -1583,7 +1645,7 @@ function addHouseEntry(kind){
       pushTx(st,{customerId:'__house__',customerName:isExp?'Expense':'Other income',
         type:isExp?'expense':'income',method:method,amount:v,note:note||''});
       if(!saveState(st)) return;
-      toast('Saved','ok');
+      toast(t('ts_saved'),'ok');
     });
 }
 
@@ -1602,7 +1664,7 @@ function openTxEdit(id){
 }
 function saveTxEdit(){
   var v=parseAmt(document.getElementById('te-amount').value);
-  if(isNaN(v)||v<=0){ toast('Enter an amount','err'); return; }
+  if(isNaN(v)||v<=0){ toast(t('ts_enter_amount'),'err'); return; }
   var note=document.getElementById('te-note').value.trim();
   var st=getState();
   for(var i=0;i<st.transactions.length;i++){
@@ -1617,7 +1679,7 @@ function saveTxEdit(){
   if(!saveState(st)) return;
   closeModal('m-txedit');
   refreshAfterTxChange();
-  toast('Transaction updated','ok');
+  toast(t('ts_tx_updated'),'ok');
 }
 function deleteTx(){
   closeModal('m-txedit');
@@ -1627,7 +1689,7 @@ function deleteTx(){
       st.transactions=st.transactions.filter(function(t){ return t.id!==editingTxId; });
       if(!saveState(st)) return;
       refreshAfterTxChange();
-      toast('Transaction deleted','ok');
+      toast(t('ts_tx_deleted'),'ok');
     });
 }
 function refreshAfterTxChange(){
@@ -1659,7 +1721,7 @@ function recordRecovery(cash,card){
   if(!saveState(st)) return;
   renderCustBalance();
   if(custTab==='hist') renderHistory();
-  toast('Old debt collected','ok');
+  toast(t('ts_olddebt_collected'),'ok');
 }
 function payOldDebt(method){
   var st=getState(), w=writtenOffOf(st,activeCustomerId);
@@ -1721,8 +1783,8 @@ function confirmSplit(){
   if(!splitCtx) return;
   var cash=parseAmt(document.getElementById('split-cash').value)||0;
   var card=parseAmt(document.getElementById('split-card').value)||0;
-  if(cash+card<=0){ toast('Enter amounts','err'); return; }
-  if(cash+card>splitCtx.total+0.001){ toast('Amount exceeds total','err'); return; }
+  if(cash+card<=0){ toast(t('ts_enter_amounts'),'err'); return; }
+  if(cash+card>splitCtx.total+0.001){ toast(t('ts_exceeds_total'),'err'); return; }
   var done=splitCtx.onDone;
   closeModal('m-split');
   splitCtx=null;
@@ -1732,7 +1794,7 @@ function openSettleSplit(){
   var st=getState(), c=findCustomer(st,activeCustomerId);
   if(!c) return;
   var b=balanceOf(st,c.id), owed=b<0?Math.abs(b):0;
-  if(owed<=0){ toast('Nothing owed','err'); return; }
+  if(owed<=0){ toast(t('ts_nothing_owed'),'err'); return; }
   closeModal('m-settled');
   openSplit(owed,function(cash,card){
     var st2=getState(), c2=findCustomer(st2,activeCustomerId);
@@ -1741,7 +1803,7 @@ function openSettleSplit(){
     if(cash>0) pushTx(st2,{ts:base,customerId:c2.id,customerName:c2.name,type:'pay',method:'cash',amount:cash,note:'Split payment'});
     if(card>0) pushTx(st2,{ts:base+1,customerId:c2.id,customerName:c2.name,type:'pay',method:'card',amount:card,note:'Split payment'});
     finishSettle(st2,c2);
-    toast(c2.name+' \u2014 split settled','ok');
+    toast(t('ts_split_settled').replace('{a}',c2.name),'ok');
   });
 }
 
@@ -1776,7 +1838,7 @@ function walkinPay(method){
   closeModal('m-wipay');
   if(!saveState(st)) return;
   cart={};
-  toast('Walk-in '+method+' recorded','ok');
+  toast(t('ts_walkin_recorded').replace('{a}',t(method==='card'?'card':'cash')),'ok');
   goHome();
 }
 function openWalkinSplit(){
@@ -1796,7 +1858,7 @@ function openWalkinSplit(){
     }
     if(!saveState(st)) return;
     cart={};
-    toast('Walk-in split recorded','ok');
+    toast(t('ts_walkin_split'),'ok');
     goHome();
   });
 }
@@ -1834,11 +1896,11 @@ function quickAmountsSection(st){
 function addQuickAmount(){
   askText('New button amount','',function(v){
     var n=parseAmt(v);
-    if(isNaN(n)||n<=0){ toast('Enter an amount','err'); return; }
+    if(isNaN(n)||n<=0){ toast(t('ts_enter_amount'),'err'); return; }
     var st=getState();
     st.quickAmounts.push(Math.round(n*100)/100);
     st.quickAmounts.sort(function(a,b){ return b-a; });
-    if(saveState(st)){ openCategories(); toast('Button added','ok'); }
+    if(saveState(st)){ openCategories(); toast(t('ts_button_added'),'ok'); }
   });
 }
 function editQuickAmount(i){
@@ -1846,26 +1908,26 @@ function editQuickAmount(i){
   if(cur===undefined) return;
   askText('Button amount',f(cur),function(v){
     var n=parseAmt(v);
-    if(isNaN(n)||n<=0){ toast('Enter an amount','err'); return; }
+    if(isNaN(n)||n<=0){ toast(t('ts_enter_amount'),'err'); return; }
     var st2=getState();
     st2.quickAmounts[i]=Math.round(n*100)/100;
     st2.quickAmounts.sort(function(a,b){ return b-a; });
-    if(saveState(st2)){ openCategories(); toast('Saved','ok'); }
+    if(saveState(st2)){ openCategories(); toast(t('ts_saved'),'ok'); }
   });
 }
 function removeQuickAmount(i){
   var st=getState();
   st.quickAmounts.splice(i,1);
-  if(saveState(st)){ openCategories(); toast('Removed','ok'); }
+  if(saveState(st)){ openCategories(); toast(t('ts_removed'),'ok'); }
 }
 function addCategory(){
   askText('New category','',function(name){
     var st=getState();
     for(var i=0;i<st.categories.length;i++){
-      if(st.categories[i].toLowerCase()===name.toLowerCase()){ toast('Already exists','err'); return; }
+      if(st.categories[i].toLowerCase()===name.toLowerCase()){ toast(t('ts_already_exists'),'err'); return; }
     }
     st.categories.push(name);
-    if(saveState(st)){ openCategories(); toast('Category added','ok'); }
+    if(saveState(st)){ openCategories(); toast(t('ts_category_added'),'ok'); }
   });
 }
 function renameCategory(enc){
@@ -1873,11 +1935,11 @@ function renameCategory(enc){
   askText('Rename category',old,function(name){
     var st=getState();
     for(var i=0;i<st.categories.length;i++){
-      if(st.categories[i].toLowerCase()===name.toLowerCase() && st.categories[i]!==old){ toast('Already exists','err'); return; }
+      if(st.categories[i].toLowerCase()===name.toLowerCase() && st.categories[i]!==old){ toast(t('ts_already_exists'),'err'); return; }
     }
     st.categories=st.categories.map(function(c){ return c===old?name:c; });
     st.products.forEach(function(p){ if(p.cat===old) p.cat=name; });
-    if(saveState(st)){ openCategories(); toast('Renamed','ok'); }
+    if(saveState(st)){ openCategories(); toast(t('ts_renamed'),'ok'); }
   });
 }
 function deleteCategory(enc){
@@ -1892,7 +1954,7 @@ function deleteCategory(enc){
     st2.categories=st2.categories.filter(function(c){ return c!==cat; });
     if(saveState(st2)){
       openCategories();
-      toast(n ? (n+' moved to '+UNCAT) : 'Category deleted','ok');
+      toast(n ? t('ts_moved_to').replace('{a}',n).replace('{b}',UNCAT) : t('ts_category_deleted'),'ok');
     }
   });
 }
@@ -1949,8 +2011,8 @@ function saveProduct(){
   var name=document.getElementById('mp-name').value.trim();
   var price=parseAmt(document.getElementById('mp-price').value);
   var cat=document.getElementById('mp-cat').value;
-  if(!name){ toast('Name is required','err'); return; }
-  if(isNaN(price)||price<0){ toast('Check the price','err'); return; }
+  if(!name){ toast(t('ts_name_required'),'err'); return; }
+  if(isNaN(price)||price<0){ toast(t('ts_check_price'),'err'); return; }
   if(editingProductId){
     for(var j=0;j<st.products.length;j++){
       if(st.products[j].id===editingProductId){
@@ -1965,7 +2027,7 @@ function saveProduct(){
   closeModal('m-prod');
   if(cat!==activeCatEdit) activeCatEdit=cat;
   renderCatProducts();
-  toast('Saved','ok');
+  toast(t('ts_saved'),'ok');
 }
 function deleteProduct(){
   if(!editingProductId) return;
@@ -1976,7 +2038,7 @@ function deleteProduct(){
   showConfirm('Delete product?', p.name+' will be removed. Past transactions keep their item lines.', function(){
     var st2=getState();
     st2.products=st2.products.filter(function(x){ return x.id!==editingProductId; });
-    if(saveState(st2)){ renderCatProducts(); toast('Deleted','ok'); }
+    if(saveState(st2)){ renderCatProducts(); toast(t('ts_deleted'),'ok'); }
   });
 }
 
@@ -2013,16 +2075,16 @@ function renderGroupsList(){
 function saveGroupsLabel(){
   var v=document.getElementById('groups-label').value.trim()||'Groups';
   var st=getState(); st.settings.groupsLabel=v;
-  if(saveState(st)){ renderGroupsList(); renderSettings(); toast('Saved','ok'); }
+  if(saveState(st)){ renderGroupsList(); renderSettings(); toast(t('ts_saved'),'ok'); }
 }
 function addGroup(){
   askText('New group','',function(name){
     var st=getState();
     if(getGroups(st).some(function(g){ return g.name.toLowerCase()===name.toLowerCase(); })){
-      toast('That group exists','err'); return;
+      toast(t('ts_group_exists'),'err'); return;
     }
     st.groups.push({ id:'__grp_'+Date.now()+'__', name:name, hidden:false });
-    if(saveState(st)){ renderGroupsList(); toast(name+' added','ok'); }
+    if(saveState(st)){ renderGroupsList(); toast(t('ts_added').replace('{a}',name),'ok'); }
   });
 }
 function openGroupManage(gid){
@@ -2062,23 +2124,23 @@ function renderGroupManage(){
 }
 function saveGroupName(){
   var v=document.getElementById('grp-name').value.trim();
-  if(!v){ toast('Name is required','err'); return; }
+  if(!v){ toast(t('ts_name_required'),'err'); return; }
   var st=getState(), g=findGroup(st,activeManageGroup);
   if(!g) return;
   g.name=v;
-  if(saveState(st)){ renderGroupManage(); toast('Renamed','ok'); }
+  if(saveState(st)){ renderGroupManage(); toast(t('ts_renamed'),'ok'); }
 }
 function toggleGroupHidden(){
   var st=getState(), g=findGroup(st,activeManageGroup);
   if(!g) return;
   g.hidden=!g.hidden;
-  if(saveState(st)){ renderGroupManage(); toast(g.hidden?'Hidden from home screen':'Shown on home screen','ok'); }
+  if(saveState(st)){ renderGroupManage(); toast(g.hidden?t('ts_hidden_home'):t('ts_shown_home'),'ok'); }
 }
 function deleteGroup(){
   var st=getState(), g=findGroup(st,activeManageGroup);
   if(!g) return;
   var gs=getGroups(st);
-  if(gs[0].id===g.id){ toast('The default group cannot be deleted','err'); return; }
+  if(gs[0].id===g.id){ toast(t('ts_no_delete_default'),'err'); return; }
   var def=gs[0], n=groupMembers(st,g.id).length;
   showConfirm('Delete '+g.name+'?',
     n ? (n+' member'+(n===1?'':'s')+' will move to '+def.name+'.') : 'The group is empty.',
@@ -2086,7 +2148,7 @@ function deleteGroup(){
       var st2=getState();
       st2.customers.forEach(function(c){ if(c.permanent && c.groupId===g.id) c.groupId=def.id; });
       st2.groups=st2.groups.filter(function(x){ return x.id!==g.id; });
-      if(saveState(st2)){ openTablesManage(); toast(n?(n+' moved to '+def.name):'Group deleted','ok'); }
+      if(saveState(st2)){ openTablesManage(); toast(n?t('ts_moved_to').replace('{a}',n).replace('{b}',def.name):t('ts_group_deleted'),'ok'); }
     });
 }
 function addTable(){
@@ -2095,7 +2157,7 @@ function addTable(){
     var st2=getState();
     // already a member here?
     if(st2.customers.some(function(c){ return c.permanent && c.groupId===activeManageGroup && c.name.toLowerCase()===name.toLowerCase(); })){
-      toast('That name is already here','err'); return;
+      toast(t('ts_name_here'),'err'); return;
     }
     // an existing non-permanent customer with history -> ask to promote
     var known=knownCustomers(st2), match=null;
@@ -2115,12 +2177,12 @@ function addTable(){
           if(existing){ existing.permanent=true; existing.groupId=activeManageGroup; }
           else st3.customers.push({id:id,name:name,permanent:true,groupId:activeManageGroup});
           unhideCustomer(st3,id);
-          if(saveState(st3)){ renderGroupManage(); toast(name+' moved in','ok'); }
+          if(saveState(st3)){ renderGroupManage(); toast(t('ts_moved_in').replace('{a}',name),'ok'); }
         },'Move in');
       return;
     }
     st2.customers.push({id:'__member_'+Date.now()+'__',name:name,permanent:true,groupId:activeManageGroup});
-    if(saveState(st2)){ renderGroupManage(); toast(name+' added','ok'); }
+    if(saveState(st2)){ renderGroupManage(); toast(t('ts_added').replace('{a}',name),'ok'); }
   });
 }
 function renameTable(id){
@@ -2131,7 +2193,7 @@ function renameTable(id){
     if(!c2) return;
     c2.name=name;
     st2.transactions.forEach(function(t){ if(t.customerId===id) t.customerName=name; });
-    if(saveState(st2)){ renderGroupManage(); toast('Renamed','ok'); }
+    if(saveState(st2)){ renderGroupManage(); toast(t('ts_renamed'),'ok'); }
   });
 }
 /* Removing a member works like removing a customer: a leftover balance is
@@ -2149,14 +2211,14 @@ function removeTable(id){
         var st2=getState();
         pushTx(st2,{customerId:id,customerName:name,type:owed?'writeoff':'debt',amount:Math.abs(bal),note:'Cleared on removal'});
         st2.customers=st2.customers.filter(function(x){ return x.id!==id; });
-        if(saveState(st2)){ renderGroupManage(); toast(name+' removed','ok'); }
+        if(saveState(st2)){ renderGroupManage(); toast(t('ts_removed_name').replace('{a}',name),'ok'); }
       },'Clear & remove');
     return;
   }
   showConfirm('Remove '+name+'?', 'Its history is kept.', function(){
     var st2=getState();
     st2.customers=st2.customers.filter(function(x){ return x.id!==id; });
-    if(saveState(st2)){ renderGroupManage(); toast(name+' removed','ok'); }
+    if(saveState(st2)){ renderGroupManage(); toast(t('ts_removed_name').replace('{a}',name),'ok'); }
   });
 }
 
@@ -2430,7 +2492,7 @@ function generateOpenTabsPDF(){
     var a=document.createElement('a');
     a.href=URL.createObjectURL(blob); a.download=name;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    toast('PDF created','ok');
+    toast(t('ts_pdf_created'),'ok');
   });
 }
 function generatePDF(){
@@ -2528,7 +2590,7 @@ function generatePDF(){
     var a=document.createElement('a');
     a.href=URL.createObjectURL(blob); a.download=name;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    toast('PDF created','ok');
+    toast(t('ts_pdf_created'),'ok');
   });
 }
 function openReports(){ show('s-rep'); setRepTab(repTab||'day'); }
@@ -2910,7 +2972,7 @@ function mergeKnownCustomer(id){
   var from=allCustomers(st).filter(function(c){ return c.id===id; })[0];
   if(!from) return;
   var others=allCustomers(st).filter(function(c){ return c.id!==id && !isPermanentId(c.id); });
-  if(!others.length){ toast('No other customer to merge into','err'); return; }
+  if(!others.length){ toast(t('ts_no_merge_target'),'err'); return; }
   document.getElementById('mg-hint').textContent='Keep which name? All of '+from.name+'\u2019s history moves to the one you pick, and '+from.name+' disappears.';
   document.getElementById('mg-list').innerHTML=others.map(function(k){
     var sub=k.open?'Open tab':(k.last?('Last seen '+fmtDate(k.last)):'');
@@ -2942,7 +3004,7 @@ function doMergeKnown(fromId,targetId){
       }
       // clear any hidden flag on the target so it stays visible
       unhideCustomer(st2,targetId);
-      if(saveState(st2)){ renderCustomersManage(); toast('Merged into '+target.name,'ok'); }
+      if(saveState(st2)){ renderCustomersManage(); toast(t('ts_merged_into').replace('{a}',target.name),'ok'); }
     },
     'Merge','background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.6em;');
 }
@@ -2955,11 +3017,11 @@ function renameKnownCustomer(id){
     var open=findCustomer(st2,id);
     if(open){
       var clash=st2.customers.some(function(x){ return x.id!==id && x.name.toLowerCase()===name.toLowerCase(); });
-      if(clash){ toast('Another open tab has that name','err'); return; }
+      if(clash){ toast(t('ts_dup_tab'),'err'); return; }
       open.name=name;
     }
     st2.transactions.forEach(function(t){ if(t.customerId===id) t.customerName=name; });
-    if(saveState(st2)){ renderCustomersManage(); toast('Renamed','ok'); }
+    if(saveState(st2)){ renderCustomersManage(); toast(t('ts_renamed'),'ok'); }
   });
 }
 /* Only the list entry goes; transactions stay so historical reports are
@@ -2986,7 +3048,7 @@ function removeKnownCustomer(id){
           amount:Math.abs(bal),
           note:'Cleared on removal'});
         hideCustomer(st2,id);
-        if(saveState(st2)){ renderCustomersManage(); toast(name+' removed','ok'); }
+        if(saveState(st2)){ renderCustomersManage(); toast(t('ts_removed_name').replace('{a}',name),'ok'); }
       },
       'Clear & remove');
     return;
@@ -2995,7 +3057,7 @@ function removeKnownCustomer(id){
     function(){
       var st2=getState();
       hideCustomer(st2,id);
-      if(saveState(st2)){ renderCustomersManage(); toast('Removed','ok'); }
+      if(saveState(st2)){ renderCustomersManage(); toast(t('ts_removed'),'ok'); }
     });
 }
 
@@ -3209,19 +3271,19 @@ function saveHeaderText(){
   var st=getState();
   st.settings.headerText=v;
   st.settings.headerImage=null;
-  if(saveState(st)){ renderHeader(); renderSetPage(); toast('Header updated','ok'); }
+  if(saveState(st)){ renderHeader(); renderSetPage(); toast(t('ts_header_updated'),'ok'); }
 }
 function resetHeader(){
   var st=getState();
   st.settings.headerText='Pub';
   st.settings.headerImage=null;
-  if(saveState(st)){ renderHeader(); renderSetPage(); renderSettings(); toast('Default logo restored','ok'); }
+  if(saveState(st)){ renderHeader(); renderSetPage(); renderSettings(); toast(t('ts_logo_restored'),'ok'); }
 }
 function pickHeaderImage(){ document.getElementById('hdr-file').click(); }
 function clearHeaderImage(){
   var st=getState();
   st.settings.headerImage=null;
-  if(saveState(st)){ renderHeader(); renderSetPage(); toast('Image removed','ok'); }
+  if(saveState(st)){ renderHeader(); renderSetPage(); toast(t('ts_image_removed'),'ok'); }
 }
 /* Scale down before storing: a full-size photo in base64 can exhaust the whole
    localStorage quota and take the bookkeeping down with it. */
@@ -3240,9 +3302,9 @@ document.getElementById('hdr-file').addEventListener('change',function(e){
       if(data.length>700000) data=cv.toDataURL('image/jpeg',0.85);
       var st=getState();
       st.settings.headerImage=data;
-      if(saveState(st)){ renderHeader(); renderSetPage(); toast('Header image set','ok'); }
+      if(saveState(st)){ renderHeader(); renderSetPage(); toast(t('ts_header_img_set'),'ok'); }
     };
-    img.onerror=function(){ toast('Could not read that image','err'); };
+    img.onerror=function(){ toast(t('ts_img_read_fail'),'err'); };
     img.src=ev.target.result;
   };
   reader.readAsDataURL(file);
@@ -3252,7 +3314,7 @@ function saveCurrency(){
   var v=document.getElementById('set-currency').value.trim()||'\u20AC';
   var st=getState();
   st.settings.currency=v;
-  if(saveState(st)){ applyCurrency(st); renderSetPage(); renderSettings(); toast('Currency set to '+v,'ok'); }
+  if(saveState(st)){ applyCurrency(st); renderSetPage(); renderSettings(); toast(t('ts_currency_set').replace('{a}',v),'ok'); }
 }
 function saveLang(v){
   var st=getState();
@@ -3261,7 +3323,7 @@ function saveLang(v){
 }
 function setDayEnd(v){
   var st=getState(); st.settings.dayEnd=parseInt(v,10);
-  if(saveState(st)) toast('Bar day ends '+pad2(st.settings.dayEnd)+':00','ok');
+  if(saveState(st)) toast(t('ts_barday_ends').replace('{a}',pad2(st.settings.dayEnd)+':00'),'ok');
 }
 function bumpFont(d){
   var st=getState();
@@ -3284,7 +3346,7 @@ function downloadBackup(name){
   a.download=name||backupFilename();
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
-function doBackup(){ downloadBackup(); toast('Backup saved','ok'); }
+function doBackup(){ downloadBackup(); toast(t('ts_backup_saved'),'ok'); }
 function pickRestoreFile(){ document.getElementById('restore-file').click(); }
 
 /* Auto backup can only fire while the app is open, so on every launch it checks
@@ -3303,14 +3365,14 @@ function toggleAutoBackup(){
   var ab=st.settings.autoBackup;
   ab.on=!ab.on;
   if(ab.on && !ab.last) ab.last=Date.now(); // don't fire immediately on first enable
-  if(saveState(st)){ renderSetPage(); renderSettings(); toast(ab.on?'Auto backup on':'Auto backup off','ok'); }
+  if(saveState(st)){ renderSetPage(); renderSettings(); toast(ab.on?t('ts_autobackup_on'):t('ts_autobackup_off'),'ok'); }
 }
 function saveAutoBackup(){
   var st=getState(), ab=st.settings.autoBackup;
   var c=document.getElementById('ab-cycle'); if(c) ab.cycle=c.value;
   var d=document.getElementById('ab-day'); if(d) ab.day=parseInt(d.value,10);
   var h=document.getElementById('ab-hour'); if(h) ab.hour=parseInt(h.value,10);
-  if(saveState(st)){ renderSetPage(); toast('Saved','ok'); }
+  if(saveState(st)){ renderSetPage(); toast(t('ts_saved'),'ok'); }
 }
 /* Returns the most recent scheduled timestamp at or before `now`. */
 function lastDueTime(ab,now){
@@ -3341,7 +3403,7 @@ function runAutoBackupCheck(){
     try{ downloadBackup(backupFilename(new Date(due))); }catch(e){ return; }
     ab.last=now;
     saveState(st);
-    toast('Auto backup saved','ok');
+    toast(t('ts_autobackup_saved'),'ok');
   }
 }
 
@@ -3380,8 +3442,8 @@ document.getElementById('restore-file').addEventListener('change',function(e){
   reader.onload=function(ev){
     var data;
     try{ data=JSON.parse(ev.target.result); }
-    catch(err){ toast('Could not read that file','err'); return; }
-    if(!data || !data.customers || !data.transactions){ toast('Not a valid backup','err'); return; }
+    catch(err){ toast(t('ts_file_read_fail'),'err'); return; }
+    if(!data || !data.customers || !data.transactions){ toast(t('ts_not_valid_backup'),'err'); return; }
     var v1=looksLikeV1(data);
     var st = v1 ? convertV1(data) : data;
     var n=st.transactions.length, c=st.customers.length;
@@ -3391,7 +3453,7 @@ document.getElementById('restore-file').addEventListener('change',function(e){
       function(){
         if(!saveState(st)) return;
         applyAppearance();
-        toast(v1?'Old backup imported':'Backup restored','ok');
+        toast(v1?t('ts_old_imported'):t('ts_backup_restored'),'ok');
         goHome();
       });
   };
@@ -3404,11 +3466,11 @@ function purgeBeforeSelected(){
   var ct=new Date(y,m,1,0,0,0,0).getTime();
   var st=getState();
   var n=st.transactions.filter(function(t){ return t.ts<ct; }).length;
-  if(!n){ toast('Nothing before '+MONTHS[m]+' '+y,'err'); return; }
+  if(!n){ toast(t('ts_nothing_before').replace('{a}',MONTHS[m]+' '+y),'err'); return; }
   showConfirm('Purge old data?', n+' transactions before '+MONTHS[m]+' '+y+' will be deleted.', function(){
     var st2=getState();
     st2.transactions=st2.transactions.filter(function(t){ return t.ts>=ct; });
-    if(saveState(st2)){ renderSetPage(); toast(n+' transactions deleted','ok'); }
+    if(saveState(st2)){ renderSetPage(); toast(t('ts_tx_deleted_n').replace('{a}',n),'ok'); }
   });
 }
 function clearHistory(){
@@ -3417,7 +3479,7 @@ function clearHistory(){
       var st=getState();
       st.transactions=[];
       st.customers=st.customers.filter(function(c){ return c.permanent; });
-      if(saveState(st)){ toast('History cleared','ok'); goHome(); }
+      if(saveState(st)){ toast(t('ts_history_cleared'),'ok'); goHome(); }
     });
 }
 function wipeData(){

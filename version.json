@@ -1,5 +1,5 @@
 {
-  "version": "2.06.03",
-  "cache": "se7env2-v60",
-  "notes": "Translations batch 5: all Settings sub-pages (Header, Appearance, Bar day, Cash flow, Updates, Backup & reset) now follow the selected language, including auto-backup cycle options and the danger zone."
+  "version": "2.06.04",
+  "cache": "se7env2-v61",
+  "notes": "Translations batch 6 (final): all toast confirmation and error messages now follow the selected language. The app is now fully translated into English, Finnish, Spanish, German and Swedish."
 }
