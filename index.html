@@ -588,7 +588,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.06.09';
+var APP_VERSION = '2.06.10';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -955,6 +955,34 @@ var LANG={
   merge_body2:{en:'{a} will be merged into {b}. Everything moves to {b} and {a} disappears. This cannot be undone.', fi:'{a} yhdistet\u00E4\u00E4n asiakkaaseen {b}. Kaikki siirtyy asiakkaalle {b} ja {a} poistuu. T\u00E4t\u00E4 ei voi peruuttaa.', es:'{a} se combinar\u00E1 con {b}. Todo pasa a {b} y {a} desaparece. No se puede deshacer.', de:'{a} wird mit {b} zusammengef\u00FChrt. Alles geht an {b} und {a} verschwindet. Nicht r\u00FCckg\u00E4ngig zu machen.', sv:'{a} sl\u00E5s samman med {b}. Allt flyttas till {b} och {a} f\u00F6rsvinner. Kan inte \u00E5ngras.'},
   clear_writeoff_body:{en:' Clear it as a write-off and remove the name? The write-off is recorded in today\u2019s history.', fi:' Kirjataanko tappioksi ja poistetaanko nimi? Tappiokirjaus tallennetaan t\u00E4m\u00E4n p\u00E4iv\u00E4n historiaan.', es:' \u00BFCancelar como p\u00E9rdida y quitar el nombre? La cancelaci\u00F3n se registra en el historial de hoy.', de:' Als Abschreibung l\u00F6schen und Namen entfernen? Die Abschreibung wird im heutigen Verlauf erfasst.', sv:' Avskriv som f\u00F6rlust och ta bort namnet? Avskrivningen registreras i dagens historik.'}
 };
+// --- batch 12: export UI + PDF report + misc ---
+var LANG_EXTRA={
+  no_history_yet:{en:'No history yet.', fi:'Ei historiaa viel\u00E4.', es:'A\u00FAn no hay historial.', de:'Noch kein Verlauf.', sv:'Ingen historik \u00E4nnu.'},
+  too_much_by:{en:'Too much by {a}', fi:'Liikaa {a}', es:'Excede en {a}', de:'Zu viel um {a}', sv:'F\u00F6r mycket med {a}'},
+  quick_ranges:{en:'Quick ranges', fi:'Pikavalinnat', es:'Rangos r\u00E1pidos', de:'Schnellbereiche', sv:'Snabbintervall'},
+  this_quarter:{en:'This quarter', fi:'T\u00E4m\u00E4 nelj\u00E4nnes', es:'Este trimestre', de:'Dieses Quartal', sv:'Detta kvartal'},
+  last_quarter:{en:'Last quarter', fi:'Edellinen nelj\u00E4nnes', es:'Trimestre pasado', de:'Letztes Quartal', sv:'F\u00F6reg\u00E5ende kvartal'},
+  this_year:{en:'This year', fi:'T\u00E4m\u00E4 vuosi', es:'Este a\u00F1o', de:'Dieses Jahr', sv:'Detta \u00E5r'},
+  this_month:{en:'This month', fi:'T\u00E4m\u00E4 kuukausi', es:'Este mes', de:'Dieser Monat', sv:'Denna m\u00E5nad'},
+  from_label:{en:'From', fi:'Alkaen', es:'Desde', de:'Von', sv:'Fr\u00E5n'},
+  to_label:{en:'To', fi:'Asti', es:'Hasta', de:'Bis', sv:'Till'},
+  preview_label:{en:'Preview \u2014 {a} to {b}', fi:'Esikatselu \u2014 {a} \u2013 {b}', es:'Vista previa \u2014 {a} a {b}', de:'Vorschau \u2014 {a} bis {b}', sv:'F\u00F6rhandsvisning \u2014 {a} till {b}'},
+  income_total:{en:'Income total', fi:'Tulot yhteens\u00E4', es:'Ingresos totales', de:'Einnahmen gesamt', sv:'Int\u00E4kter totalt'},
+  writeoffs_loss:{en:'Write-offs (loss)', fi:'Tappiokirjaukset', es:'Cancelaciones (p\u00E9rdida)', de:'Abschreibungen (Verlust)', sv:'Avskrivningar (f\u00F6rlust)'},
+  net_income_exp:{en:'Net (income \u2212 expenses)', fi:'Netto (tulot \u2212 kulut)', es:'Neto (ingresos \u2212 gastos)', de:'Netto (Einnahmen \u2212 Ausgaben)', sv:'Netto (int\u00E4kter \u2212 utgifter)'},
+  open_tabs_included:{en:'Open tabs (included)', fi:'Avoimet piikit (mukana)', es:'Cuentas abiertas (incluidas)', de:'Offene Deckel (enthalten)', sv:'\u00D6ppna notor (inkluderade)'},
+  tab_singular:{en:'tab', fi:'piikki', es:'cuenta', de:'Deckel', sv:'nota'},
+  tabs_plural:{en:'tabs', fi:'piikki\u00E4', es:'cuentas', de:'Deckel', sv:'notor'},
+  options_label:{en:'Options', fi:'Asetukset', es:'Opciones', de:'Optionen', sv:'Alternativ'},
+  include_open_tabs:{en:'Include open tabs at period end', fi:'Sis\u00E4llyt\u00E4 avoimet piikit jakson lopussa', es:'Incluir cuentas abiertas al final del per\u00EDodo', de:'Offene Deckel am Periodenende einbeziehen', sv:'Inkludera \u00F6ppna notor vid periodens slut'},
+  show_cust_names:{en:'Show customer names', fi:'N\u00E4yt\u00E4 asiakkaiden nimet', es:'Mostrar nombres de clientes', de:'Kundennamen zeigen', sv:'Visa kundnamn'},
+  names_hint:{en:'Off: listed as Customer 1, 2, 3\u2026 On: real names.', fi:'Pois: Asiakas 1, 2, 3\u2026 P\u00E4\u00E4ll\u00E4: oikeat nimet.', es:'Off: Cliente 1, 2, 3\u2026 On: nombres reales.', de:'Aus: Kunde 1, 2, 3\u2026 An: echte Namen.', sv:'Av: Kund 1, 2, 3\u2026 P\u00E5: riktiga namn.'},
+  open_tabs_hint:{en:'Adds a section showing how many tabs are open and the amounts owed.', fi:'Lis\u00E4\u00E4 osion, joka n\u00E4ytt\u00E4\u00E4 avoimien piikkien m\u00E4\u00E4r\u00E4n ja velat.', es:'A\u00F1ade una secci\u00F3n con cu\u00E1ntas cuentas est\u00E1n abiertas y lo adeudado.', de:'F\u00FCgt einen Abschnitt mit offenen Deckeln und Schulden hinzu.', sv:'L\u00E4gger till en sektion som visar \u00F6ppna notor och skulder.'},
+  generate_pdf:{en:'Generate PDF', fi:'Luo PDF', es:'Generar PDF', de:'PDF erstellen', sv:'Skapa PDF'},
+  report_language:{en:'Report language', fi:'Raportin kieli', es:'Idioma del informe', de:'Berichtssprache', sv:'Rapportspr\u00E5k'}
+};
+for(var _k in LANG_EXTRA){ if(LANG_EXTRA.hasOwnProperty(_k)) LANG[_k]=LANG_EXTRA[_k]; }
+
 // Localized month + weekday names
 var MONTHS_L={
   en:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
@@ -970,6 +998,7 @@ var DAYS_L={
   de:['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'],
   sv:['s\u00F6ndag','m\u00E5ndag','tisdag','onsdag','torsdag','fredag','l\u00F6rdag']
 };
+function t2(id){ return t(id); }
 function monthName(m){ var l=curLang(); return (MONTHS_L[l]||MONTHS_L.en)[m]; }
 function dayName(d){ var l=curLang(); return (DAYS_L[l]||DAYS_L.en)[d]; }
 function curLang(){
@@ -1090,7 +1119,7 @@ function showConfirm(title,body,onOk,okLabel,okStyle){
   document.getElementById('cf-title').textContent=title;
   document.getElementById('cf-body').textContent=body;
   var btn=document.getElementById('cf-ok');
-  btn.textContent=okLabel||'Confirm';
+  btn.textContent=okLabel||t('confirm');
   btn.setAttribute('style', okStyle ||
     'background:var(--rbg);border-color:var(--red);color:var(--red);margin-bottom:0.6em;');
   btn.onclick=function(){ closeModal('m-confirm'); onOk(); };
@@ -1617,7 +1646,7 @@ function renderHistory(){
   var txs=st.transactions.filter(function(t){ return t.customerId===activeCustomerId; })
                          .sort(function(a,b){ return b.ts-a.ts; });
   var el=document.getElementById('pane-hist');
-  if(!txs.length){ el.innerHTML='<div class="empty-hint">No history yet.</div>'; return; }
+  if(!txs.length){ el.innerHTML='<div class="empty-hint">'+t('no_history_yet')+'</div>'; return; }
   var groups={};
   txs.forEach(function(t){ var d=txBarDate(t); if(!groups[d]) groups[d]=[]; groups[d].push(t); });
   var days=Object.keys(groups).map(Number).sort(function(a,b){ return b-a; });
@@ -1935,7 +1964,7 @@ function updateSplitInfo(){
   var sum=Math.round((cash+card)*100)/100, rem=Math.round((splitCtx.total-sum)*100)/100;
   var info=document.getElementById('split-info'), btn=document.getElementById('split-ok');
   if(sum>splitCtx.total+0.001){
-    info.textContent='Too much by '+f(sum-splitCtx.total)+EUR;
+    info.textContent=t('too_much_by').replace('{a}',f(sum-splitCtx.total)+EUR);
     info.style.color='var(--red)'; btn.disabled=true;
   } else if(sum<=0){
     info.textContent=''; btn.disabled=true;
@@ -2428,9 +2457,10 @@ var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','D
 function openHistoryHub(){ show('s-hub'); }
 
 /* ---------- EXPORT FOR ACCOUNTANT ---------- */
-var expFrom=null, expTo=null, expOpenTabs=false, expNames=false;
+var expFrom=null, expTo=null, expOpenTabs=false, expNames=false, expLang=null;
 function openExport(){
   var now=new Date();
+  if(expLang===null){ expLang=curLang(); }  // default the report to the app language
   if(!expFrom){ // default to the current quarter
     var q=Math.floor(now.getMonth()/3);
     expFrom=new Date(now.getFullYear(), q*3, 1);
@@ -2440,42 +2470,45 @@ function openExport(){
 }
 function isoDate(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
 function renderExport(){
-  var presets='<div class="label">Quick ranges</div>'+
+  var presets='<div class="label">'+t('quick_ranges')+'</div>'+
     '<div class="prod-grid" style="--cols:2;margin-bottom:1em;">'+
-    '<div class="prod-card" onclick="expQuarter(0)"><div class="prod-name">This quarter</div></div>'+
-    '<div class="prod-card" onclick="expQuarter(-1)"><div class="prod-name">Last quarter</div></div>'+
-    '<div class="prod-card" onclick="expYear(0)"><div class="prod-name">This year</div></div>'+
-    '<div class="prod-card" onclick="expMonthRange()"><div class="prod-name">This month</div></div></div>';
-  var range='<div class="card-box"><div class="label">From</div>'+
+    '<div class="prod-card" onclick="expQuarter(0)"><div class="prod-name">'+t('this_quarter')+'</div></div>'+
+    '<div class="prod-card" onclick="expQuarter(-1)"><div class="prod-name">'+t('last_quarter')+'</div></div>'+
+    '<div class="prod-card" onclick="expYear(0)"><div class="prod-name">'+t('this_year')+'</div></div>'+
+    '<div class="prod-card" onclick="expMonthRange()"><div class="prod-name">'+t('this_month')+'</div></div></div>';
+  var range='<div class="card-box"><div class="label">'+t('from_label')+'</div>'+
     '<input type="date" id="exp-from" value="'+isoDate(expFrom)+'" onchange="expSet()">'+
-    '<div class="label" style="margin-top:0.6em;">To</div>'+
+    '<div class="label" style="margin-top:0.6em;">'+t('to_label')+'</div>'+
     '<input type="date" id="exp-to" value="'+isoDate(expTo)+'" onchange="expSet()"></div>';
   var st=getState();
   var txs=rangeTxs(st,expFrom,expTo), sum=sumRange(txs);
-  var preview='<div class="card-box"><div class="label">Preview \u2014 '+fmtDate(expFrom.getTime())+' to '+fmtDate(expTo.getTime())+'</div>'+
-    expLine('Income total',f(sum.income)+EUR)+
-    expLine('&nbsp;&nbsp;Cash',f(sum.cash)+EUR)+
-    expLine('&nbsp;&nbsp;Card',f(sum.card)+EUR)+
-    expLine('Expenses',f(sum.exp)+EUR)+
-    expLine('Write-offs (loss)',f(sum.loss)+EUR)+
-    expLine('Net (income \u2212 expenses)',f(sum.income-sum.exp)+EUR)+
-    expLine('Transactions',String(txs.length))+
+  var preview='<div class="card-box"><div class="label">'+t('preview_label').replace('{a}',fmtDate(expFrom.getTime())).replace('{b}',fmtDate(expTo.getTime()))+'</div>'+
+    expLine(t('income_total'),f(sum.income)+EUR)+
+    expLine('&nbsp;&nbsp;'+t('cash'),f(sum.cash)+EUR)+
+    expLine('&nbsp;&nbsp;'+t('card'),f(sum.card)+EUR)+
+    expLine(t('expenses'),f(sum.exp)+EUR)+
+    expLine(t('writeoffs_loss'),f(sum.loss)+EUR)+
+    expLine(t('net_income_exp'),f(sum.income-sum.exp)+EUR)+
+    expLine(t('transactions_pl'),String(txs.length))+
     (expOpenTabs ? (function(){
       var open=openTabsAsOf(st,expTo), t=0; open.forEach(function(r){ t+=r.owed; });
-      return expLine('Open tabs (included)',f(t)+EUR+' \u00B7 '+open.length+' tab'+(open.length===1?'':'s'));
+      return expLine(t2('open_tabs_included'),f(t)+EUR+' \u00B7 '+open.length+' '+(open.length===1?t2('tab_singular'):t2('tabs_plural')));
     })() : '')+
     '</div>';
-  var toggles='<div class="card-box"><div class="label">Options</div>'+
+  var toggles='<div class="card-box"><div class="label">'+t('options_label')+'</div>'+
     '<button class="btn-full" style="'+(expOpenTabs?'border-color:var(--gold);color:var(--gold2);':'')+'margin-bottom:0.5em;" onclick="expToggle(\'tabs\')">'+
-    (expOpenTabs?'\u2713 ':'')+'Include open tabs at period end</button>'+
+    (expOpenTabs?'\u2713 ':'')+t('include_open_tabs')+'</button>'+
     (expOpenTabs?
       '<button class="btn-full" style="'+(expNames?'border-color:var(--gold);color:var(--gold2);':'')+'" onclick="expToggle(\'names\')">'+
-      (expNames?'\u2713 ':'')+'Show customer names</button>'+
-      '<div class="hint">Off: listed as Customer 1, 2, 3\u2026 On: real names.</div>'
-      :'<div class="hint">Adds a section showing how many tabs are open and the amounts owed.</div>')+
+      (expNames?'\u2713 ':'')+t('show_cust_names')+'</button>'+
+      '<div class="hint">'+t('names_hint')+'</div>'
+      :'<div class="hint">'+t('open_tabs_hint')+'</div>')+
     '</div>';
-  var btn='<button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.8em;" onclick="generatePDF()">Generate PDF</button>';
-  document.getElementById('export-body').innerHTML=presets+range+preview+toggles+btn;
+  var langSel='<div class="card-box"><div class="label">'+t('report_language')+'</div>'+
+    '<select id="exp-lang">'+LANGS.map(function(L){ return '<option value="'+L[0]+'"'+(expLang===L[0]?' selected':'')+'>'+L[1]+'</option>'; }).join('')+'</select></div>';
+  var btn='<button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.8em;" onclick="generatePDF()">'+t('generate_pdf')+'</button>';
+  document.getElementById('export-body').innerHTML=presets+range+preview+toggles+langSel+btn;
+  var ls=document.getElementById('exp-lang'); if(ls) ls.onchange=function(){ expLang=this.value; };
 }
 function expToggle(which){
   if(which==='tabs'){ expOpenTabs=!expOpenTabs; if(!expOpenTabs) expNames=false; }
@@ -2665,13 +2698,14 @@ function generateOpenTabsPDF(){
   function money(n){ return n.toFixed(2)+' '+pdfCur(cur); }
   var hasImg=!!st.settings.headerImage;
   if(hasImg){ y+=64; }
-  line(hasImg?'Open tabs':(title+' \u2014 Open tabs'),{size:18,bold:true}); y+=26;
-  line('As of '+fmtDate(now.getTime())+' '+fmtTime(now.getTime()),{size:10}); y+=26;
+  var plang=curLang();
+  line(hasImg?pdfT('open_tabs_title',plang):(title+' \u2014 '+pdfT('open_tabs_title',plang)),{size:18,bold:true}); y+=26;
+  line(pdfT('as_of',plang)+' '+pdfDate(now.getTime(),plang)+' '+fmtTime(now.getTime()),{size:10}); y+=26;
   if(!open.length){
-    line('No open tabs \u2014 everyone is settled.',{size:12});
+    line(pdfT('everyone_settled',plang),{size:12});
   } else {
-    L.push({text:'Customer',x:50,y:y,size:11,bold:true});
-    L.push({text:'Owes',x:360,y:y,size:11,bold:true}); y+=16;
+    L.push({text:pdfT('customer',plang),x:50,y:y,size:11,bold:true});
+    L.push({text:pdfT('owes',plang),x:360,y:y,size:11,bold:true}); y+=16;
     var tot=0;
     open.forEach(function(r){
       if(y>815) return;
@@ -2681,10 +2715,10 @@ function generateOpenTabsPDF(){
       y+=15;
     });
     y+=4;
-    L.push({text:'Total owed',x:50,y:y,size:12,bold:true});
+    L.push({text:pdfT('total_owed',plang),x:50,y:y,size:12,bold:true});
     L.push({text:money(tot),x:360,y:y,size:12,bold:true});
   }
-  var name='Open tabs '+isoDate(now)+'.pdf';
+  var name=pdfT('open_tabs_file',plang)+' '+isoDate(now)+'.pdf';
   headerLogoForPDF(st,function(logo){
     if(logo){ logo.x=50; logo.y=40; }
     var blob=new Blob([pdfBytes(buildPDF(L,logo))],{type:'application/pdf'});
@@ -2694,8 +2728,48 @@ function generateOpenTabsPDF(){
     toast(t('ts_pdf_created'),'ok');
   });
 }
+/* The accountant PDF can be produced in any of the five languages, chosen on the
+   export screen and defaulting to the app language. These strings are kept
+   separate so the report reads cleanly regardless of the UI language. */
+var PDFSTR={
+  sales_report:{en:'Sales report', fi:'Myyntiraportti', es:'Informe de ventas', de:'Umsatzbericht', sv:'F\u00F6rs\u00E4ljningsrapport'},
+  period:{en:'Period', fi:'Jakso', es:'Per\u00EDodo', de:'Zeitraum', sv:'Period'},
+  generated:{en:'Generated', fi:'Luotu', es:'Generado', de:'Erstellt', sv:'Skapad'},
+  summary:{en:'Summary', fi:'Yhteenveto', es:'Resumen', de:'Zusammenfassung', sv:'Sammanfattning'},
+  income_total:{en:'Income total', fi:'Tulot yhteens\u00E4', es:'Ingresos totales', de:'Einnahmen gesamt', sv:'Int\u00E4kter totalt'},
+  cash:{en:'Cash', fi:'K\u00E4teinen', es:'Efectivo', de:'Bar', sv:'Kontant'},
+  card:{en:'Card', fi:'Kortti', es:'Tarjeta', de:'Karte', sv:'Kort'},
+  expenses:{en:'Expenses', fi:'Kulut', es:'Gastos', de:'Ausgaben', sv:'Utgifter'},
+  writeoffs:{en:'Write-offs (loss)', fi:'Tappiokirjaukset', es:'Cancelaciones (p\u00E9rdida)', de:'Abschreibungen (Verlust)', sv:'Avskrivningar (f\u00F6rlust)'},
+  net:{en:'Net (income - expenses)', fi:'Netto (tulot - kulut)', es:'Neto (ingresos - gastos)', de:'Netto (Einnahmen - Ausgaben)', sv:'Netto (int\u00E4kter - utgifter)'},
+  transactions:{en:'Transactions', fi:'Tapahtumat', es:'Transacciones', de:'Buchungen', sv:'Transaktioner'},
+  income_by_day:{en:'Income by day', fi:'Tulot p\u00E4ivitt\u00E4in', es:'Ingresos por d\u00EDa', de:'Einnahmen pro Tag', sv:'Int\u00E4kter per dag'},
+  date:{en:'Date', fi:'P\u00E4iv\u00E4', es:'Fecha', de:'Datum', sv:'Datum'},
+  total:{en:'Total', fi:'Yhteens\u00E4', es:'Total', de:'Gesamt', sv:'Totalt'},
+  expenses_by_day:{en:'Expenses by day', fi:'Kulut p\u00E4ivitt\u00E4in', es:'Gastos por d\u00EDa', de:'Ausgaben pro Tag', sv:'Utgifter per dag'},
+  description:{en:'Description', fi:'Kuvaus', es:'Descripci\u00F3n', de:'Beschreibung', sv:'Beskrivning'},
+  amount:{en:'Amount', fi:'Summa', es:'Importe', de:'Betrag', sv:'Belopp'},
+  expense:{en:'Expense', fi:'Kulu', es:'Gasto', de:'Ausgabe', sv:'Utgift'},
+  total_expenses:{en:'Total expenses', fi:'Kulut yhteens\u00E4', es:'Gastos totales', de:'Ausgaben gesamt', sv:'Utgifter totalt'},
+  open_tabs_end:{en:'Open tabs at period end', fi:'Avoimet piikit jakson lopussa', es:'Cuentas abiertas al final del per\u00EDodo', de:'Offene Deckel am Periodenende', sv:'\u00D6ppna notor vid periodens slut'},
+  owed_ref:{en:'Money owed on this date - not income, shown for reference.', fi:'T\u00E4n\u00E4 p\u00E4iv\u00E4n\u00E4 avoinna oleva velka - ei tuloa, vain viitteeksi.', es:'Dinero adeudado en esta fecha - no es ingreso, solo referencia.', de:'An diesem Datum offene Schuld - keine Einnahme, nur zur Referenz.', sv:'Skuld denna dag - ingen int\u00E4kt, visas som referens.'},
+  no_open_tabs:{en:'No open tabs.', fi:'Ei avoimia piikkej\u00E4.', es:'Sin cuentas abiertas.', de:'Keine offenen Deckel.', sv:'Inga \u00F6ppna notor.'},
+  customer:{en:'Customer', fi:'Asiakas', es:'Cliente', de:'Kunde', sv:'Kund'},
+  total_owed:{en:'Total owed', fi:'Velkaa yhteens\u00E4', es:'Total adeudado', de:'Offen gesamt', sv:'Skuld totalt'},
+  sales_file:{en:'Sales', fi:'Myynti', es:'Ventas', de:'Umsatz', sv:'F\u00F6rs\u00E4ljning'},
+  owes:{en:'Owes', fi:'Velkaa', es:'Debe', de:'Schuldet', sv:'Skyldig'},
+  open_tabs_title:{en:'Open tabs', fi:'Avoimet piikit', es:'Cuentas abiertas', de:'Offene Deckel', sv:'\u00D6ppna notor'},
+  as_of:{en:'As of', fi:'Tilanne', es:'A fecha de', de:'Stand', sv:'Per'},
+  everyone_settled:{en:'No open tabs - everyone is settled.', fi:'Ei avoimia piikkej\u00E4 - kaikki maksettu.', es:'Sin cuentas abiertas - todo liquidado.', de:'Keine offenen Deckel - alles beglichen.', sv:'Inga \u00F6ppna notor - allt betalt.'},
+  open_tabs_file:{en:'Open tabs', fi:'Avoimet piikit', es:'Cuentas abiertas', de:'Offene Deckel', sv:'\u00D6ppna notor'}
+};
+function pdfT(id,lang){ var e=PDFSTR[id]; if(!e) return id; return e[lang]!==undefined?e[lang]:e.en; }
+function pdfMonth(m,lang){ return (MONTHS_L[lang]||MONTHS_L.en)[m]; }
+/* Date formatter for the PDF in the chosen language: DD Mon YYYY. */
+function pdfDate(ms,lang){ var d=new Date(ms); return pad2(d.getDate())+' '+pdfMonth(d.getMonth(),lang)+' '+d.getFullYear(); }
 function generatePDF(){
   var st=getState();
+  var lang=expLang||curLang();
   var txs=rangeTxs(st,expFrom,expTo), sum=sumRange(txs), days=rangeDays(txs);
   var title=reportTitle(st);
   var cur=(st.settings.currency||'\u20AC');
@@ -2704,31 +2778,31 @@ function generatePDF(){
   function money(n){ return n.toFixed(2)+' '+pdfCur(cur); }
   var hasImg=!!st.settings.headerImage;
   if(hasImg){ y+=64; }  // leave room for the logo drawn at the top
-  line(hasImg?'Sales report':(title+' \u2014 Sales report'),{size:18,bold:true}); y+=26;
-  line('Period: '+fmtDate(expFrom.getTime())+' \u2013 '+fmtDate(expTo.getTime()),{size:11}); y+=16;
-  line('Generated: '+fmtDate(Date.now())+' '+fmtTime(Date.now()),{size:9}); y+=28;
+  line(hasImg?pdfT('sales_report',lang):(title+' \u2014 '+pdfT('sales_report',lang)),{size:18,bold:true}); y+=26;
+  line(pdfT('period',lang)+': '+pdfDate(expFrom.getTime(),lang)+' \u2013 '+pdfDate(expTo.getTime(),lang),{size:11}); y+=16;
+  line(pdfT('generated',lang)+': '+pdfDate(Date.now(),lang)+' '+fmtTime(Date.now()),{size:9}); y+=28;
 
-  line('Summary',{size:13,bold:true}); y+=20;
+  line(pdfT('summary',lang),{size:13,bold:true}); y+=20;
   function row(a,b,bold){ L.push({text:a,x:50,y:y,size:11,bold:bold}); L.push({text:b,x:360,y:y,size:11,bold:bold}); y+=16; }
-  row('Income total',money(sum.income),true);
-  row('   Cash',money(sum.cash));
-  row('   Card',money(sum.card));
-  row('Expenses',money(sum.exp));
-  row('Write-offs (loss)',money(sum.loss));
-  row('Net (income - expenses)',money(sum.income-sum.exp),true);
-  row('Transactions',String(txs.length));
+  row(pdfT('income_total',lang),money(sum.income),true);
+  row('   '+pdfT('cash',lang),money(sum.cash));
+  row('   '+pdfT('card',lang),money(sum.card));
+  row(pdfT('expenses',lang),money(sum.exp));
+  row(pdfT('writeoffs',lang),money(sum.loss));
+  row(pdfT('net',lang),money(sum.income-sum.exp),true);
+  row(pdfT('transactions',lang),String(txs.length));
   y+=16;
 
   // ----- Income per day -----
-  line('Income by day',{size:13,bold:true}); y+=18;
-  L.push({text:'Date',x:50,y:y,size:10,bold:true});
-  L.push({text:'Cash',x:300,y:y,size:10,bold:true});
-  L.push({text:'Card',x:390,y:y,size:10,bold:true});
-  L.push({text:'Total',x:480,y:y,size:10,bold:true});
+  line(pdfT('income_by_day',lang),{size:13,bold:true}); y+=18;
+  L.push({text:pdfT('date',lang),x:50,y:y,size:10,bold:true});
+  L.push({text:pdfT('cash',lang),x:300,y:y,size:10,bold:true});
+  L.push({text:pdfT('card',lang),x:390,y:y,size:10,bold:true});
+  L.push({text:pdfT('total',lang),x:480,y:y,size:10,bold:true});
   y+=15;
   days.forEach(function(d){
     if(y>815) return;
-    L.push({text:fmtDate(d.date),x:50,y:y,size:10});
+    L.push({text:pdfDate(d.date,lang),x:50,y:y,size:10});
     L.push({text:money(d.cash),x:300,y:y,size:10});
     L.push({text:money(d.card),x:390,y:y,size:10});
     L.push({text:money(d.cash+d.card),x:480,y:y,size:10});
@@ -2740,22 +2814,22 @@ function generatePDF(){
     .sort(function(a,b){ return txBarDate(a)-txBarDate(b) || a.ts-b.ts; });
   if(expTx.length){
     y+=18;
-    line('Expenses by day',{size:13,bold:true}); y+=18;
-    L.push({text:'Date',x:50,y:y,size:10,bold:true});
-    L.push({text:'Description',x:150,y:y,size:10,bold:true});
-    L.push({text:'Amount',x:470,y:y,size:10,bold:true});
+    line(pdfT('expenses_by_day',lang),{size:13,bold:true}); y+=18;
+    L.push({text:pdfT('date',lang),x:50,y:y,size:10,bold:true});
+    L.push({text:pdfT('description',lang),x:150,y:y,size:10,bold:true});
+    L.push({text:pdfT('amount',lang),x:470,y:y,size:10,bold:true});
     y+=15;
     var etot=0;
     expTx.forEach(function(t){
       if(y>815) return;
       etot+=t.amount;
-      L.push({text:fmtDate(txBarDate(t)),x:50,y:y,size:10});
-      L.push({text:(t.note||'Expense').slice(0,45),x:150,y:y,size:10});
+      L.push({text:pdfDate(txBarDate(t),lang),x:50,y:y,size:10});
+      L.push({text:(t.note||pdfT('expense',lang)).slice(0,45),x:150,y:y,size:10});
       L.push({text:money(t.amount),x:470,y:y,size:10});
       y+=14;
     });
     y+=2;
-    L.push({text:'Total expenses',x:50,y:y,size:11,bold:true});
+    L.push({text:pdfT('total_expenses',lang),x:50,y:y,size:11,bold:true});
     L.push({text:money(etot),x:470,y:y,size:11,bold:true});
     y+=14;
   }
@@ -2763,25 +2837,25 @@ function generatePDF(){
   if(expOpenTabs){
     var open=openTabsAsOf(st,expTo);
     if(y<720){ y+=22; } 
-    line('Open tabs at period end',{size:13,bold:true}); y+=8;
-    line('Money owed on this date \u2014 not income, shown for reference.',{size:9}); y+=18;
-    if(!open.length){ line('No open tabs.',{size:10}); }
+    line(pdfT('open_tabs_end',lang),{size:13,bold:true}); y+=8;
+    line(pdfT('owed_ref',lang),{size:9}); y+=18;
+    if(!open.length){ line(pdfT('no_open_tabs',lang),{size:10}); }
     else{
       var tot=0;
       open.forEach(function(r,i){
         if(y>815) return;
         tot+=r.owed;
-        L.push({text: expNames ? r.name : ('Customer '+(i+1)), x:50,y:y,size:10});
+        L.push({text: expNames ? r.name : (pdfT('customer',lang)+' '+(i+1)), x:50,y:y,size:10});
         L.push({text:money(r.owed),x:360,y:y,size:10});
         y+=14;
       });
       y+=2;
-      L.push({text:'Total owed ('+open.length+')',x:50,y:y,size:11,bold:true});
+      L.push({text:pdfT('total_owed',lang)+' ('+open.length+')',x:50,y:y,size:11,bold:true});
       L.push({text:money(tot),x:360,y:y,size:11,bold:true});
     }
   }
 
-  var name='Sales '+isoDate(expFrom)+' to '+isoDate(expTo)+'.pdf';
+  var name=pdfT('sales_file',lang)+' '+isoDate(expFrom)+' - '+isoDate(expTo)+'.pdf';
   headerLogoForPDF(st,function(logo){
     if(logo){ logo.x=50; logo.y=40; }
     var pdf=buildPDF(L, logo);
