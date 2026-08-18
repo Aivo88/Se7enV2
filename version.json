@@ -1,5 +1,5 @@
 {
-  "version": "2.06.05",
-  "cache": "se7env2-v62",
-  "notes": "Translations batch 7: History (day/month/year-summary/customers), month and weekday names, Products and Categories screens, and confirm dialogs now follow the selected language. New: product search box on the Categories page to find any product across all categories."
+  "version": "2.06.06",
+  "cache": "se7env2-v63",
+  "notes": "Translations batch 8: the 'Known name' dialog, all transaction type labels (Purchase, payments, credit, write-off, expense, income), the Customers and Raw history tabs, per-customer history headers, the write-off confirm, and the product editor (New/Edit product, Favorite) now follow the selected language."
 }

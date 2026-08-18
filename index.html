@@ -537,11 +537,11 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <div class="modal-bg" id="m-known">
   <div class="modal">
-    <div class="modal-title">Known name</div>
+    <div class="modal-title" data-t="known_name">Known name</div>
     <div style="color:var(--text2);text-align:center;line-height:1.6;margin-bottom:1em;" id="mk-body"></div>
-    <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.6em;" id="mk-same">Same person</button>
-    <button class="btn-full" style="margin-bottom:0.6em;" id="mk-new">Different person</button>
-    <button class="btn-modal-cancel" onclick="closeModal('m-known')">Cancel</button>
+    <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.6em;" id="mk-same" data-t="same_person">Same person</button>
+    <button class="btn-full" style="margin-bottom:0.6em;" id="mk-new" data-t="different_person">Different person</button>
+    <button class="btn-modal-cancel" onclick="closeModal('m-known')" data-t="cancel">Cancel</button>
   </div>
 </div>
 
@@ -588,7 +588,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.06.05';
+var APP_VERSION = '2.06.06';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -854,7 +854,28 @@ var LANG={
   products_move:{en:'{a} products will move to {b}.', fi:'{a} tuotetta siirtyy kohteeseen {b}.', es:'{a} productos se mover\u00E1n a {b}.', de:'{a} Produkte werden nach {b} verschoben.', sv:'{a} produkter flyttas till {b}.'},
   category_empty:{en:'The category is empty.', fi:'Kategoria on tyhj\u00E4.', es:'La categor\u00EDa est\u00E1 vac\u00EDa.', de:'Die Kategorie ist leer.', sv:'Kategorin \u00E4r tom.'},
   members_move:{en:'{a} members will move to {b}.', fi:'{a} j\u00E4sent\u00E4 siirtyy kohteeseen {b}.', es:'{a} miembros se mover\u00E1n a {b}.', de:'{a} Mitglieder werden nach {b} verschoben.', sv:'{a} medlemmar flyttas till {b}.'},
-  group_empty:{en:'The group is empty.', fi:'Ryhm\u00E4 on tyhj\u00E4.', es:'El grupo est\u00E1 vac\u00EDo.', de:'Die Gruppe ist leer.', sv:'Gruppen \u00E4r tom.'}
+  group_empty:{en:'The group is empty.', fi:'Ryhm\u00E4 on tyhj\u00E4.', es:'El grupo est\u00E1 vac\u00EDo.', de:'Die Gruppe ist leer.', sv:'Gruppen \u00E4r tom.'},
+  // --- batch 8: tx labels, customers/raw, known-name dialog ---
+  known_name:{en:'Known name', fi:'Tunnettu nimi', es:'Nombre conocido', de:'Bekannter Name', sv:'K\u00E4nt namn'},
+  same_person:{en:'Same person', fi:'Sama henkil\u00F6', es:'Misma persona', de:'Gleiche Person', sv:'Samma person'},
+  different_person:{en:'Different person', fi:'Eri henkil\u00F6', es:'Persona distinta', de:'Andere Person', sv:'Annan person'},
+  known_q:{en:'{a} \u2014 last seen {b}. Is this the same person?', fi:'{a} \u2014 viimeksi n\u00E4hty {b}. Onko t\u00E4m\u00E4 sama henkil\u00F6?', es:'{a} \u2014 visto por \u00FAltima vez {b}. \u00BFEs la misma persona?', de:'{a} \u2014 zuletzt gesehen {b}. Ist das dieselbe Person?', sv:'{a} \u2014 senast sedd {b}. \u00C4r det samma person?'},
+  lbl_purchase:{en:'Purchase', fi:'Osto', es:'Compra', de:'Kauf', sv:'K\u00F6p'},
+  lbl_writeoff:{en:'Written off (loss)', fi:'Kirjattu tappioksi', es:'Cancelado (p\u00E9rdida)', de:'Abgeschrieben (Verlust)', sv:'Avskriven (f\u00F6rlust)'},
+  lbl_credit:{en:'Credit added ({a})', fi:'Saldoa lis\u00E4tty ({a})', es:'Cr\u00E9dito a\u00F1adido ({a})', de:'Guthaben ({a})', sv:'Kredit tillagd ({a})'},
+  lbl_recovery:{en:'Old debt collected ({a})', fi:'Vanha velka peritty ({a})', es:'Deuda antigua cobrada ({a})', de:'Alte Schuld eingezogen ({a})', sv:'Gammal skuld inkasserad ({a})'},
+  lbl_expense:{en:'Expense', fi:'Kulu', es:'Gasto', de:'Ausgabe', sv:'Utgift'},
+  lbl_income:{en:'Other income ({a})', fi:'Muu tulo ({a})', es:'Otro ingreso ({a})', de:'Sonstige Einnahme ({a})', sv:'\u00D6vrig int\u00E4kt ({a})'},
+  lbl_card_pay:{en:'Card payment', fi:'Korttimaksu', es:'Pago con tarjeta', de:'Kartenzahlung', sv:'Kortbetalning'},
+  lbl_cash_pay:{en:'Cash payment', fi:'K\u00E4teismaksu', es:'Pago en efectivo', de:'Barzahlung', sv:'Kontantbetalning'},
+  no_customers:{en:'No customers.', fi:'Ei asiakkaita.', es:'Sin clientes.', de:'Keine Kunden.', sv:'Inga kunder.'},
+  no_transactions:{en:'No transactions yet.', fi:'Ei tapahtumia viel\u00E4.', es:'A\u00FAn no hay transacciones.', de:'Noch keine Buchungen.', sv:'Inga transaktioner \u00E4nnu.'},
+  no_transactions2:{en:'No transactions.', fi:'Ei tapahtumia.', es:'Sin transacciones.', de:'Keine Buchungen.', sv:'Inga transaktioner.'},
+  all_history:{en:'All history', fi:'Koko historia', es:'Todo el historial', de:'Gesamter Verlauf', sv:'All historik'},
+  writeoff_q:{en:'Write off debt?', fi:'Kirjataanko velka tappioksi?', es:'\u00BFCancelar la deuda?', de:'Schuld abschreiben?', sv:'Avskriva skulden?'},
+  writeoff_body:{en:'{a} \u2014 {b} will be cleared as a loss (no income recorded).', fi:'{a} \u2014 {b} kirjataan tappioksi (ei tuloa).', es:'{a} \u2014 {b} se cancelar\u00E1 como p\u00E9rdida (sin ingreso).', de:'{a} \u2014 {b} wird als Verlust abgeschrieben (keine Einnahme).', sv:'{a} \u2014 {b} avskrivs som f\u00F6rlust (ingen int\u00E4kt).'},
+  new_product:{en:'New product', fi:'Uusi tuote', es:'Nuevo producto', de:'Neues Produkt', sv:'Ny produkt'},
+  edit_product:{en:'Edit product', fi:'Muokkaa tuotetta', es:'Editar producto', de:'Produkt bearbeiten', sv:'Redigera produkt'}
 };
 // Localized month + weekday names
 var MONTHS_L={
@@ -1233,7 +1254,7 @@ function askNewCustomer(prefill){
     }
     if(match){
       document.getElementById('mk-body').textContent=
-        match.name+' \u2014 last seen '+fmtDate(match.last)+'. Is this the same person?';
+        t('known_q').replace('{a}',match.name).replace('{b}',fmtDate(match.last));
       document.getElementById('mk-same').onclick=function(){
         closeModal('m-known'); addCustomer(match.id,name,true);
       };
@@ -1539,14 +1560,15 @@ function toggleDay(d){
   var e=document.getElementById('day-'+d);
   if(e) e.style.display = e.style.display==='none' ? '' : 'none';
 }
-function txLabel(t){
-  if(t.type==='debt') return 'Purchase';
-  if(t.type==='writeoff') return 'Written off (loss)';
-  if(t.type==='credit') return 'Credit added ('+(t.method==='card'?'card':'cash')+')';
-  if(t.type==='recovery') return 'Old debt collected ('+(t.method==='card'?'card':'cash')+')';
-  if(t.type==='expense') return 'Expense';
-  if(t.type==='income') return 'Other income ('+(t.method==='card'?'card':'cash')+')';
-  return (t.method==='card'?'Card':'Cash')+' payment';
+function txLabel(tx){
+  var mw=t(tx.method==='card'?'card':'cash').toLowerCase();
+  if(tx.type==='debt') return t('lbl_purchase');
+  if(tx.type==='writeoff') return t('lbl_writeoff');
+  if(tx.type==='credit') return t('lbl_credit').replace('{a}',mw);
+  if(tx.type==='recovery') return t('lbl_recovery').replace('{a}',mw);
+  if(tx.type==='expense') return t('lbl_expense');
+  if(tx.type==='income') return t('lbl_income').replace('{a}',mw);
+  return tx.method==='card'?t('lbl_card_pay'):t('lbl_cash_pay');
 }
 function txIsOut(t){ return t.type==='debt'||t.type==='expense'; }
 function txHTML(t,withName,hideDate){
@@ -1575,7 +1597,7 @@ function askBillSettled(id){
   activeCustomerId=c.id;
   var b=balanceOf(st,c.id), owed=b<0?Math.abs(b):0;
   document.getElementById('set-cust-text').textContent=c.name;
-  document.getElementById('set-amount-text').textContent = owed>0 ? f(owed)+EUR : 'Nothing owed';
+  document.getElementById('set-amount-text').textContent = owed>0 ? f(owed)+EUR : t('ts_nothing_owed');
   openModal('m-settled');
 }
 function settlePayment(method){
@@ -1593,7 +1615,7 @@ function writeOffDebt(){
   var b=balanceOf(st,c.id), owed=b<0?Math.abs(b):0;
   if(owed<=0){ closeModal('m-settled'); toast(t('ts_nothing_writeoff'),'err'); return; }
   closeModal('m-settled');
-  showConfirm('Write off debt?', c.name+' \u2014 '+f(owed)+EUR+' will be cleared as a loss (no income recorded).', function(){
+  showConfirm(t('writeoff_q'), t('writeoff_body').replace('{a}',c.name).replace('{b}',f(owed)+EUR), function(){
     var st2=getState(), c2=findCustomer(st2,activeCustomerId);
     if(!c2) return;
     pushTx(st2,{customerId:c2.id,customerName:c2.name,type:'writeoff',amount:owed,note:'Written off (loss)'});
@@ -2088,7 +2110,7 @@ function toggleFav(id){
 function setFavField(v){
   editingFav=v;
   var b=document.getElementById('mp-fav');
-  b.textContent=(v?'\u2605':'\u2606')+' Favorite';
+  b.textContent=(v?'\u2605':'\u2606')+' '+t('favorite');
   b.style.borderColor = v?'var(--gold)':'var(--border2)';
   b.style.color = v?'var(--gold2)':'var(--text2)';
 }
@@ -2097,7 +2119,7 @@ function editProduct(id){
   var st=getState(), p=null;
   editingProductId=id;
   if(id) for(var i=0;i<st.products.length;i++) if(st.products[i].id===id) p=st.products[i];
-  document.getElementById('mp-title').textContent = p?'Edit product':'New product';
+  document.getElementById('mp-title').textContent = p?t('edit_product'):t('new_product');
   document.getElementById('mp-name').value = p?p.name:'';
   document.getElementById('mp-price').value = p?f(p.price):'';
   var sel=document.getElementById('mp-cat');
@@ -2785,7 +2807,7 @@ function renderProdCustomers(){
       '><button class="row-main" onclick="openProdCust(\''+c.id+'\')">'+
       '<div style="font-weight:600;'+(perm?'color:var(--gold2);':'')+'">'+esc(c.name)+'</div></button>'+
       '<div style="color:var(--text3);font-size:1.2em;">\u203A</div></div>';
-  }).join('') : '<div class="empty-hint">No customers.</div>';
+  }).join('') : '<div class="empty-hint">'+t('no_customers')+'</div>';
   document.getElementById('prod-report-body').innerHTML=search+rows;
 }
 function openProdCust(id){ prodCustId=id; renderProdCustDetail(); }
@@ -3168,11 +3190,11 @@ function renderCustomersTab(){
   var list=all.filter(function(c){ return c.name.toLowerCase().indexOf(q)!==-1; });
   var search='<div class="search-wrap" style="margin-bottom:0.8em;">'+
     '<span style="color:var(--text4);">\uD83D\uDD0D</span>'+
-    '<input id="cust-tab-search" type="text" placeholder="Search customer..." '+
+    '<input id="cust-tab-search" type="text" placeholder="'+t('search_customer')+'" '+
     'value="'+esc(custQuery)+'" oninput="custQuery=this.value; renderCustomersTab();"></div>';
   var rows = list.length ? list.map(function(c){
     var perm=isPermanentId(c.id);
-    var sub = c.open ? 'Open tab' : (c.last?('Last seen '+fmtDate(c.last)):'');
+    var sub = c.open ? t('open_tab_label') : (c.last?t('last_seen').replace('{a}',fmtDate(c.last)):'');
     return '<div class="row"'+(perm?' style="border-color:var(--gold);"':'')+
       '><button class="row-main" onclick="openCustHistory(\''+c.id+'\')">'+
       '<div style="font-weight:600;'+(perm?'color:var(--gold2);':'')+'">'+esc(c.name)+'</div>'+
@@ -3191,7 +3213,7 @@ function renderRaw(){
   var txs=st.transactions.slice().sort(function(a,b){ return b.ts-a.ts; }).slice(0,400);
   document.getElementById('rep-body').innerHTML=
     txs.length ? txs.map(function(t){ return txHTML(t,true); }).join('')
-               : '<div class="empty-hint">No transactions yet.</div>';
+               : '<div class="empty-hint">'+t('no_transactions')+'</div>';
 }
 
 /* Grouped under day headers so a long history reads as separate visits rather
@@ -3204,7 +3226,7 @@ function txDaysHTML(txs){
   return days.map(function(d){
     var g=groups[d], spent=0;
     g.forEach(function(t){ if(t.type==='debt') spent+=t.amount; });
-    return '<div class="day-hdr"><span class="d">'+(d===today?'Today \u00B7 ':'')+fmtDate(d)+'</span>'+
+    return '<div class="day-hdr"><span class="d">'+(d===today?t('today_dash')+' \u00B7 ':'')+fmtDate(d)+'</span>'+
       '<span style="color:var(--gold2);">'+f(spent)+EUR+'</span></div>'+
       g.map(function(t){ return txHTML(t,false,true); }).join('');
   }).join('');
@@ -3221,12 +3243,12 @@ function openTxDay(scope,custId){
   var name=txs.length?(txs[0].customerName||'?'):'?';
   var period = scope==='month' ? (monthName(repMonth.month)+' '+repMonth.year)
              : scope==='mday' ? fmtDate(monthDayCtx)
-             : scope==='cust' ? 'All history'
+             : scope==='cust' ? t('all_history')
              : fmtDate(todayBarDate());
   document.getElementById('txday-title').textContent=name;
-  document.getElementById('txday-sub').textContent=period+' \u00B7 '+txs.length+' transaction'+(txs.length===1?'':'s');
+  document.getElementById('txday-sub').textContent=period+' \u00B7 '+txs.length+' '+(txs.length===1?t('transaction'):t('transactions_pl'));
   document.getElementById('txday-body').innerHTML=
-    txs.length ? txDaysHTML(txs) : '<div class="empty-hint">No transactions.</div>';
+    txs.length ? txDaysHTML(txs) : '<div class="empty-hint">'+t('no_transactions2')+'</div>';
   show('s-txday');
 }
 
