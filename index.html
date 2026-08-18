@@ -588,7 +588,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.06.02';
+var APP_VERSION = '2.06.03';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -693,7 +693,55 @@ var LANG={
   m_data:{en:'Data', fi:'Tiedot', es:'Datos', de:'Daten', sv:'Data'},
   m_data_sub:{en:'Backup and storage', fi:'Varmuuskopiot ja tallennustila', es:'Copia de seguridad y almacenamiento', de:'Sicherung und Speicher', sv:'S\u00E4kerhetskopia och lagring'},
   m_group:{en:'group', fi:'ryhm\u00E4', es:'grupo', de:'Gruppe', sv:'grupp'},
-  m_groups:{en:'groups', fi:'ryhm\u00E4\u00E4', es:'grupos', de:'Gruppen', sv:'grupper'}
+  m_groups:{en:'groups', fi:'ryhm\u00E4\u00E4', es:'grupos', de:'Gruppen', sv:'grupper'},
+  // --- batch 5: settings sub-pages ---
+  sp_text:{en:'Text', fi:'Teksti', es:'Texto', de:'Text', sv:'Text'},
+  sp_use_text:{en:'Use this text', fi:'K\u00E4yt\u00E4 t\u00E4t\u00E4 teksti\u00E4', es:'Usar este texto', de:'Diesen Text verwenden', sv:'Anv\u00E4nd denna text'},
+  sp_image:{en:'Image', fi:'Kuva', es:'Imagen', de:'Bild', sv:'Bild'},
+  sp_choose_image:{en:'Choose image from device', fi:'Valitse kuva laitteelta', es:'Elegir imagen del dispositivo', de:'Bild vom Ger\u00E4t w\u00E4hlen', sv:'V\u00E4lj bild fr\u00E5n enheten'},
+  sp_remove_image:{en:'Remove image', fi:'Poista kuva', es:'Quitar imagen', de:'Bild entfernen', sv:'Ta bort bild'},
+  sp_image_hint:{en:'An image replaces the text. Large photos are scaled down automatically before saving.', fi:'Kuva korvaa tekstin. Suuret kuvat pienennet\u00E4\u00E4n automaattisesti ennen tallennusta.', es:'Una imagen sustituye al texto. Las fotos grandes se reducen autom\u00E1ticamente antes de guardar.', de:'Ein Bild ersetzt den Text. Gro\u00DFe Fotos werden vor dem Speichern automatisch verkleinert.', sv:'En bild ers\u00E4tter texten. Stora foton f\u00F6rminskas automatiskt f\u00F6re sparande.'},
+  sp_default:{en:'Default', fi:'Oletus', es:'Predeterminado', de:'Standard', sv:'Standard'},
+  sp_use_logo:{en:'Use the built-in logo', fi:'K\u00E4yt\u00E4 sis\u00E4\u00E4nrakennettua logoa', es:'Usar el logo integrado', de:'Eingebautes Logo verwenden', sv:'Anv\u00E4nd den inbyggda loggan'},
+  sp_logo_hint:{en:'Clears both the text and the image and puts the bundled Pub logo back.', fi:'Tyhjent\u00E4\u00E4 sek\u00E4 tekstin ett\u00E4 kuvan ja palauttaa mukana tulevan Pub-logon.', es:'Borra el texto y la imagen y restaura el logo Pub incluido.', de:'L\u00F6scht Text und Bild und setzt das mitgelieferte Pub-Logo zur\u00FCck.', sv:'Rensar b\u00E5de texten och bilden och \u00E5terst\u00E4ller den medf\u00F6ljande Pub-loggan.'},
+  sp_cards_per_row:{en:'Product cards per row', fi:'Tuotekortteja rivill\u00E4', es:'Tarjetas de producto por fila', de:'Produktkarten pro Zeile', sv:'Produktkort per rad'},
+  sp_bigger:{en:'Bigger', fi:'Suurempi', es:'M\u00E1s grande', de:'Gr\u00F6\u00DFer', sv:'St\u00F6rre'},
+  sp_smaller:{en:'Smaller', fi:'Pienempi', es:'M\u00E1s peque\u00F1o', de:'Kleiner', sv:'Mindre'},
+  sp_barday_ends:{en:'Bar day ends at', fi:'Baarip\u00E4iv\u00E4 p\u00E4\u00E4ttyy', es:'El d\u00EDa de barra termina a las', de:'Bartag endet um', sv:'Bardagen slutar'},
+  sp_barday_hint:{en:'Sales before this hour count towards the previous day. Each transaction stores its bar day when created, so changing this only affects new entries \u2014 past reports stay as they were.', fi:'Ennen t\u00E4t\u00E4 tuntia tehty myynti lasketaan edelliselle p\u00E4iv\u00E4lle. Jokainen tapahtuma tallentaa baarip\u00E4iv\u00E4ns\u00E4 luontihetkell\u00E4, joten muutos vaikuttaa vain uusiin \u2014 vanhat raportit s\u00E4ilyv\u00E4t.', es:'Las ventas antes de esta hora cuentan para el d\u00EDa anterior. Cada transacci\u00F3n guarda su d\u00EDa de barra al crearse, as\u00ED que el cambio solo afecta a las nuevas \u2014 los informes pasados no cambian.', de:'Verk\u00E4ufe vor dieser Stunde z\u00E4hlen zum Vortag. Jede Buchung speichert ihren Bartag bei Erstellung, daher betrifft die \u00C4nderung nur neue Eintr\u00E4ge \u2014 alte Berichte bleiben.', sv:'F\u00F6rs\u00E4ljning f\u00F6re denna timme r\u00E4knas till f\u00F6reg\u00E5ende dag. Varje transaktion sparar sin bardag n\u00E4r den skapas, s\u00E5 \u00E4ndringen p\u00E5verkar bara nya \u2014 gamla rapporter beh\u00E5lls.'},
+  sp_currency_hint:{en:'Shown after every amount. Anything short works \u2014 \u20AC, $, kr, z\u0142.', fi:'N\u00E4kyy jokaisen summan per\u00E4ss\u00E4. Mik\u00E4 tahansa lyhyt k\u00E4y \u2014 \u20AC, $, kr, z\u0142.', es:'Se muestra tras cada importe. Vale cualquier s\u00EDmbolo corto \u2014 \u20AC, $, kr, z\u0142.', de:'Wird nach jedem Betrag angezeigt. Alles Kurze geht \u2014 \u20AC, $, kr, z\u0142.', sv:'Visas efter varje belopp. Vad som helst kort fungerar \u2014 \u20AC, $, kr, z\u0142.'},
+  sp_expense:{en:'+ Expense', fi:'+ Kulu', es:'+ Gasto', de:'+ Ausgabe', sv:'+ Utgift'},
+  sp_other_income:{en:'+ Other income', fi:'+ Muu tulo', es:'+ Otro ingreso', de:'+ Sonstige Einnahme', sv:'+ \u00D6vrig int\u00E4kt'},
+  sp_cash_hint:{en:'Money in or out of the till that is not tied to a customer tab. Both appear in History.', fi:'Kassaan tai kassasta liikkuva raha, joka ei liity asiakkaan piikkiin. Molemmat n\u00E4kyv\u00E4t historiassa.', es:'Dinero que entra o sale de la caja sin estar ligado a una cuenta de cliente. Ambos aparecen en el historial.', de:'Geld rein oder raus aus der Kasse, das nicht an einen Kundendeckel gebunden ist. Beide erscheinen im Verlauf.', sv:'Pengar in eller ut ur kassan som inte h\u00F6r till en kundnota. B\u00E5da visas i historiken.'},
+  sp_check_updates:{en:'Check for updates', fi:'Tarkista p\u00E4ivitykset', es:'Buscar actualizaciones', de:'Nach Updates suchen', sv:'S\u00F6k efter uppdateringar'},
+  sp_backup_reset:{en:'Backup & reset', fi:'Varmuuskopio ja nollaus', es:'Copia y reinicio', de:'Sicherung & Zur\u00FCcksetzen', sv:'S\u00E4kerhetskopia & \u00E5terst\u00E4llning'},
+  sp_backup:{en:'Backup', fi:'Varmuuskopio', es:'Copia de seguridad', de:'Sicherung', sv:'S\u00E4kerhetskopia'},
+  sp_save_backup:{en:'Save backup', fi:'Tallenna varmuuskopio', es:'Guardar copia', de:'Sicherung speichern', sv:'Spara s\u00E4kerhetskopia'},
+  sp_load_backup:{en:'Load backup', fi:'Lataa varmuuskopio', es:'Cargar copia', de:'Sicherung laden', sv:'Ladda s\u00E4kerhetskopia'},
+  sp_auto_backup:{en:'Auto backup', fi:'Automaattinen varmuuskopio', es:'Copia autom\u00E1tica', de:'Auto-Sicherung', sv:'Automatisk s\u00E4kerhetskopia'},
+  sp_on:{en:'On', fi:'P\u00E4\u00E4ll\u00E4', es:'Activado', de:'An', sv:'P\u00E5'},
+  sp_off:{en:'Off', fi:'Pois', es:'Desactivado', de:'Aus', sv:'Av'},
+  sp_how_often:{en:'How often', fi:'Kuinka usein', es:'Con qu\u00E9 frecuencia', de:'Wie oft', sv:'Hur ofta'},
+  sp_day:{en:'Day', fi:'P\u00E4iv\u00E4', es:'D\u00EDa', de:'Tag', sv:'Dag'},
+  sp_time:{en:'Time', fi:'Aika', es:'Hora', de:'Uhrzeit', sv:'Tid'},
+  sp_last:{en:'Last', fi:'Viimeisin', es:'\u00DAltima', de:'Zuletzt', sv:'Senaste'},
+  sp_no_auto_yet:{en:'No automatic backup yet.', fi:'Ei automaattista varmuuskopiota viel\u00E4.', es:'A\u00FAn no hay copia autom\u00E1tica.', de:'Noch keine automatische Sicherung.', sv:'Ingen automatisk s\u00E4kerhetskopia \u00E4nnu.'},
+  sp_auto_off_hint:{en:'Downloads a backup on a schedule while the app is open.', fi:'Lataa varmuuskopion aikataulun mukaan, kun sovellus on auki.', es:'Descarga una copia seg\u00FAn un horario mientras la app est\u00E1 abierta.', de:'L\u00E4dt eine Sicherung nach Zeitplan, w\u00E4hrend die App offen ist.', sv:'Laddar ner en s\u00E4kerhetskopia enligt schema medan appen \u00E4r \u00F6ppen.'},
+  sp_auto_file_hint:{en:'A file is downloaded automatically the next time the app is open after that time.', fi:'Tiedosto ladataan automaattisesti, kun sovellus on seuraavan kerran auki t\u00E4m\u00E4n ajan j\u00E4lkeen.', es:'Se descarga un archivo autom\u00E1ticamente la pr\u00F3xima vez que la app est\u00E9 abierta tras esa hora.', de:'Eine Datei wird automatisch heruntergeladen, wenn die App das n\u00E4chste Mal nach dieser Zeit offen ist.', sv:'En fil laddas ner automatiskt n\u00E4sta g\u00E5ng appen \u00E4r \u00F6ppen efter den tiden.'},
+  sp_purge:{en:'Purge old data', fi:'Poista vanhat tiedot', es:'Purgar datos antiguos', de:'Alte Daten l\u00F6schen', sv:'Rensa gammal data'},
+  sp_purge_hint:{en:'Delete all transactions before the selected month.', fi:'Poista kaikki tapahtumat ennen valittua kuukautta.', es:'Elimina todas las transacciones antes del mes seleccionado.', de:'L\u00F6scht alle Buchungen vor dem gew\u00E4hlten Monat.', sv:'Radera alla transaktioner f\u00F6re den valda m\u00E5naden.'},
+  sp_save_first:{en:'Save a backup first.', fi:'Tallenna ensin varmuuskopio.', es:'Guarda una copia primero.', de:'Zuerst eine Sicherung speichern.', sv:'Spara en s\u00E4kerhetskopia f\u00F6rst.'},
+  sp_storage:{en:'Storage', fi:'Tallennustila', es:'Almacenamiento', de:'Speicher', sv:'Lagring'},
+  sp_kb_used:{en:'kB used', fi:'kt k\u00E4yt\u00F6ss\u00E4', es:'kB usados', de:'kB belegt', sv:'kB anv\u00E4nt'},
+  sp_of_5mb:{en:'of ~5 MB', fi:'/ n. 5 Mt', es:'de ~5 MB', de:'von ~5 MB', sv:'av ~5 MB'},
+  sp_danger:{en:'Danger zone', fi:'Vaaravy\u00F6hyke', es:'Zona de peligro', de:'Gefahrenzone', sv:'Farozon'},
+  sp_clear_history:{en:'Clear all history', fi:'Tyhjenn\u00E4 koko historia', es:'Borrar todo el historial', de:'Gesamten Verlauf l\u00F6schen', sv:'Rensa all historik'},
+  sp_reset_all:{en:'Reset all data', fi:'Nollaa kaikki tiedot', es:'Restablecer todos los datos', de:'Alle Daten zur\u00FCcksetzen', sv:'\u00C5terst\u00E4ll all data'},
+  sp_danger_hint:{en:'Clearing history keeps products, categories and tables. Reset removes everything.', fi:'Historian tyhjennys s\u00E4ilytt\u00E4\u00E4 tuotteet, kategoriat ja p\u00F6yd\u00E4t. Nollaus poistaa kaiken.', es:'Borrar el historial conserva productos, categor\u00EDas y mesas. Restablecer elimina todo.', de:'Verlauf l\u00F6schen beh\u00E4lt Produkte, Kategorien und Tische. Zur\u00FCcksetzen entfernt alles.', sv:'Rensa historik beh\u00E5ller produkter, kategorier och bord. \u00C5terst\u00E4llning tar bort allt.'},
+  cyc_daily:{en:'Every day', fi:'Joka p\u00E4iv\u00E4', es:'Cada d\u00EDa', de:'T\u00E4glich', sv:'Varje dag'},
+  cyc_2day:{en:'Every 2 days', fi:'Joka toinen p\u00E4iv\u00E4', es:'Cada 2 d\u00EDas', de:'Alle 2 Tage', sv:'Varannan dag'},
+  cyc_weekly:{en:'Weekly', fi:'Viikoittain', es:'Semanal', de:'W\u00F6chentlich', sv:'Varje vecka'},
+  cyc_monthly:{en:'Monthly', fi:'Kuukausittain', es:'Mensual', de:'Monatlich', sv:'Varje m\u00E5nad'}
 };
 function curLang(){
   try{ return (getState().settings.lang)||'en'; }catch(e){ return 'en'; }
@@ -3048,56 +3096,56 @@ function openSetPage(k){ setPage=k; renderSetPage(); show('s-setpage'); }
 function renderSetPage(){
   var st=getState(), s=st.settings, h='', title='';
   if(setPage==='header'){
-    title='Header';
-    h='<div class="card-box"><div class="label">Text</div>'+
+    title=t('m_header');
+    h='<div class="card-box"><div class="label">'+t('sp_text')+'</div>'+
       '<div class="field"><input type="text" id="set-hdrtext" value="'+esc(s.headerText==='Pub'?'':(s.headerText||''))+'" placeholder="Pub"></div>'+
-      '<button class="btn-full" onclick="saveHeaderText()">Use this text</button></div>'+
-      '<div class="card-box"><div class="label">Image</div>'+
-      '<button class="btn-full" style="margin-bottom:0.5em;" onclick="pickHeaderImage()">Choose image from device</button>'+
-      (s.headerImage?'<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);" onclick="clearHeaderImage()">Remove image</button>':'')+
-      '<div class="hint">An image replaces the text. Large photos are scaled down automatically before saving.</div></div>'+
-      '<div class="card-box"><div class="label">Default</div>'+
-      '<button class="btn-full" style="border-color:var(--gold);color:var(--gold2);" onclick="resetHeader()">Use the built-in logo</button>'+
-      '<div class="hint">Clears both the text and the image and puts the bundled Pub logo back.</div></div>';
+      '<button class="btn-full" onclick="saveHeaderText()">'+t('sp_use_text')+'</button></div>'+
+      '<div class="card-box"><div class="label">'+t('sp_image')+'</div>'+
+      '<button class="btn-full" style="margin-bottom:0.5em;" onclick="pickHeaderImage()">'+t('sp_choose_image')+'</button>'+
+      (s.headerImage?'<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);" onclick="clearHeaderImage()">'+t('sp_remove_image')+'</button>':'')+
+      '<div class="hint">'+t('sp_image_hint')+'</div></div>'+
+      '<div class="card-box"><div class="label">'+t('sp_default')+'</div>'+
+      '<button class="btn-full" style="border-color:var(--gold);color:var(--gold2);" onclick="resetHeader()">'+t('sp_use_logo')+'</button>'+
+      '<div class="hint">'+t('sp_logo_hint')+'</div></div>';
   } else if(setPage==='look'){
-    title='Appearance';
-    h='<div class="card-box"><div class="label">Text size \u2014 '+Math.round(s.fontScale*100)+'%</div>'+
+    title=t('m_appearance');
+    h='<div class="card-box"><div class="label">'+t('m_textsize')+' \u2014 '+Math.round(s.fontScale*100)+'%</div>'+
       '<div class="btn-row"><button class="btn-full" onclick="bumpFont(-0.05)">A \u2212</button>'+
       '<button class="btn-full" onclick="bumpFont(0.05)">A +</button></div></div>'+
-      '<div class="card-box"><div class="label">Product cards per row \u2014 '+s.cols+'</div>'+
-      '<div class="btn-row"><button class="btn-full" onclick="bumpCols(-1)">Bigger</button>'+
-      '<button class="btn-full" onclick="bumpCols(1)">Smaller</button></div></div>';
+      '<div class="card-box"><div class="label">'+t('sp_cards_per_row')+' \u2014 '+s.cols+'</div>'+
+      '<div class="btn-row"><button class="btn-full" onclick="bumpCols(-1)">'+t('sp_bigger')+'</button>'+
+      '<button class="btn-full" onclick="bumpCols(1)">'+t('sp_smaller')+'</button></div></div>';
   } else if(setPage==='day'){
-    title='Bar day';
+    title=t('m_barday');
     var hours='';
     for(var i=1;i<=8;i++) hours+='<option value="'+i+'"'+(s.dayEnd===i?' selected':'')+'>'+pad2(i)+':00</option>';
-    h='<div class="card-box"><div class="label">Bar day ends at</div>'+
+    h='<div class="card-box"><div class="label">'+t('sp_barday_ends')+'</div>'+
       '<select onchange="setDayEnd(this.value)">'+hours+'</select>'+
-      '<div class="hint">Sales before this hour count towards the previous day. Each transaction stores its bar day when created, so changing this only affects new entries \u2014 past reports stay as they were.</div></div>';
+      '<div class="hint">'+t('sp_barday_hint')+'</div></div>';
   } else if(setPage==='region'){
     title=t('currency_and_language');
     h='<div class="card-box"><div class="label">'+t('currency_symbol')+'</div>'+
       '<div class="field"><input type="text" id="set-currency" value="'+esc(s.currency)+'" placeholder="\u20AC" maxlength="4"></div>'+
-      '<button class="btn-full" onclick="saveCurrency()">Save</button>'+
-      '<div class="hint">Shown after every amount. Anything short works \u2014 \u20AC, $, kr, z\u0142.</div></div>'+
+      '<button class="btn-full" onclick="saveCurrency()">'+t('save')+'</button>'+
+      '<div class="hint">'+t('sp_currency_hint')+'</div></div>'+
       '<div class="card-box"><div class="label">'+t('language')+'</div>'+
       '<select id="set-lang" onchange="saveLang(this.value)">'+
       LANGS.map(function(L){ return '<option value="'+L[0]+'"'+(s.lang===L[0]?' selected':'')+'>'+L[1]+'</option>'; }).join('')+
       '</select>'+
       '<div class="hint">'+t('lang_hint')+'</div></div>';
   } else if(setPage==='cash'){
-    title='Cash flow';
+    title=t('m_cashflow');
     h='<div class="card-box">'+
-      '<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);margin-bottom:0.5em;" onclick="addHouseEntry(\'expense\')">+ Expense</button>'+
-      '<button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="addHouseEntry(\'income\')">+ Other income</button>'+
-      '<div class="hint">Money in or out of the till that is not tied to a customer tab. Both appear in History.</div></div>';
+      '<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);margin-bottom:0.5em;" onclick="addHouseEntry(\'expense\')">'+t('sp_expense')+'</button>'+
+      '<button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="addHouseEntry(\'income\')">'+t('sp_other_income')+'</button>'+
+      '<div class="hint">'+t('sp_cash_hint')+'</div></div>';
   } else if(setPage==='upd'){
-    title='Updates';
-    h='<div class="card-box"><div class="label">Version '+APP_VERSION+'</div>'+
-      '<button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="checkUpdate()">Check for updates</button>'+
+    title=t('m_updates');
+    h='<div class="card-box"><div class="label">'+t('m_version')+' '+APP_VERSION+'</div>'+
+      '<button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="checkUpdate()">'+t('sp_check_updates')+'</button>'+
       '<div id="upd-status" class="hint" style="text-align:center;"></div></div>';
   } else {
-    title='Backup & reset';
+    title=t('sp_backup_reset');
     var kb=Math.round(storageBytes()/1024);
     var pct=Math.min(100,Math.round(storageBytes()/(5*1024*1024)*100));
     var now=new Date(), minYear=now.getFullYear()-1;
@@ -3119,39 +3167,39 @@ function renderSetPage(){
     var hourOpts='';
     for(var hi=0;hi<24;hi++) hourOpts+='<option value="'+hi+'"'+(ab.hour===hi?' selected':'')+'>'+pad2(hi)+':00</option>';
     var cycleOpts='';
-    [['daily','Every day'],['2day','Every 2 days'],['weekly','Weekly'],['monthly','Monthly']].forEach(function(o){
+    [['daily',t('cyc_daily')],['2day',t('cyc_2day')],['weekly',t('cyc_weekly')],['monthly',t('cyc_monthly')]].forEach(function(o){
       cycleOpts+='<option value="'+o[0]+'"'+(ab.cycle===o[0]?' selected':'')+'>'+o[1]+'</option>';
     });
-    h='<div class="card-box"><div class="label">Backup</div>'+
-      '<button class="btn-full" style="margin-bottom:0.5em;" onclick="doBackup()">Save backup</button>'+
-      '<button class="btn-full" style="border-color:var(--text3);color:var(--text2);" onclick="pickRestoreFile()">Load backup</button>'+
+    h='<div class="card-box"><div class="label">'+t('sp_backup')+'</div>'+
+      '<button class="btn-full" style="margin-bottom:0.5em;" onclick="doBackup()">'+t('sp_save_backup')+'</button>'+
+      '<button class="btn-full" style="border-color:var(--text3);color:var(--text2);" onclick="pickRestoreFile()">'+t('sp_load_backup')+'</button>'+
       '</div>'+
 
-      '<div class="card-box"><div class="label">Auto backup</div>'+
+      '<div class="card-box"><div class="label">'+t('sp_auto_backup')+'</div>'+
       '<button class="btn-full" style="'+(ab.on?'background:var(--gbg);border-color:var(--green);color:var(--green);':'')+'margin-bottom:0.6em;" onclick="toggleAutoBackup()">'+
-      (ab.on?'On':'Off')+'</button>'+
+      (ab.on?t('sp_on'):t('sp_off'))+'</button>'+
       (ab.on?
-        '<div class="label">How often</div><select id="ab-cycle" onchange="saveAutoBackup()" style="margin-bottom:0.6em;">'+cycleOpts+'</select>'+
-        (ab.cycle==='weekly'?'<div class="label">Day</div><select id="ab-day" onchange="saveAutoBackup()" style="margin-bottom:0.6em;">'+dayOpts+'</select>':'')+
-        '<div class="label">Time</div><select id="ab-hour" onchange="saveAutoBackup()">'+hourOpts+'</select>'+
-        '<div class="hint">'+autoBackupDesc(ab)+' A file is downloaded automatically the next time the app is open after that time. '+
-        (ab.last?('Last: '+fmtDate(ab.last)+' '+fmtTime(ab.last)+'.'):'No automatic backup yet.')+'</div>'
-        :'<div class="hint">Downloads a backup on a schedule while the app is open.</div>')+
+        '<div class="label">'+t('sp_how_often')+'</div><select id="ab-cycle" onchange="saveAutoBackup()" style="margin-bottom:0.6em;">'+cycleOpts+'</select>'+
+        (ab.cycle==='weekly'?'<div class="label">'+t('sp_day')+'</div><select id="ab-day" onchange="saveAutoBackup()" style="margin-bottom:0.6em;">'+dayOpts+'</select>':'')+
+        '<div class="label">'+t('sp_time')+'</div><select id="ab-hour" onchange="saveAutoBackup()">'+hourOpts+'</select>'+
+        '<div class="hint">'+autoBackupDesc(ab)+' '+t('sp_auto_file_hint')+' '+
+        (ab.last?(t('sp_last')+': '+fmtDate(ab.last)+' '+fmtTime(ab.last)+'.'):t('sp_no_auto_yet'))+'</div>'
+        :'<div class="hint">'+t('sp_auto_off_hint')+'</div>')+
       '</div>'+
 
-      '<div class="card-box"><div class="label">Purge old data</div>'+
-      '<div class="hint" style="margin:0 0 0.6em;">Delete all transactions before the selected month.</div>'+
+      '<div class="card-box"><div class="label">'+t('sp_purge')+'</div>'+
+      '<div class="hint" style="margin:0 0 0.6em;">'+t('sp_purge_hint')+'</div>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5em;margin-bottom:0.6em;">'+
       '<select id="purge-month">'+mOpts+'</select><select id="purge-year">'+yOpts+'</select></div>'+
-      '<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);" onclick="purgeBeforeSelected()">Purge old data</button>'+
-      '<div class="hint">Save a backup first.</div></div>'+
+      '<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);" onclick="purgeBeforeSelected()">'+t('sp_purge')+'</button>'+
+      '<div class="hint">'+t('sp_save_first')+'</div></div>'+
 
-      '<div class="card-box"><div class="label">Storage \u2014 '+kb+' kB used ('+pct+'% of ~5 MB)</div></div>'+
+      '<div class="card-box"><div class="label">'+t('sp_storage')+' \u2014 '+kb+' '+t('sp_kb_used')+' ('+pct+'% '+t('sp_of_5mb')+')</div></div>'+
 
-      '<div class="card-box" style="border-color:var(--rborder);"><div class="label" style="color:var(--red);">Danger zone</div>'+
-      '<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);margin-bottom:0.5em;" onclick="clearHistory()">Clear all history</button>'+
-      '<button class="btn-full" style="background:var(--rbg);border-color:var(--red);color:var(--red);" onclick="wipeData()">Reset all data</button>'+
-      '<div class="hint">Clearing history keeps products, categories and tables. Reset removes everything.</div></div>';
+      '<div class="card-box" style="border-color:var(--rborder);"><div class="label" style="color:var(--red);">'+t('sp_danger')+'</div>'+
+      '<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);margin-bottom:0.5em;" onclick="clearHistory()">'+t('sp_clear_history')+'</button>'+
+      '<button class="btn-full" style="background:var(--rbg);border-color:var(--red);color:var(--red);" onclick="wipeData()">'+t('sp_reset_all')+'</button>'+
+      '<div class="hint">'+t('sp_danger_hint')+'</div></div>';
   }
   document.getElementById('sp-title').textContent=title;
   document.getElementById('sp-body').innerHTML=h;

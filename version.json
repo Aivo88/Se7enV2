@@ -1,5 +1,5 @@
 {
-  "version": "2.06.02",
-  "cache": "se7env2-v59",
-  "notes": "Translations batch 3-4: report and product screen titles/tabs, all modal dialogs (settle, payment, split, product editor, amount, edit transaction), and the whole Settings menu now follow the selected language."
+  "version": "2.06.03",
+  "cache": "se7env2-v60",
+  "notes": "Translations batch 5: all Settings sub-pages (Header, Appearance, Bar day, Cash flow, Updates, Backup & reset) now follow the selected language, including auto-backup cycle options and the danger zone."
 }
