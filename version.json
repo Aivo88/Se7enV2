@@ -1,5 +1,5 @@
 {
-  "version": "2.06.04",
-  "cache": "se7env2-v61",
-  "notes": "Translations batch 6 (final): all toast confirmation and error messages now follow the selected language. The app is now fully translated into English, Finnish, Spanish, German and Swedish."
+  "version": "2.06.05",
+  "cache": "se7env2-v62",
+  "notes": "Translations batch 7: History (day/month/year-summary/customers), month and weekday names, Products and Categories screens, and confirm dialogs now follow the selected language. New: product search box on the Categories page to find any product across all categories."
 }
