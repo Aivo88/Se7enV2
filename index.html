@@ -200,19 +200,19 @@ input:focus,select:focus{border-color:var(--gold);}
     </div>
     <div id="pane-bal" style="display:none;">
       <div class="card-box">
-        <div class="label">Customer hands over money</div>
+        <div class="label" data-t="bal_credit_label">Customer hands over money</div>
         <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.5em;" onclick="balAction('credit')" data-t="add_credit">Add credit</button>
-        <div class="hint">Money taken now and held against future purchases.</div>
+        <div class="hint" data-t="bal_credit_hint">Money taken now and held against future purchases.</div>
       </div>
       <div class="card-box">
-        <div class="label">Payment towards the tab</div>
+        <div class="label" data-t="bal_pay_label">Payment towards the tab</div>
         <button class="btn-full" style="background:var(--bbg);border-color:var(--blue);color:var(--blue);" onclick="balAction('pay')" data-t="add_payment">Add payment</button>
-        <div class="hint">Reduces what is currently owed.</div>
+        <div class="hint" data-t="bal_pay_hint">Reduces what is currently owed.</div>
       </div>
       <div class="card-box">
-        <div class="label">Charge without products</div>
+        <div class="label" data-t="bal_debt_label">Charge without products</div>
         <button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);" onclick="balAction('debt')" data-t="add_debt">Add debt</button>
-        <div class="hint">A manual charge, for example a broken glass.</div>
+        <div class="hint" data-t="bal_debt_hint">A manual charge, for example a broken glass.</div>
       </div>
     </div>
     <div id="pane-hist" style="display:none;"></div>
@@ -568,7 +568,7 @@ input:focus,select:focus{border-color:var(--gold);}
     <div class="modal-title" id="mt-title"></div>
     <div class="field"><input type="text" id="mt-input" autocomplete="off"></div>
     <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.6em;" id="mt-ok">OK</button>
-    <button class="btn-modal-cancel" onclick="closeModal('m-text')">Cancel</button>
+    <button class="btn-modal-cancel" onclick="closeModal('m-text')" data-t="cancel">Cancel</button>
   </div>
 </div>
 
@@ -588,7 +588,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.06.06';
+var APP_VERSION = '2.06.08';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -875,7 +875,51 @@ var LANG={
   writeoff_q:{en:'Write off debt?', fi:'Kirjataanko velka tappioksi?', es:'\u00BFCancelar la deuda?', de:'Schuld abschreiben?', sv:'Avskriva skulden?'},
   writeoff_body:{en:'{a} \u2014 {b} will be cleared as a loss (no income recorded).', fi:'{a} \u2014 {b} kirjataan tappioksi (ei tuloa).', es:'{a} \u2014 {b} se cancelar\u00E1 como p\u00E9rdida (sin ingreso).', de:'{a} \u2014 {b} wird als Verlust abgeschrieben (keine Einnahme).', sv:'{a} \u2014 {b} avskrivs som f\u00F6rlust (ingen int\u00E4kt).'},
   new_product:{en:'New product', fi:'Uusi tuote', es:'Nuevo producto', de:'Neues Produkt', sv:'Ny produkt'},
-  edit_product:{en:'Edit product', fi:'Muokkaa tuotetta', es:'Editar producto', de:'Produkt bearbeiten', sv:'Redigera produkt'}
+  edit_product:{en:'Edit product', fi:'Muokkaa tuotetta', es:'Editar producto', de:'Produkt bearbeiten', sv:'Redigera produkt'},
+  // --- batch 9: prompts & remaining buttons ---
+  custom_amount_title:{en:'Custom amount', fi:'Oma summa', es:'Importe libre', de:'Freier Betrag', sv:'Eget belopp'},
+  custom_to_tab:{en:'Charged straight to the tab.', fi:'Veloitetaan suoraan piikkiin.', es:'Se carga directamente a la cuenta.', de:'Direkt auf den Deckel gebucht.', sv:'Debiteras direkt p\u00E5 notan.'},
+  custom_no_product:{en:'A charge with no product button.', fi:'Veloitus ilman tuotepainiketta.', es:'Un cargo sin bot\u00F3n de producto.', de:'Eine Belastung ohne Produkt-Schaltfl\u00E4che.', sv:'En debitering utan produktknapp.'},
+  or_type_exact:{en:'Or type an exact amount', fi:'Tai sy\u00F6t\u00E4 tarkka summa', es:'O escribe un importe exacto', de:'Oder genauen Betrag eingeben', sv:'Eller skriv ett exakt belopp'},
+  add_expense_title:{en:'Add expense', fi:'Lis\u00E4\u00E4 kulu', es:'A\u00F1adir gasto', de:'Ausgabe hinzuf\u00FCgen', sv:'L\u00E4gg till utgift'},
+  add_income_title:{en:'Add other income', fi:'Lis\u00E4\u00E4 muu tulo', es:'A\u00F1adir otro ingreso', de:'Sonstige Einnahme hinzuf\u00FCgen', sv:'L\u00E4gg till \u00F6vrig int\u00E4kt'},
+  expense_hint:{en:'Money out of the till that is not a customer debt.', fi:'Kassasta l\u00E4htev\u00E4 raha, joka ei ole asiakkaan velka.', es:'Dinero que sale de la caja y no es deuda de cliente.', de:'Geld aus der Kasse, das keine Kundenschuld ist.', sv:'Pengar ut ur kassan som inte \u00E4r en kundskuld.'},
+  income_hint:{en:'Money in that did not come from a tab.', fi:'Sis\u00E4\u00E4n tullut raha, joka ei tullut piikilt\u00E4.', es:'Dinero que entr\u00F3 y no vino de una cuenta.', de:'Geld rein, das nicht von einem Deckel kam.', sv:'Pengar in som inte kom fr\u00E5n en nota.'},
+  expense_name:{en:'Expense', fi:'Kulu', es:'Gasto', de:'Ausgabe', sv:'Utgift'},
+  income_name:{en:'Other income', fi:'Muu tulo', es:'Otro ingreso', de:'Sonstige Einnahme', sv:'\u00D6vrig int\u00E4kt'},
+  custom_line:{en:'Custom', fi:'Oma', es:'Libre', de:'Frei', sv:'Eget'},
+  rename_customer:{en:'Rename customer', fi:'Nime\u00E4 asiakas', es:'Renombrar cliente', de:'Kunde umbenennen', sv:'D\u00F6p om kund'},
+  new_button_amount:{en:'New button amount', fi:'Uuden painikkeen summa', es:'Importe del nuevo bot\u00F3n', de:'Betrag neue Schaltfl\u00E4che', sv:'Nytt knappbelopp'},
+  button_amount:{en:'Button amount', fi:'Painikkeen summa', es:'Importe del bot\u00F3n', de:'Schaltfl\u00E4chen-Betrag', sv:'Knappbelopp'},
+  // --- batch 10: balance tab + group management ---
+  bal_credit_label:{en:'Customer hands over money', fi:'Asiakas antaa rahaa', es:'El cliente entrega dinero', de:'Kunde \u00FCbergibt Geld', sv:'Kunden l\u00E4mnar pengar'},
+  bal_credit_hint:{en:'Money taken now and held against future purchases.', fi:'Nyt otettu raha, s\u00E4ilytet\u00E4\u00E4n tulevia ostoja varten.', es:'Dinero recibido ahora y guardado para compras futuras.', de:'Jetzt genommenes Geld, f\u00FCr k\u00FCnftige Eink\u00E4ufe.', sv:'Pengar som tas nu och sparas f\u00F6r framtida k\u00F6p.'},
+  bal_pay_label:{en:'Payment towards the tab', fi:'Maksu piikkiin', es:'Pago a la cuenta', de:'Zahlung auf den Deckel', sv:'Betalning mot notan'},
+  bal_pay_hint:{en:'Reduces what is currently owed.', fi:'V\u00E4hent\u00E4\u00E4 nykyist\u00E4 velkaa.', es:'Reduce lo que se debe actualmente.', de:'Verringert die aktuelle Schuld.', sv:'Minskar nuvarande skuld.'},
+  bal_debt_label:{en:'Charge without products', fi:'Veloitus ilman tuotteita', es:'Cargo sin productos', de:'Belastung ohne Produkte', sv:'Debitering utan produkter'},
+  bal_debt_hint:{en:'A manual charge, for example a broken glass.', fi:'Manuaalinen veloitus, esimerkiksi rikkoutunut lasi.', es:'Un cargo manual, por ejemplo un vaso roto.', de:'Eine manuelle Belastung, z.B. ein zerbrochenes Glas.', sv:'En manuell debitering, t.ex. ett trasigt glas.'},
+  group_name:{en:'Group name', fi:'Ryhm\u00E4n nimi', es:'Nombre del grupo', de:'Gruppenname', sv:'Gruppnamn'},
+  save_name:{en:'Save name', fi:'Tallenna nimi', es:'Guardar nombre', de:'Name speichern', sv:'Spara namn'},
+  show_on_home:{en:'Show on home screen', fi:'N\u00E4yt\u00E4 kotin\u00E4yt\u00F6ll\u00E4', es:'Mostrar en la pantalla de inicio', de:'Auf Startbildschirm zeigen', sv:'Visa p\u00E5 startsk\u00E4rmen'},
+  hide_from_home:{en:'Hide from home screen', fi:'Piilota kotin\u00E4yt\u00F6lt\u00E4', es:'Ocultar de la pantalla de inicio', de:'Vom Startbildschirm ausblenden', sv:'D\u00F6lj fr\u00E5n startsk\u00E4rmen'},
+  delete_group:{en:'Delete group', fi:'Poista ryhm\u00E4', es:'Eliminar grupo', de:'Gruppe l\u00F6schen', sv:'Radera grupp'},
+  grp_hidden_hint:{en:'Hidden from the home screen. Balances still count and can be settled here.', fi:'Piilotettu kotin\u00E4yt\u00F6lt\u00E4. Saldot lasketaan silti ja voidaan maksaa t\u00E4\u00E4ll\u00E4.', es:'Oculto de la pantalla de inicio. Los saldos siguen contando y se pueden liquidar aqu\u00ED.', de:'Vom Startbildschirm ausgeblendet. Salden z\u00E4hlen weiter und k\u00F6nnen hier beglichen werden.', sv:'D\u00F6ld fr\u00E5n startsk\u00E4rmen. Saldon r\u00E4knas fortfarande och kan betalas h\u00E4r.'},
+  grp_default_hint:{en:'The default group cannot be deleted.', fi:'Oletusryhm\u00E4\u00E4 ei voi poistaa.', es:'El grupo predeterminado no se puede eliminar.', de:'Die Standardgruppe kann nicht gel\u00F6scht werden.', sv:'Standardgruppen kan inte raderas.'},
+  grp_delete_hint:{en:'Deleting moves its members to the default group.', fi:'Poisto siirt\u00E4\u00E4 j\u00E4senet oletusryhm\u00E4\u00E4n.', es:'Eliminar traslada sus miembros al grupo predeterminado.', de:'L\u00F6schen verschiebt die Mitglieder in die Standardgruppe.', sv:'Radering flyttar medlemmarna till standardgruppen.'},
+  members:{en:'Members', fi:'J\u00E4senet', es:'Miembros', de:'Mitglieder', sv:'Medlemmar'},
+  no_members:{en:'No members yet.', fi:'Ei j\u00E4seni\u00E4 viel\u00E4.', es:'A\u00FAn no hay miembros.', de:'Noch keine Mitglieder.', sv:'Inga medlemmar \u00E4nnu.'},
+  add_member:{en:'+ Add member', fi:'+ Lis\u00E4\u00E4 j\u00E4sen', es:'+ A\u00F1adir miembro', de:'+ Mitglied hinzuf\u00FCgen', sv:'+ L\u00E4gg till medlem'},
+  tap_to_open2:{en:'tap to open', fi:'napauta avataksesi', es:'toca para abrir', de:'zum \u00D6ffnen tippen', sv:'tryck f\u00F6r att \u00F6ppna'},
+  section_name:{en:'Section name', fi:'Osion nimi', es:'Nombre de la secci\u00F3n', de:'Abschnittsname', sv:'Sektionsnamn'},
+  section_name_hint:{en:'The word used for these groups across the app.', fi:'Sana jota k\u00E4ytet\u00E4\u00E4n n\u00E4ist\u00E4 ryhmist\u00E4 sovelluksessa.', es:'La palabra usada para estos grupos en la app.', de:'Das Wort f\u00FCr diese Gruppen in der App.', sv:'Ordet som anv\u00E4nds f\u00F6r dessa grupper i appen.'},
+  member:{en:'member', fi:'j\u00E4sen', es:'miembro', de:'Mitglied', sv:'medlem'},
+  members_pl:{en:'members', fi:'j\u00E4sent\u00E4', es:'miembros', de:'Mitglieder', sv:'medlemmar'},
+  tag_hidden:{en:'hidden', fi:'piilotettu', es:'oculto', de:'ausgeblendet', sv:'d\u00F6ld'},
+  tag_default:{en:'default', fi:'oletus', es:'predeterminado', de:'Standard', sv:'standard'},
+  new_group:{en:'New group', fi:'Uusi ryhm\u00E4', es:'Nuevo grupo', de:'Neue Gruppe', sv:'Ny grupp'},
+  add_member_prompt:{en:'Add member', fi:'Lis\u00E4\u00E4 j\u00E4sen', es:'A\u00F1adir miembro', de:'Mitglied hinzuf\u00FCgen', sv:'L\u00E4gg till medlem'},
+  rename_prompt:{en:'Rename', fi:'Nime\u00E4 uudelleen', es:'Renombrar', de:'Umbenennen', sv:'D\u00F6p om'},
+  new_customer_prompt:{en:'New customer', fi:'Uusi asiakas', es:'Nuevo cliente', de:'Neuer Kunde', sv:'Ny kund'}
 };
 // Localized month + weekday names
 var MONTHS_L={
@@ -1183,7 +1227,7 @@ function renderHome(){
         '<button class="cust-item-tap" onclick="openCustomer(\''+c.id+'\')">'+
         '<div class="cust-name">'+esc(c.name)+mark+'</div>'+
         '<div class="cust-bal '+balClass(b)+'">'+balText(b)+'</div></button>'+
-        '<button class="btn-settled-list" onclick="askBillSettled(\''+c.id+'\')">Settled</button></div>';
+        '<button class="btn-settled-list" onclick="askBillSettled(\''+c.id+'\')">'+t('settled')+'</button></div>';
     }).join('')+'</div>';
 
   var bd=todayBarDate(), cash=0, card=0;
@@ -1230,7 +1274,7 @@ function isPerson(st,id){
 }
 
 function askNewCustomer(prefill){
-  askText('New customer',prefill||'',function(name){
+  askText(t('new_customer_prompt'),prefill||'',function(name){
     var st=getState(), i;
     /* Two people called Dave on the same night would be impossible to tell
        apart later, so the name has to be made unique up front. */
@@ -1289,7 +1333,7 @@ function renameCustomer(){
   var st=getState(), c=findCustomer(st,activeCustomerId);
   if(!c) return;
   closeModal('m-cmenu');
-  askText('Rename customer',c.name,function(name){
+  askText(t('rename_customer'),c.name,function(name){
     var st2=getState(), c2=findCustomer(st2,activeCustomerId);
     if(!c2) return;
     var clash=st2.customers.some(function(x){
@@ -1364,7 +1408,7 @@ function openTables(gid){
       '<button class="cust-item-tap" onclick="openCustomer(\''+c.id+'\')">'+
       '<div class="cust-name">'+esc(c.name)+'</div>'+
       '<div class="cust-bal '+balClass(b)+'">'+balText(b)+'</div></button>'+
-      '<button class="btn-settled-list" onclick="askBillSettled(\''+c.id+'\')">Settled</button></div>';
+      '<button class="btn-settled-list" onclick="askBillSettled(\''+c.id+'\')">'+t('settled')+'</button></div>';
   }).join('')+'</div>') : '<div class="empty-hint">Nothing here yet.<br>Add entries in Settings.</div>';
   show('s-tables');
 }
@@ -1504,11 +1548,11 @@ function addCustomLine(v,grid,render){
 function promptCustomCust(){
   var c=findCustomer(getState(),activeCustomerId);
   if(!c) return;
-  openAmount('Custom amount','Charged straight to the tab.',false,function(v,note){
+  openAmount(t('custom_amount_title'),t('custom_to_tab'),false,function(v,note){
     var st=getState(), cc=findCustomer(st,activeCustomerId);
     if(!cc) return;
     var tx={customerId:cc.id,customerName:cc.name,type:'debt',amount:v,
-      items:[{name:'Custom',qty:1,price:v}]};
+      items:[{name:t('custom_line'),qty:1,price:v}]};
     if(note) tx.note=note;
     pushTx(st,tx);
     if(!saveState(st)) return;
@@ -1518,7 +1562,7 @@ function promptCustomCust(){
   }, true);
 }
 function promptCustomWalkin(){
-  openAmount('Custom amount','A charge with no product button.',false,function(v){
+  openAmount(t('custom_amount_title'),t('custom_no_product'),false,function(v){
     addCustomLine(v,'wi-prod-grid',renderWiCart);
   });
 }
@@ -1651,12 +1695,12 @@ function openAmount(title,hint,needMethod,onOk,useQuick){
   var qw=document.getElementById('ma-quickwrap');
   if(quickActive){
     qw.style.display='';
-    document.getElementById('ma-amount-label').textContent='Or type an exact amount';
+    document.getElementById('ma-amount-label').textContent=t('or_type_exact');
     renderQuickButtons();
     updateRunning();
   } else {
     qw.style.display='none';
-    document.getElementById('ma-amount-label').textContent='Amount';
+    document.getElementById('ma-amount-label').textContent=t('amount');
   }
   openModal('m-amount');
   if(!quickActive) setTimeout(function(){ document.getElementById('ma-amount').focus(); },100);
@@ -1726,13 +1770,12 @@ function addBalanceTx(type,amount,note,method){
 /* ---------- HOUSE CASH FLOW ---------- */
 function addHouseEntry(kind){
   var isExp=(kind==='expense');
-  openAmount(isExp?'Add expense':'Add other income',
-    isExp?'Money out of the till that is not a customer debt.'
-         :'Money in that did not come from a tab.',
+  openAmount(isExp?t('add_expense_title'):t('add_income_title'),
+    isExp?t('expense_hint'):t('income_hint'),
     true,
     function(v,note,method){
       var st=getState();
-      pushTx(st,{customerId:'__house__',customerName:isExp?'Expense':'Other income',
+      pushTx(st,{customerId:'__house__',customerName:isExp?t('expense_name'):t('income_name'),
         type:isExp?'expense':'income',method:method,amount:v,note:note||''});
       if(!saveState(st)) return;
       toast(t('ts_saved'),'ok');
@@ -2017,7 +2060,7 @@ function quickAmountsSection(st){
     '<div style="margin-top:0.6em;"><button class="btn-full" onclick="addQuickAmount()">'+t('new_button')+'</button></div>';
 }
 function addQuickAmount(){
-  askText('New button amount','',function(v){
+  askText(t('new_button_amount'),'',function(v){
     var n=parseAmt(v);
     if(isNaN(n)||n<=0){ toast(t('ts_enter_amount'),'err'); return; }
     var st=getState();
@@ -2029,7 +2072,7 @@ function addQuickAmount(){
 function editQuickAmount(i){
   var st=getState(), cur=st.quickAmounts[i];
   if(cur===undefined) return;
-  askText('Button amount',f(cur),function(v){
+  askText(t('button_amount'),f(cur),function(v){
     var n=parseAmt(v);
     if(isNaN(n)||n<=0){ toast(t('ts_enter_amount'),'err'); return; }
     var st2=getState();
@@ -2179,21 +2222,21 @@ function openTablesManage(){
 function renderGroupsList(){
   var st=getState(), gs=getGroups(st);
   document.getElementById('tabman-title').textContent=groupsLabel(st);
-  var head='<div class="card-box"><div class="label">Section name</div>'+
+  var head='<div class="card-box"><div class="label">'+t('section_name')+'</div>'+
     '<div class="field"><input type="text" id="groups-label" value="'+esc(groupsLabel(st))+'" placeholder="Groups"></div>'+
-    '<button class="btn-full" onclick="saveGroupsLabel()">Save</button>'+
-    '<div class="hint">The word used for these groups across the app.</div></div>';
+    '<button class="btn-full" onclick="saveGroupsLabel()">'+t('save')+'</button>'+
+    '<div class="hint">'+t('section_name_hint')+'</div></div>';
   var list=gs.map(function(g,i){
     var gb=groupBalance(st,g.id), n=groupMembers(st,g.id).length;
     return '<div class="row"'+(g.hidden?'':' style="border-color:var(--gold);"')+'>'+
       '<button class="row-main" onclick="openGroupManage(\''+g.id+'\')">'+
       '<div style="font-weight:600;'+(g.hidden?'color:var(--text3);':'color:var(--gold2);')+'">'+esc(g.name)+
-        (g.hidden?' \u00B7 hidden':'')+(i===0?' \u00B7 default':'')+'</div>'+
-      '<div class="row-sub">'+n+' member'+(n===1?'':'s')+' \u00B7 '+balText(gb)+'</div></button>'+
+        (g.hidden?' \u00B7 '+t('tag_hidden'):'')+(i===0?' \u00B7 '+t('tag_default'):'')+'</div>'+
+      '<div class="row-sub">'+n+' '+(n===1?t('member'):t('members_pl'))+' \u00B7 '+balText(gb)+'</div></button>'+
       '<div style="color:var(--text3);font-size:1.2em;">\u203A</div></div>';
   }).join('');
   document.getElementById('tabman-body').innerHTML=head+list+
-    '<div style="margin-top:1em;"><button class="btn-full" onclick="addGroup()">+ New group</button></div>';
+    '<div style="margin-top:1em;"><button class="btn-full" onclick="addGroup()">'+t('add')+' '+t('new_group')+'</button></div>';
 }
 function saveGroupsLabel(){
   var v=document.getElementById('groups-label').value.trim()||'Groups';
@@ -2201,7 +2244,7 @@ function saveGroupsLabel(){
   if(saveState(st)){ renderGroupsList(); renderSettings(); toast(t('ts_saved'),'ok'); }
 }
 function addGroup(){
-  askText('New group','',function(name){
+  askText(t('new_group'),'',function(name){
     var st=getState();
     if(getGroups(st).some(function(g){ return g.name.toLowerCase()===name.toLowerCase(); })){
       toast(t('ts_group_exists'),'err'); return;
@@ -2222,28 +2265,28 @@ function renderGroupManage(){
   document.getElementById('grpman-title').textContent=g.name;
   var members=groupMembers(st,g.id);
 
-  var head='<div class="card-box"><div class="label">Group name</div>'+
+  var head='<div class="card-box"><div class="label">'+t('group_name')+'</div>'+
     '<div class="field"><input type="text" id="grp-name" value="'+esc(g.name)+'"></div>'+
-    '<button class="btn-full" style="margin-bottom:0.5em;" onclick="saveGroupName()">Save name</button>'+
+    '<button class="btn-full" style="margin-bottom:0.5em;" onclick="saveGroupName()">'+t('save_name')+'</button>'+
     '<button class="btn-full" style="'+(g.hidden?'border-color:var(--gold);color:var(--gold2);':'')+'" onclick="toggleGroupHidden()">'+
-    (g.hidden?'Show on home screen':'Hide from home screen')+'</button>'+
-    (isDefault?'':'<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);margin-top:0.5em;" onclick="deleteGroup()">Delete group</button>')+
-    '<div class="hint">'+(g.hidden?'Hidden from the home screen. Balances still count and can be settled here.'
-      :(isDefault?'The default group cannot be deleted.':'Deleting moves its members to the default group.'))+'</div></div>';
+    (g.hidden?t('show_on_home'):t('hide_from_home'))+'</button>'+
+    (isDefault?'':'<button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);margin-top:0.5em;" onclick="deleteGroup()">'+t('delete_group')+'</button>')+
+    '<div class="hint">'+(g.hidden?t('grp_hidden_hint')
+      :(isDefault?t('grp_default_hint'):t('grp_delete_hint')))+'</div></div>';
 
   var list = members.length ? members.map(function(c){
     var b=balanceOf(st,c.id);
     return '<div class="row">'+
       '<button class="row-main" onclick="openCustomer(\''+c.id+'\')">'+
       '<div style="font-weight:600;">'+esc(c.name)+'</div>'+
-      '<div class="row-sub '+balClass(b)+'">'+balText(b)+' \u2014 tap to open</div></button>'+
+      '<div class="row-sub '+balClass(b)+'">'+balText(b)+' \u2014 '+t('tap_to_open2')+'</div></button>'+
       '<button class="qbtn" style="color:var(--gold2);" onclick="renameTable(\''+c.id+'\')">\u270E</button>'+
       '<button class="qbtn" style="color:var(--red);" onclick="removeTable(\''+c.id+'\')">\u2715</button></div>';
-  }).join('') : '<div class="empty-hint">No members yet.</div>';
+  }).join('') : '<div class="empty-hint">'+t('no_members')+'</div>';
 
   document.getElementById('grpman-body').innerHTML=head+
-    '<div class="label">Members</div>'+list+
-    '<div style="margin-top:1em;"><button class="btn-full" onclick="addTable()">+ Add member</button></div>';
+    '<div class="label">'+t('members')+'</div>'+list+
+    '<div style="margin-top:1em;"><button class="btn-full" onclick="addTable()">'+t('add_member')+'</button></div>';
 }
 function saveGroupName(){
   var v=document.getElementById('grp-name').value.trim();
@@ -2265,7 +2308,7 @@ function deleteGroup(){
   var gs=getGroups(st);
   if(gs[0].id===g.id){ toast(t('ts_no_delete_default'),'err'); return; }
   var def=gs[0], n=groupMembers(st,g.id).length;
-  showConfirm('Delete '+g.name+'?',
+  showConfirm(t('delete_q').replace('{a}',g.name),
     n ? t('members_move').replace('{a}',n).replace('{b}',def.name) : t('group_empty'),
     function(){
       var st2=getState();
@@ -2276,7 +2319,7 @@ function deleteGroup(){
 }
 function addTable(){
   var st=getState();
-  askText('Add member','',function(name){
+  askText(t('add_member_prompt'),'',function(name){
     var st2=getState();
     // already a member here?
     if(st2.customers.some(function(c){ return c.permanent && c.groupId===activeManageGroup && c.name.toLowerCase()===name.toLowerCase(); })){
@@ -2311,7 +2354,7 @@ function addTable(){
 function renameTable(id){
   var st=getState(), c=findCustomer(st,id);
   if(!c) return;
-  askText('Rename',c.name,function(name){
+  askText(t('rename_prompt'),c.name,function(name){
     var st2=getState(), c2=findCustomer(st2,id);
     if(!c2) return;
     c2.name=name;
@@ -2799,7 +2842,7 @@ function renderProdCustomers(){
   var list=all.filter(function(c){ return c.name.toLowerCase().indexOf(q)!==-1; });
   var search='<div class="search-wrap" style="margin-bottom:0.8em;">'+
     '<span style="color:var(--text4);">\uD83D\uDD0D</span>'+
-    '<input type="text" placeholder="Search customer..." value="'+esc(prodCustQuery)+'" '+
+    '<input type="text" placeholder="'+t('search_customer')+'" value="'+esc(prodCustQuery)+'" '+
     'oninput="prodCustQuery=this.value; renderProdCustomers();"></div>';
   var rows = list.length ? list.map(function(c){
     var perm=isPermanentId(c.id);
@@ -3135,7 +3178,7 @@ function renameKnownCustomer(id){
   var st=getState(), all=allCustomers(st), cur=null;
   for(var i=0;i<all.length;i++) if(all[i].id===id) cur=all[i];
   if(!cur) return;
-  askText('Rename customer',cur.name,function(name){
+  askText(t('rename_customer'),cur.name,function(name){
     var st2=getState();
     var open=findCustomer(st2,id);
     if(open){
