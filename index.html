@@ -588,7 +588,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.06.08';
+var APP_VERSION = '2.06.09';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -919,7 +919,41 @@ var LANG={
   new_group:{en:'New group', fi:'Uusi ryhm\u00E4', es:'Nuevo grupo', de:'Neue Gruppe', sv:'Ny grupp'},
   add_member_prompt:{en:'Add member', fi:'Lis\u00E4\u00E4 j\u00E4sen', es:'A\u00F1adir miembro', de:'Mitglied hinzuf\u00FCgen', sv:'L\u00E4gg till medlem'},
   rename_prompt:{en:'Rename', fi:'Nime\u00E4 uudelleen', es:'Renombrar', de:'Umbenennen', sv:'D\u00F6p om'},
-  new_customer_prompt:{en:'New customer', fi:'Uusi asiakas', es:'Nuevo cliente', de:'Neuer Kunde', sv:'Ny kund'}
+  new_customer_prompt:{en:'New customer', fi:'Uusi asiakas', es:'Nuevo cliente', de:'Neuer Kunde', sv:'Ny kund'},
+  // --- batch 11: confirm dialogs, merge/remove, split, update check ---
+  name_in_use:{en:'Name already in use', fi:'Nimi on jo k\u00E4yt\u00F6ss\u00E4', es:'El nombre ya est\u00E1 en uso', de:'Name bereits vergeben', sv:'Namnet anv\u00E4nds redan'},
+  change_name:{en:'Change name', fi:'Vaihda nimi', es:'Cambiar nombre', de:'Namen \u00E4ndern', sv:'\u00C4ndra namn'},
+  no_merge_tabs:{en:'No other open tabs to merge with.', fi:'Ei muita avoimia piikkej\u00E4 yhdistett\u00E4v\u00E4ksi.', es:'No hay otras cuentas abiertas para combinar.', de:'Keine anderen offenen Deckel zum Zusammenf\u00FChren.', sv:'Inga andra \u00F6ppna notor att sl\u00E5 samman med.'},
+  merge_q:{en:'Merge customers?', fi:'Yhdistet\u00E4\u00E4nk\u00F6 asiakkaat?', es:'\u00BFCombinar clientes?', de:'Kunden zusammenf\u00FChren?', sv:'Sl\u00E5 samman kunder?'},
+  merge_body:{en:'{a} will be merged into {b}. All entries move over and {a} disappears. This cannot be undone.', fi:'{a} yhdistet\u00E4\u00E4n asiakkaaseen {b}. Kaikki tapahtumat siirtyv\u00E4t ja {a} poistuu. T\u00E4t\u00E4 ei voi peruuttaa.', es:'{a} se combinar\u00E1 con {b}. Todos los registros pasan y {a} desaparece. No se puede deshacer.', de:'{a} wird mit {b} zusammengef\u00FChrt. Alle Eintr\u00E4ge wandern \u00FCber und {a} verschwindet. Nicht r\u00FCckg\u00E4ngig zu machen.', sv:'{a} sl\u00E5s samman med {b}. Alla poster flyttas \u00F6ver och {a} f\u00F6rsvinner. Kan inte \u00E5ngras.'},
+  merge_btn:{en:'Merge', fi:'Yhdist\u00E4', es:'Combinar', de:'Zusammenf\u00FChren', sv:'Sl\u00E5 samman'},
+  same_customer_q:{en:'Same customer?', fi:'Sama asiakas?', es:'\u00BFMismo cliente?', de:'Gleicher Kunde?', sv:'Samma kund?'},
+  move_in_btn:{en:'Move in', fi:'Siirr\u00E4 t\u00E4nne', es:'Trasladar aqu\u00ED', de:'Hierher verschieben', sv:'Flytta hit'},
+  bal_outstanding:{en:'Balance outstanding', fi:'Avoin saldo', es:'Saldo pendiente', de:'Offener Saldo', sv:'Utest\u00E5ende saldo'},
+  still_owes:{en:'{a} still owes {b}.', fi:'{a} on yh\u00E4 velkaa {b}.', es:'{a} a\u00FAn debe {b}.', de:'{a} schuldet noch {b}.', sv:'{a} \u00E4r fortfarande skyldig {b}.'},
+  still_credit:{en:'{a} still has {b} credit.', fi:'{a} on yh\u00E4 {b} saldoa.', es:'{a} a\u00FAn tiene {b} de cr\u00E9dito.', de:'{a} hat noch {b} Guthaben.', sv:'{a} har fortfarande {b} kredit.'},
+  clear_and_remove_body:{en:' Clear it and remove? The write-off is recorded in today\u2019s history.', fi:' Nollataanko ja poistetaan? Tappiokirjaus tallennetaan t\u00E4m\u00E4n p\u00E4iv\u00E4n historiaan.', es:' \u00BFLiquidar y quitar? La cancelaci\u00F3n se registra en el historial de hoy.', de:' L\u00F6schen und entfernen? Die Abschreibung wird im heutigen Verlauf erfasst.', sv:' Rensa och ta bort? Avskrivningen registreras i dagens historik.'},
+  clear_remove_btn:{en:'Clear & remove', fi:'Nollaa ja poista', es:'Liquidar y quitar', de:'L\u00F6schen & entfernen', sv:'Rensa & ta bort'},
+  remove_q:{en:'Remove {a}?', fi:'Poistetaanko {a}?', es:'\u00BFQuitar {a}?', de:'{a} entfernen?', sv:'Ta bort {a}?'},
+  history_kept:{en:'Its history is kept.', fi:'Historia s\u00E4ilyy.', es:'Su historial se conserva.', de:'Der Verlauf bleibt erhalten.', sv:'Historiken beh\u00E5lls.'},
+  del_product_q:{en:'Delete product?', fi:'Poistetaanko tuote?', es:'\u00BFEliminar producto?', de:'Produkt l\u00F6schen?', sv:'Radera produkt?'},
+  del_product_body:{en:'{a} will be removed. Past transactions keep their item lines.', fi:'{a} poistetaan. Vanhat tapahtumat s\u00E4ilytt\u00E4v\u00E4t tuoterivins\u00E4.', es:'{a} se eliminar\u00E1. Las transacciones pasadas conservan sus l\u00EDneas.', de:'{a} wird entfernt. Fr\u00FChere Buchungen behalten ihre Positionen.', sv:'{a} tas bort. Tidigare transaktioner beh\u00E5ller sina rader.'},
+  del_tx_q:{en:'Delete transaction?', fi:'Poistetaanko tapahtuma?', es:'\u00BFEliminar transacci\u00F3n?', de:'Buchung l\u00F6schen?', sv:'Radera transaktion?'},
+  del_tx_body:{en:'This removes the entry and corrects every balance and report it affected.', fi:'T\u00E4m\u00E4 poistaa tapahtuman ja korjaa kaikki saldot ja raportit joihin se vaikutti.', es:'Esto elimina el registro y corrige cada saldo e informe afectado.', de:'Dies entfernt den Eintrag und korrigiert alle betroffenen Salden und Berichte.', sv:'Detta tar bort posten och r\u00E4ttar alla saldon och rapporter den p\u00E5verkade.'},
+  import_old_q:{en:'Import old SE7EN history?', fi:'Tuodaanko vanha SE7EN-historia?', es:'\u00BFImportar historial antiguo de SE7EN?', de:'Alten SE7EN-Verlauf importieren?', sv:'Importera gammal SE7EN-historik?'},
+  restore_q:{en:'Restore backup?', fi:'Palautetaanko varmuuskopio?', es:'\u00BFRestaurar copia?', de:'Sicherung wiederherstellen?', sv:'\u00C5terst\u00E4lla s\u00E4kerhetskopia?'},
+  import_old_body:{en:'{a} customers and {b} transactions come across. Products, categories and settings already in this app are kept.', fi:'{a} asiakasta ja {b} tapahtumaa tuodaan. T\u00E4ss\u00E4 sovelluksessa jo olevat tuotteet, kategoriat ja asetukset s\u00E4ilyv\u00E4t.', es:'Pasan {a} clientes y {b} transacciones. Se conservan los productos, categor\u00EDas y ajustes ya presentes.', de:'{a} Kunden und {b} Buchungen kommen her\u00FCber. Vorhandene Produkte, Kategorien und Einstellungen bleiben.', sv:'{a} kunder och {b} transaktioner f\u00F6ljer med. Produkter, kategorier och inst\u00E4llningar som redan finns beh\u00E5lls.'},
+  restore_body:{en:'{a} customers and {b} transactions will replace everything currently stored.', fi:'{a} asiakasta ja {b} tapahtumaa korvaavat kaiken nykyisen.', es:'{a} clientes y {b} transacciones reemplazar\u00E1n todo lo guardado.', de:'{a} Kunden und {b} Buchungen ersetzen alles derzeit Gespeicherte.', sv:'{a} kunder och {b} transaktioner ers\u00E4tter allt som lagras nu.'},
+  clear_history_q:{en:'Clear all history?', fi:'Tyhjennet\u00E4\u00E4nk\u00F6 koko historia?', es:'\u00BFBorrar todo el historial?', de:'Gesamten Verlauf l\u00F6schen?', sv:'Rensa all historik?'},
+  clear_history_body:{en:'Every transaction is deleted. Products, categories and tables are kept, and all balances return to zero.', fi:'Kaikki tapahtumat poistetaan. Tuotteet, kategoriat ja p\u00F6yd\u00E4t s\u00E4ilyv\u00E4t, ja kaikki saldot nollautuvat.', es:'Se eliminan todas las transacciones. Se conservan productos, categor\u00EDas y mesas, y todos los saldos vuelven a cero.', de:'Alle Buchungen werden gel\u00F6scht. Produkte, Kategorien und Tische bleiben, alle Salden werden null.', sv:'Alla transaktioner raderas. Produkter, kategorier och bord beh\u00E5lls, och alla saldon nollst\u00E4lls.'},
+  erase_q:{en:'Erase everything?', fi:'Poistetaanko kaikki?', es:'\u00BFBorrar todo?', de:'Alles l\u00F6schen?', sv:'Radera allt?'},
+  erase_body:{en:'All customers, products and transactions will be permanently deleted.', fi:'Kaikki asiakkaat, tuotteet ja tapahtumat poistetaan pysyv\u00E4sti.', es:'Todos los clientes, productos y transacciones se eliminar\u00E1n permanentemente.', de:'Alle Kunden, Produkte und Buchungen werden dauerhaft gel\u00F6scht.', sv:'Alla kunder, produkter och transaktioner raderas permanent.'},
+  err_no_server:{en:'Could not reach the server.', fi:'Palvelimeen ei saatu yhteytt\u00E4.', es:'No se pudo conectar con el servidor.', de:'Server nicht erreichbar.', sv:'Kunde inte n\u00E5 servern.'},
+  err_no_version:{en:'Could not read the version file.', fi:'Versiotiedostoa ei voitu lukea.', es:'No se pudo leer el archivo de versi\u00F3n.', de:'Versionsdatei konnte nicht gelesen werden.', sv:'Kunde inte l\u00E4sa versionsfilen.'},
+  fully_covered:{en:'Fully covered', fi:'T\u00E4ysin katettu', es:'Cubierto por completo', de:'Vollst\u00E4ndig gedeckt', sv:'Helt t\u00E4ckt'},
+  remaining_pref:{en:'Remaining: {a}', fi:'J\u00E4ljell\u00E4: {a}', es:'Restante: {a}', de:'Verbleibend: {a}', sv:'\u00C5terst\u00E5r: {a}'},
+  merge_body2:{en:'{a} will be merged into {b}. Everything moves to {b} and {a} disappears. This cannot be undone.', fi:'{a} yhdistet\u00E4\u00E4n asiakkaaseen {b}. Kaikki siirtyy asiakkaalle {b} ja {a} poistuu. T\u00E4t\u00E4 ei voi peruuttaa.', es:'{a} se combinar\u00E1 con {b}. Todo pasa a {b} y {a} desaparece. No se puede deshacer.', de:'{a} wird mit {b} zusammengef\u00FChrt. Alles geht an {b} und {a} verschwindet. Nicht r\u00FCckg\u00E4ngig zu machen.', sv:'{a} sl\u00E5s samman med {b}. Allt flyttas till {b} och {a} f\u00F6rsvinner. Kan inte \u00E5ngras.'},
+  clear_writeoff_body:{en:' Clear it as a write-off and remove the name? The write-off is recorded in today\u2019s history.', fi:' Kirjataanko tappioksi ja poistetaanko nimi? Tappiokirjaus tallennetaan t\u00E4m\u00E4n p\u00E4iv\u00E4n historiaan.', es:' \u00BFCancelar como p\u00E9rdida y quitar el nombre? La cancelaci\u00F3n se registra en el historial de hoy.', de:' Als Abschreibung l\u00F6schen und Namen entfernen? Die Abschreibung wird im heutigen Verlauf erfasst.', sv:' Avskriv som f\u00F6rlust och ta bort namnet? Avskrivningen registreras i dagens historik.'}
 };
 // Localized month + weekday names
 var MONTHS_L={
@@ -1283,11 +1317,11 @@ function askNewCustomer(prefill){
         var pc=st.customers[i];
         var g0 = pc.permanent ? findGroup(st,pc.groupId) : null;
         var where = g0 ? (' in '+g0.name) : ' with an open tab';
-        showConfirm('Name already in use',
+        showConfirm(t('name_in_use'),
           'There is already a '+st.customers[i].name+where+
           '. Give this one a name you can tell apart, for example '+name+' B.',
           function(){ askNewCustomer(name+' '); },
-          'Change name',
+          t('change_name'),
           'background:var(--bg3);border-color:var(--gold);color:var(--gold2);margin-bottom:0.6em;');
         return;
       }
@@ -1359,7 +1393,7 @@ function openMergePicker(){
   }).map(function(x){ return {id:x.id,name:x.name}; });
   document.getElementById('mg-hint').textContent=
     others.length ? ('All of '+c.name+'\u2019s history moves to the customer you pick.')
-                  : 'No other open tabs to merge with.';
+                  : t('no_merge_tabs');
   document.getElementById('mg-list').innerHTML=others.map(function(k){
     return '<div class="row"><button class="row-main" onclick="doMerge(\''+k.id+'\')">'+
       '<div style="font-weight:600;">'+esc(k.name)+'</div></button></div>';
@@ -1373,9 +1407,8 @@ function doMerge(targetId){
   var target=findCustomer(st,targetId);
   if(!target) return;
   closeModal('m-merge');
-  showConfirm('Merge customers?',
-    from.name+' will be merged into '+target.name+'. All entries move over and '+from.name+
-    ' disappears. This cannot be undone.',
+  showConfirm(t('merge_q'),
+    t('merge_body').replace(/\{a\}/g,from.name).replace('{b}',target.name),
     function(){
       var st2=getState(), f=findCustomer(st2,activeCustomerId);
       if(!f) return;
@@ -1594,7 +1627,7 @@ function renderHistory(){
     g.forEach(function(t){ if(t.type==='debt') spent+=t.amount; });
     var open=(d===today||i===0);
     return '<div><div class="day-hdr" onclick="toggleDay('+d+')">'+
-      '<span class="d">'+(d===today?'Today \u00B7 ':'')+fmtDate(d)+'</span>'+
+      '<span class="d">'+(d===today?t('today_dash')+' \u00B7 ':'')+fmtDate(d)+'</span>'+
       '<span style="color:var(--gold2);">'+f(spent)+EUR+'</span></div>'+
       '<div id="day-'+d+'" style="display:'+(open?'':'none')+';">'+
       g.map(function(t){ return txHTML(t,false,true); }).join('')+'</div></div>';
@@ -1816,7 +1849,7 @@ function saveTxEdit(){
 }
 function deleteTx(){
   closeModal('m-txedit');
-  showConfirm('Delete transaction?','This removes the entry and corrects every balance and report it affected.',
+  showConfirm(t('del_tx_q'),t('del_tx_body'),
     function(){
       var st=getState();
       st.transactions=st.transactions.filter(function(t){ return t.id!==editingTxId; });
@@ -1907,7 +1940,7 @@ function updateSplitInfo(){
   } else if(sum<=0){
     info.textContent=''; btn.disabled=true;
   } else {
-    info.textContent = rem>0.001 ? ('Remaining: '+f(rem)+EUR) : 'Fully covered';
+    info.textContent = rem>0.001 ? t('remaining_pref').replace('{a}',f(rem)+EUR) : t('fully_covered');
     info.style.color = rem>0.001 ? 'var(--text3)' : 'var(--green)';
     btn.disabled=false;
   }
@@ -2201,7 +2234,7 @@ function deleteProduct(){
   for(var i=0;i<st.products.length;i++) if(st.products[i].id===editingProductId) p=st.products[i];
   if(!p) return;
   closeModal('m-prod');
-  showConfirm('Delete product?', p.name+' will be removed. Past transactions keep their item lines.', function(){
+  showConfirm(t('del_product_q'), t('del_product_body').replace('{a}',p.name), function(){
     var st2=getState();
     st2.products=st2.products.filter(function(x){ return x.id!==editingProductId; });
     if(saveState(st2)){ renderCatProducts(); toast(t('ts_deleted'),'ok'); }
@@ -2335,7 +2368,7 @@ function addTable(){
     if(match || openC){
       var id=(openC?openC.id:match.id);
       var g=findGroup(st2,activeManageGroup);
-      showConfirm('Same customer?',
+      showConfirm(t('same_customer_q'),
         'There is already a customer called '+name+'. Move them into '+g.name+' with all their history?',
         function(){
           var st3=getState();
@@ -2344,7 +2377,7 @@ function addTable(){
           else st3.customers.push({id:id,name:name,permanent:true,groupId:activeManageGroup});
           unhideCustomer(st3,id);
           if(saveState(st3)){ renderGroupManage(); toast(t('ts_moved_in').replace('{a}',name),'ok'); }
-        },'Move in');
+        },t('move_in_btn'));
       return;
     }
     st2.customers.push({id:'__member_'+Date.now()+'__',name:name,permanent:true,groupId:activeManageGroup});
@@ -2370,18 +2403,18 @@ function removeTable(id){
   var bal=balanceOf(st,id), name=c.name;
   if(Math.abs(bal)>0.001){
     var owed=bal<0;
-    showConfirm('Balance outstanding',
-      (owed?(name+' still owes '+f(Math.abs(bal))+EUR+'.'):(name+' still has '+f(bal)+EUR+' credit.'))+
-      ' Clear it and remove? The write-off is recorded in today\u2019s history.',
+    showConfirm(t('bal_outstanding'),
+      (owed?t('still_owes').replace('{a}',name).replace('{b}',f(Math.abs(bal))+EUR):t('still_credit').replace('{a}',name).replace('{b}',f(bal)+EUR))+
+      t('clear_and_remove_body'),
       function(){
         var st2=getState();
         pushTx(st2,{customerId:id,customerName:name,type:owed?'writeoff':'debt',amount:Math.abs(bal),note:'Cleared on removal'});
         st2.customers=st2.customers.filter(function(x){ return x.id!==id; });
         if(saveState(st2)){ renderGroupManage(); toast(t('ts_removed_name').replace('{a}',name),'ok'); }
-      },'Clear & remove');
+      },t('clear_remove_btn'));
     return;
   }
-  showConfirm('Remove '+name+'?', 'Its history is kept.', function(){
+  showConfirm(t('remove_q').replace('{a}',name), t('history_kept'), function(){
     var st2=getState();
     st2.customers=st2.customers.filter(function(x){ return x.id!==id; });
     if(saveState(st2)){ renderGroupManage(); toast(t('ts_removed_name').replace('{a}',name),'ok'); }
@@ -3141,7 +3174,7 @@ function mergeKnownCustomer(id){
   if(!others.length){ toast(t('ts_no_merge_target'),'err'); return; }
   document.getElementById('mg-hint').textContent='Keep which name? All of '+from.name+'\u2019s history moves to the one you pick, and '+from.name+' disappears.';
   document.getElementById('mg-list').innerHTML=others.map(function(k){
-    var sub=k.open?'Open tab':(k.last?('Last seen '+fmtDate(k.last)):'');
+    var sub=k.open?t('open_tab_label'):(k.last?t('last_seen').replace('{a}',fmtDate(k.last)):'');
     return '<div class="row"><button class="row-main" onclick="doMergeKnown(\''+id+'\',\''+k.id+'\')">'+
       '<div style="font-weight:600;">'+esc(k.name)+'</div>'+
       (sub?'<div class="row-sub">'+sub+'</div>':'')+'</button></div>';
@@ -3154,9 +3187,8 @@ function doMergeKnown(fromId,targetId){
   var target=allCustomers(st).filter(function(c){ return c.id===targetId; })[0];
   if(!from || !target || fromId===targetId) return;
   closeModal('m-merge');
-  showConfirm('Merge customers?',
-    from.name+' will be merged into '+target.name+'. Everything moves to '+target.name+
-    ' and '+from.name+' disappears. This cannot be undone.',
+  showConfirm(t('merge_q'),
+    t('merge_body2').replace(/\{a\}/g,from.name).replace(/\{b\}/g,target.name),
     function(){
       var st2=getState();
       st2.transactions.forEach(function(t){
@@ -3172,7 +3204,7 @@ function doMergeKnown(fromId,targetId){
       unhideCustomer(st2,targetId);
       if(saveState(st2)){ renderCustomersManage(); toast(t('ts_merged_into').replace('{a}',target.name),'ok'); }
     },
-    'Merge','background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.6em;');
+    t('merge_btn'),'background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.6em;');
 }
 function renameKnownCustomer(id){
   var st=getState(), all=allCustomers(st), cur=null;
@@ -3201,12 +3233,12 @@ function removeKnownCustomer(id){
   var bal=balanceOf(st,id);
   if(open && Math.abs(bal)>0.001){
     var owed=bal<0;
-    var line = owed ? (name+' still owes '+f(Math.abs(bal))+EUR+'.')
-                    : (name+' still has '+f(bal)+EUR+' credit.');
+    var line = owed ? t('still_owes').replace('{a}',name).replace('{b}',f(Math.abs(bal))+EUR)
+                    : t('still_credit').replace('{a}',name).replace('{b}',f(bal)+EUR);
     /* Clearing the name would hide a live balance, so it is written off (debt)
        or dropped (credit) as an explicit, recorded step before removal. */
-    showConfirm('Balance outstanding',
-      line+' Clear it as a write-off and remove the name? The write-off is recorded in today\u2019s history.',
+    showConfirm(t('bal_outstanding'),
+      line+t('clear_writeoff_body'),
       function(){
         var st2=getState();
         pushTx(st2,{customerId:id,customerName:name,
@@ -3216,7 +3248,7 @@ function removeKnownCustomer(id){
         hideCustomer(st2,id);
         if(saveState(st2)){ renderCustomersManage(); toast(t('ts_removed_name').replace('{a}',name),'ok'); }
       },
-      'Clear & remove');
+      t('clear_remove_btn'));
     return;
   }
   showConfirm('Remove '+name+'?','Only the name is cleared from the list. Transactions and past reports are kept, and the name returns if used again.',
@@ -3612,9 +3644,9 @@ document.getElementById('restore-file').addEventListener('change',function(e){
     var v1=looksLikeV1(data);
     var st = v1 ? convertV1(data) : data;
     var n=st.transactions.length, c=st.customers.length;
-    showConfirm(v1?'Import old SE7EN history?':'Restore backup?',
-      v1 ? (c+' customers and '+n+' transactions come across. Products, categories and settings already in this app are kept.')
-         : (c+' customers and '+n+' transactions will replace everything currently stored.'),
+    showConfirm(v1?t('import_old_q'):t('restore_q'),
+      v1 ? t('import_old_body').replace('{a}',c).replace('{b}',n)
+         : t('restore_body').replace('{a}',c).replace('{b}',n),
       function(){
         if(!saveState(st)) return;
         applyAppearance();
@@ -3639,7 +3671,7 @@ function purgeBeforeSelected(){
   });
 }
 function clearHistory(){
-  showConfirm('Clear all history?','Every transaction is deleted. Products, categories and tables are kept, and all balances return to zero.',
+  showConfirm(t('clear_history_q'),t('clear_history_body'),
     function(){
       var st=getState();
       st.transactions=[];
@@ -3648,7 +3680,7 @@ function clearHistory(){
     });
 }
 function wipeData(){
-  showConfirm('Erase everything?','All customers, products and transactions will be permanently deleted.',function(){
+  showConfirm(t('erase_q'),t('erase_body'),function(){
     try{ localStorage.removeItem(KEY); }catch(e){}
     try{ sessionStorage.removeItem(KEY); }catch(e){}
     location.reload();
@@ -3671,7 +3703,7 @@ function checkUpdate(){
     .then(function(r){ return r.json(); })
     .then(function(info){
       var remote=info && info.version;
-      if(!remote){ el.textContent='Could not read the version file.'; el.style.color='var(--red)'; return; }
+      if(!remote){ el.textContent=t('err_no_version'); el.style.color='var(--red)'; return; }
       if(remote===APP_VERSION){
         el.textContent='You already have the latest version ('+APP_VERSION+').';
         el.style.color='var(--text3)';
@@ -3682,7 +3714,7 @@ function checkUpdate(){
       applyUpdate();
     })
     ['catch'](function(){
-      el.textContent='Could not reach the server.';
+      el.textContent=t('err_no_server');
       el.style.color='var(--red)';
     });
 }

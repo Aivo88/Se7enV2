@@ -1,5 +1,5 @@
 {
-  "version": "2.06.08",
-  "cache": "se7env2-v65",
-  "notes": "Translations batch 10: the customer Balance tab (add credit / payment / debt labels and hints), the whole group/tables management area (group name, show/hide, delete, members list, section name), and the New customer / New group / Add member / Rename prompts now follow the selected language."
+  "version": "2.06.09",
+  "cache": "se7env2-v66",
+  "notes": "Translations batch 11: the per-customer history 'Today' header, plus every remaining confirm dialog (merge, remove, delete product/transaction, restore backup, clear history, erase everything), the split-payment info line and the update-check messages now follow the selected language. A full scan confirms the whole UI is translated."
 }
