@@ -259,7 +259,7 @@ input:focus,select:focus{border-color:var(--gold);}
 <!-- HISTORY HUB -->
 <div class="screen" id="s-hub">
   <div class="top-bar">
-    <div class="top-row"><div class="screen-title">History</div></div>
+    <div class="top-row"><div class="screen-title" data-t="history">History</div></div>
   </div>
   <div class="body-scroll">
     <button class="btn-full" style="min-height:90px;font-size:1.3em;margin-bottom:1em;background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="openReports()" data-t="money">Money</button>
@@ -275,10 +275,10 @@ input:focus,select:focus{border-color:var(--gold);}
 <!-- PRODUCTS REPORT -->
 <div class="screen" id="s-prod">
   <div class="top-bar">
-    <div class="top-row"><div class="screen-title">Products</div></div>
+    <div class="top-row"><div class="screen-title" data-t="products">Products</div></div>
     <div class="tabs">
-      <button class="tab active" id="ptab-top" onclick="setProdTab('top')">Top sellers</button>
-      <button class="tab" id="ptab-cust" onclick="setProdTab('cust')">Customers</button>
+      <button class="tab active" id="ptab-top" onclick="setProdTab('top')" data-t="top_sellers">Top sellers</button>
+      <button class="tab" id="ptab-cust" onclick="setProdTab('cust')" data-t="customers">Customers</button>
     </div>
   </div>
   <div class="body-scroll" id="prod-report-body"></div>
@@ -289,17 +289,17 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <div class="screen" id="s-rep">
   <div class="top-bar">
-    <div class="top-row"><div class="screen-title">History</div></div>
+    <div class="top-row"><div class="screen-title" data-t="history">History</div></div>
     <div class="tabs">
-      <button class="tab active" id="rtab-day" onclick="setRepTab('day')">Today</button>
-      <button class="tab" id="rtab-month" onclick="setRepTab('month')">Month</button>
-      <button class="tab" id="rtab-cust" onclick="setRepTab('cust')">Customers</button>
-      <button class="tab" id="rtab-raw" onclick="setRepTab('raw')">Raw</button>
+      <button class="tab active" id="rtab-day" onclick="setRepTab('day')" data-t="today">Today</button>
+      <button class="tab" id="rtab-month" onclick="setRepTab('month')" data-t="month">Month</button>
+      <button class="tab" id="rtab-cust" onclick="setRepTab('cust')" data-t="customers">Customers</button>
+      <button class="tab" id="rtab-raw" onclick="setRepTab('raw')" data-t="raw">Raw</button>
     </div>
   </div>
   <div class="body-scroll" id="rep-body"></div>
   <div class="foot">
-    <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.57em;" onclick="openExport()">Export for accountant</button>
+    <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.57em;" onclick="openExport()" data-t="export_accountant">Export for accountant</button>
     <button class="btn-full" style="background:var(--bg3);border-color:var(--gold);color:var(--gold2);" onclick="openHistoryHub()" data-t="back">Back</button>
   </div>
 </div>
@@ -307,8 +307,8 @@ input:focus,select:focus{border-color:var(--gold);}
 <!-- EXPORT -->
 <div class="screen" id="s-export">
   <div class="top-bar">
-    <div class="top-row"><div class="screen-title">Export for accountant</div></div>
-    <div class="hint">Pick a date range. A PDF summary is generated for that period.</div>
+    <div class="top-row"><div class="screen-title" data-t="export_accountant">Export for accountant</div></div>
+    <div class="hint" data-t="export_hint">Pick a date range. A PDF summary is generated for that period.</div>
   </div>
   <div class="body-scroll" id="export-body"></div>
   <div class="foot">
@@ -345,8 +345,8 @@ input:focus,select:focus{border-color:var(--gold);}
 <!-- CUSTOMERS MANAGEMENT -->
 <div class="screen" id="s-custman">
   <div class="top-bar">
-    <div class="top-row"><div class="screen-title">Customers</div></div>
-    <div class="hint">Removing a name only clears it from the list &mdash; its transactions and past reports are kept.</div>
+    <div class="top-row"><div class="screen-title" data-t="customers">Customers</div></div>
+    <div class="hint" data-t="custman_hint">Removing a name only clears it from the list &mdash; its transactions and past reports are kept.</div>
   </div>
   <div class="body-scroll" id="custman-body"></div>
   <div class="foot">
@@ -391,7 +391,7 @@ input:focus,select:focus{border-color:var(--gold);}
 <div class="screen" id="s-cats">
   <div class="top-bar">
     <div class="top-row">
-      <div class="screen-title">Categories</div>
+      <div class="screen-title" data-t="categories">Categories</div>
       
     </div>
   </div>
@@ -407,7 +407,7 @@ input:focus,select:focus{border-color:var(--gold);}
     <div class="top-row">
       <div class="screen-title" id="catprod-title"></div>
       <div class="top-actions">
-        <button class="btn-icon" onclick="editProduct(null)">+ New</button>
+        <button class="btn-icon" onclick="editProduct(null)" data-t="new_short">+ New</button>
       </div>
     </div>
     <div class="hint" data-t="tap_edit_star">Tap a product to edit &middot; star toggles Favorites</div>
@@ -435,7 +435,7 @@ input:focus,select:focus{border-color:var(--gold);}
 <!-- MODALS -->
 <div class="modal-bg" id="m-settled">
   <div class="modal">
-    <div class="modal-title">Settle bill</div>
+    <div class="modal-title" data-t="settle_bill">Settle bill</div>
     <div style="text-align:center;color:var(--text2);font-size:1.1em;" id="set-cust-text"></div>
     <div style="text-align:center;color:var(--gold2);font-size:1.45em;font-weight:700;margin:4px 0 16px;" id="set-amount-text"></div>
     <div class="btn-row" style="margin-bottom:0.6em;">
@@ -444,20 +444,20 @@ input:focus,select:focus{border-color:var(--gold);}
     </div>
     <button class="btn-full" style="margin-bottom:0.6em;" onclick="openSettleSplit()" data-t="cash_and_card">Cash and card</button>
     <button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);margin-bottom:0.6em;" onclick="writeOffDebt()" data-t="write_off">Write off (loss)</button>
-    <button class="btn-modal-cancel" onclick="closeModal('m-settled')">Cancel</button>
+    <button class="btn-modal-cancel" onclick="closeModal('m-settled')" data-t="cancel">Cancel</button>
   </div>
 </div>
 
 <div class="modal-bg" id="m-wipay">
   <div class="modal">
-    <div class="modal-title">Payment</div>
+    <div class="modal-title" data-t="payment">Payment</div>
     <div style="text-align:center;color:var(--gold2);font-size:1.6em;font-weight:700;margin-bottom:16px;" id="wi-total-text"></div>
     <div class="btn-row" style="margin-bottom:0.6em;">
       <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="walkinPay('cash')" data-t="cash">Cash</button>
       <button class="btn-full" style="background:var(--bbg);border-color:var(--blue);color:var(--blue);" onclick="walkinPay('card')" data-t="card">Card</button>
     </div>
     <button class="btn-full" style="margin-bottom:0.6em;" onclick="openWalkinSplit()" data-t="cash_and_card">Cash and card</button>
-    <button class="btn-modal-cancel" onclick="closeModal('m-wipay')">Cancel</button>
+    <button class="btn-modal-cancel" onclick="closeModal('m-wipay')" data-t="cancel">Cancel</button>
   </div>
 </div>
 
@@ -465,26 +465,26 @@ input:focus,select:focus{border-color:var(--gold);}
   <div class="modal">
     <div class="modal-title" data-t="cash_and_card">Cash and card</div>
     <div style="text-align:center;color:var(--gold2);font-size:1.4em;font-weight:700;margin-bottom:14px;" id="split-total"></div>
-    <div class="field"><div class="label">Cash</div><input type="text" id="split-cash" inputmode="decimal" autocomplete="off" oninput="splitTyped('cash')"></div>
-    <div class="field"><div class="label">Card</div><input type="text" id="split-card" inputmode="decimal" autocomplete="off" oninput="splitTyped('card')"></div>
+    <div class="field"><div class="label" data-t="cash">Cash</div><input type="text" id="split-cash" inputmode="decimal" autocomplete="off" oninput="splitTyped('cash')"></div>
+    <div class="field"><div class="label" data-t="card">Card</div><input type="text" id="split-card" inputmode="decimal" autocomplete="off" oninput="splitTyped('card')"></div>
     <div style="text-align:center;font-size:0.95em;margin-bottom:0.8em;" id="split-info"></div>
-    <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.6em;" id="split-ok" onclick="confirmSplit()">Confirm</button>
-    <button class="btn-modal-cancel" onclick="closeModal('m-split')">Cancel</button>
+    <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.6em;" id="split-ok" onclick="confirmSplit()" data-t="confirm">Confirm</button>
+    <button class="btn-modal-cancel" onclick="closeModal('m-split')" data-t="cancel">Cancel</button>
   </div>
 </div>
 
 <div class="modal-bg" id="m-prod">
   <div class="modal">
     <div class="modal-title" id="mp-title">Product</div>
-    <div class="field"><div class="label">Name</div><input type="text" id="mp-name" autocomplete="off"></div>
-    <div class="field"><div class="label">Price</div><input type="text" id="mp-price" inputmode="decimal" autocomplete="off"></div>
-    <div class="field"><div class="label">Category</div><select id="mp-cat"></select></div>
-    <div class="field"><button class="btn-full" id="mp-fav" onclick="toggleFavField()">Favorite</button></div>
+    <div class="field"><div class="label" data-t="name">Name</div><input type="text" id="mp-name" autocomplete="off"></div>
+    <div class="field"><div class="label" data-t="price">Price</div><input type="text" id="mp-price" inputmode="decimal" autocomplete="off"></div>
+    <div class="field"><div class="label" data-t="category">Category</div><select id="mp-cat"></select></div>
+    <div class="field"><button class="btn-full" id="mp-fav" onclick="toggleFavField()" data-t="favorite">Favorite</button></div>
     <div class="btn-row" style="margin-bottom:0.6em;">
-      <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="saveProduct()">Save</button>
-      <button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);" id="mp-del" onclick="deleteProduct()">Delete</button>
+      <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="saveProduct()" data-t="save">Save</button>
+      <button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);" id="mp-del" onclick="deleteProduct()" data-t="delete">Delete</button>
     </div>
-    <button class="btn-modal-cancel" onclick="closeModal('m-prod')">Cancel</button>
+    <button class="btn-modal-cancel" onclick="closeModal('m-prod')" data-t="cancel">Cancel</button>
   </div>
 </div>
 
@@ -495,28 +495,28 @@ input:focus,select:focus{border-color:var(--gold);}
     <div id="ma-quickwrap" style="display:none;">
       <div style="text-align:center;color:var(--gold2);font-size:1.8em;font-weight:700;margin-bottom:0.5em;" id="ma-running"></div>
       <div class="prod-grid" id="ma-quick" style="--cols:3;margin-bottom:0.6em;"></div>
-      <button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);margin-bottom:0.8em;" onclick="quickClear()">Clear</button>
+      <button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);margin-bottom:0.8em;" onclick="quickClear()" data-t="clear">Clear</button>
     </div>
-    <div class="field"><div class="label" id="ma-amount-label">Amount</div><input type="text" id="ma-amount" inputmode="decimal" autocomplete="off" oninput="quickTyped()"></div>
-    <div class="field"><div class="label">Reason (optional)</div><input type="text" id="ma-note" autocomplete="off"></div>
+    <div class="field"><div class="label" id="ma-amount-label" data-t="amount">Amount</div><input type="text" id="ma-amount" inputmode="decimal" autocomplete="off" oninput="quickTyped()"></div>
+    <div class="field"><div class="label" data-t="reason_opt">Reason (optional)</div><input type="text" id="ma-note" autocomplete="off"></div>
     <div id="ma-methods" class="btn-row" style="margin-bottom:0.6em;">
-      <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="amountOk('cash')">Cash</button>
-      <button class="btn-full" style="background:var(--bbg);border-color:var(--blue);color:var(--blue);" onclick="amountOk('card')">Card</button>
+      <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);" onclick="amountOk('cash')" data-t="cash">Cash</button>
+      <button class="btn-full" style="background:var(--bbg);border-color:var(--blue);color:var(--blue);" onclick="amountOk('card')" data-t="card">Card</button>
     </div>
-    <button class="btn-full" id="ma-save" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.6em;" onclick="amountOk(null)">Save</button>
-    <button class="btn-modal-cancel" onclick="closeModal('m-amount')">Cancel</button>
+    <button class="btn-full" id="ma-save" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.6em;" onclick="amountOk(null)" data-t="save">Save</button>
+    <button class="btn-modal-cancel" onclick="closeModal('m-amount')" data-t="cancel">Cancel</button>
   </div>
 </div>
 
 <div class="modal-bg" id="m-txedit">
   <div class="modal">
-    <div class="modal-title">Edit transaction</div>
+    <div class="modal-title" data-t="edit_tx">Edit transaction</div>
     <div class="hint" id="te-what" style="text-align:center;margin-bottom:0.8em;"></div>
-    <div class="field"><div class="label">Amount</div><input type="text" id="te-amount" inputmode="decimal" autocomplete="off"></div>
-    <div class="field"><div class="label">Reason (optional)</div><input type="text" id="te-note" autocomplete="off"></div>
-    <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.6em;" onclick="saveTxEdit()">Save changes</button>
-    <button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);margin-bottom:0.6em;" onclick="deleteTx()">Delete transaction</button>
-    <button class="btn-modal-cancel" onclick="closeModal('m-txedit')">Cancel</button>
+    <div class="field"><div class="label" data-t="amount">Amount</div><input type="text" id="te-amount" inputmode="decimal" autocomplete="off"></div>
+    <div class="field"><div class="label" data-t="reason_opt">Reason (optional)</div><input type="text" id="te-note" autocomplete="off"></div>
+    <button class="btn-full" style="background:var(--gbg);border-color:var(--green);color:var(--green);margin-bottom:0.6em;" onclick="saveTxEdit()" data-t="save_changes">Save changes</button>
+    <button class="btn-full" style="background:var(--rbg);border-color:var(--rborder);color:var(--red);margin-bottom:0.6em;" onclick="deleteTx()" data-t="delete_tx">Delete transaction</button>
+    <button class="btn-modal-cancel" onclick="closeModal('m-txedit')" data-t="cancel">Cancel</button>
   </div>
 </div>
 
@@ -588,7 +588,7 @@ input:focus,select:focus{border-color:var(--gold);}
 
 <script>
 "use strict";
-var APP_VERSION = '2.06.01';
+var APP_VERSION = '2.06.02';
 var KEY = 'se7env2';
 var CASH_ID = '__cash__', CARD_ID = '__card__';
 var UNCAT = 'Uncategorized';
@@ -647,7 +647,53 @@ var LANG={
   tap_edit_star:{en:'Tap a product to edit \u00B7 star toggles Favorites', fi:'Napauta tuotetta muokataksesi \u00B7 t\u00E4hti vaihtaa suosikin', es:'Toca un producto para editar \u00B7 la estrella marca Favoritos', de:'Produkt zum Bearbeiten tippen \u00B7 Stern schaltet Favoriten', sv:'Tryck p\u00E5 en produkt f\u00F6r att redigera \u00B7 stj\u00E4rnan v\u00E4xlar favoriter'},
   add_credit_hint:{en:'Money handed over now, held against future purchases.', fi:'Nyt annettu raha, s\u00E4ilytet\u00E4\u00E4n tulevia ostoja varten.', es:'Dinero entregado ahora, guardado para compras futuras.', de:'Jetzt \u00FCbergebenes Geld, f\u00FCr k\u00FCnftige Eink\u00E4ufe.', sv:'Pengar som l\u00E4mnas nu, sparas f\u00F6r framtida k\u00F6p.'},
   add_payment_hint:{en:'Reduces what is currently owed.', fi:'V\u00E4hent\u00E4\u00E4 nykyist\u00E4 velkaa.', es:'Reduce lo que se debe actualmente.', de:'Verringert die aktuelle Schuld.', sv:'Minskar nuvarande skuld.'},
-  add_debt_hint:{en:'A manual charge with no products attached.', fi:'Manuaalinen veloitus ilman tuotteita.', es:'Un cargo manual sin productos.', de:'Manuelle Belastung ohne Produkte.', sv:'En manuell debitering utan produkter.'}
+  add_debt_hint:{en:'A manual charge with no products attached.', fi:'Manuaalinen veloitus ilman tuotteita.', es:'Un cargo manual sin productos.', de:'Manuelle Belastung ohne Produkte.', sv:'En manuell debitering utan produkter.'},
+  // --- batch 3: titles, tabs, modals, reports ---
+  top_sellers:{en:'Top sellers', fi:'Myydyimm\u00E4t', es:'M\u00E1s vendidos', de:'Bestseller', sv:'B\u00E4sts\u00E4ljare'},
+  customers:  {en:'Customers', fi:'Asiakkaat', es:'Clientes', de:'Kunden', sv:'Kunder'},
+  today:      {en:'Today', fi:'T\u00E4n\u00E4\u00E4n', es:'Hoy', de:'Heute', sv:'Idag'},
+  month:      {en:'Month', fi:'Kuukausi', es:'Mes', de:'Monat', sv:'M\u00E5nad'},
+  raw:        {en:'Raw', fi:'Tapahtumat', es:'Registro', de:'Roh', sv:'R\u00E5data'},
+  export_accountant:{en:'Export for accountant', fi:'Vie kirjanpit\u00E4j\u00E4lle', es:'Exportar para el contable', de:'F\u00FCr Buchhalter exportieren', sv:'Exportera f\u00F6r bokf\u00F6ring'},
+  export_hint:{en:'Pick a date range. A PDF summary is generated for that period.', fi:'Valitse aikav\u00E4li. Ajalta luodaan PDF-yhteenveto.', es:'Elige un rango de fechas. Se genera un resumen PDF de ese per\u00EDodo.', de:'W\u00E4hle einen Zeitraum. Ein PDF wird f\u00FCr diesen Zeitraum erstellt.', sv:'V\u00E4lj ett datumintervall. En PDF-sammanfattning skapas f\u00F6r perioden.'},
+  categories: {en:'Categories', fi:'Kategoriat', es:'Categor\u00EDas', de:'Kategorien', sv:'Kategorier'},
+  custman_hint:{en:'Removing a name only clears it from the list \u2014 its transactions and past reports are kept.', fi:'Nimen poisto vain piilottaa sen listalta \u2014 tapahtumat ja raportit s\u00E4ilyv\u00E4t.', es:'Quitar un nombre solo lo borra de la lista \u2014 sus transacciones e informes se conservan.', de:'Ein Name wird nur aus der Liste entfernt \u2014 Buchungen und Berichte bleiben erhalten.', sv:'Att ta bort ett namn rensar det bara fr\u00E5n listan \u2014 transaktioner och rapporter beh\u00E5lls.'},
+  new_short:  {en:'+ New', fi:'+ Uusi', es:'+ Nuevo', de:'+ Neu', sv:'+ Ny'},
+  settle_bill:{en:'Settle bill', fi:'Maksa lasku', es:'Liquidar cuenta', de:'Rechnung begleichen', sv:'Betala nota'},
+  payment:    {en:'Payment', fi:'Maksu', es:'Pago', de:'Zahlung', sv:'Betalning'},
+  name:       {en:'Name', fi:'Nimi', es:'Nombre', de:'Name', sv:'Namn'},
+  price:      {en:'Price', fi:'Hinta', es:'Precio', de:'Preis', sv:'Pris'},
+  category:   {en:'Category', fi:'Kategoria', es:'Categor\u00EDa', de:'Kategorie', sv:'Kategori'},
+  favorite:   {en:'Favorite', fi:'Suosikki', es:'Favorito', de:'Favorit', sv:'Favorit'},
+  save:       {en:'Save', fi:'Tallenna', es:'Guardar', de:'Speichern', sv:'Spara'},
+  delete:     {en:'Delete', fi:'Poista', es:'Eliminar', de:'L\u00F6schen', sv:'Radera'},
+  product:    {en:'Product', fi:'Tuote', es:'Producto', de:'Produkt', sv:'Produkt'},
+  amount:     {en:'Amount', fi:'Summa', es:'Importe', de:'Betrag', sv:'Belopp'},
+  reason_opt: {en:'Reason (optional)', fi:'Syy (valinnainen)', es:'Motivo (opcional)', de:'Grund (optional)', sv:'Orsak (valfritt)'},
+  edit_tx:    {en:'Edit transaction', fi:'Muokkaa tapahtumaa', es:'Editar transacci\u00F3n', de:'Buchung bearbeiten', sv:'Redigera transaktion'},
+  save_changes:{en:'Save changes', fi:'Tallenna muutokset', es:'Guardar cambios', de:'\u00C4nderungen speichern', sv:'Spara \u00E4ndringar'},
+  delete_tx:  {en:'Delete transaction', fi:'Poista tapahtuma', es:'Eliminar transacci\u00F3n', de:'Buchung l\u00F6schen', sv:'Radera transaktion'},
+  // --- batch 4: settings menu rows ---
+  m_header:{en:'Header', fi:'Otsikko', es:'Encabezado', de:'Kopfzeile', sv:'Rubrik'},
+  m_header_img:{en:'Custom image', fi:'Oma kuva', es:'Imagen propia', de:'Eigenes Bild', sv:'Egen bild'},
+  m_header_logo:{en:'Default logo', fi:'Oletuslogo', es:'Logo predeterminado', de:'Standardlogo', sv:'Standardlogga'},
+  m_appearance:{en:'Appearance', fi:'Ulkoasu', es:'Apariencia', de:'Darstellung', sv:'Utseende'},
+  m_textsize:{en:'Text size', fi:'Tekstin koko', es:'Tama\u00F1o de texto', de:'Textgr\u00F6\u00DFe', sv:'Textstorlek'},
+  m_cards_per_row:{en:'cards per row', fi:'korttia rivill\u00E4', es:'tarjetas por fila', de:'Karten pro Zeile', sv:'kort per rad'},
+  m_barday:{en:'Bar day', fi:'Baarip\u00E4iv\u00E4', es:'D\u00EDa de barra', de:'Bartag', sv:'Bardag'},
+  m_ends_at:{en:'Ends at', fi:'P\u00E4\u00E4ttyy', es:'Termina a las', de:'Endet um', sv:'Slutar'},
+  m_cats_products:{en:'Categories & products', fi:'Kategoriat ja tuotteet', es:'Categor\u00EDas y productos', de:'Kategorien & Produkte', sv:'Kategorier & produkter'},
+  m_product:{en:'product', fi:'tuote', es:'producto', de:'Produkt', sv:'produkt'},
+  m_products:{en:'products', fi:'tuotetta', es:'productos', de:'Produkte', sv:'produkter'},
+  m_customers_row:{en:'Rename or remove', fi:'Nime\u00E4 uudelleen tai poista', es:'Renombrar o quitar', de:'Umbenennen oder entfernen', sv:'D\u00F6p om eller ta bort'},
+  m_cashflow:{en:'Cash flow', fi:'Kassavirta', es:'Flujo de caja', de:'Geldfluss', sv:'Kassafl\u00F6de'},
+  m_cashflow_sub:{en:'Expenses and other income', fi:'Kulut ja muut tulot', es:'Gastos y otros ingresos', de:'Ausgaben und sonstige Einnahmen', sv:'Utgifter och \u00F6vriga int\u00E4kter'},
+  m_updates:{en:'Updates', fi:'P\u00E4ivitykset', es:'Actualizaciones', de:'Updates', sv:'Uppdateringar'},
+  m_version:{en:'Version', fi:'Versio', es:'Versi\u00F3n', de:'Version', sv:'Version'},
+  m_data:{en:'Data', fi:'Tiedot', es:'Datos', de:'Daten', sv:'Data'},
+  m_data_sub:{en:'Backup and storage', fi:'Varmuuskopiot ja tallennustila', es:'Copia de seguridad y almacenamiento', de:'Sicherung und Speicher', sv:'S\u00E4kerhetskopia och lagring'},
+  m_group:{en:'group', fi:'ryhm\u00E4', es:'grupo', de:'Gruppe', sv:'grupp'},
+  m_groups:{en:'groups', fi:'ryhm\u00E4\u00E4', es:'grupos', de:'Gruppen', sv:'grupper'}
 };
 function curLang(){
   try{ return (getState().settings.lang)||'en'; }catch(e){ return 'en'; }
@@ -2986,16 +3032,16 @@ function menuRow(label,sub,handler){
 function renderSettings(){
   var st=getState(), s=st.settings;
   document.getElementById('set-body').innerHTML=
-    menuRow('Header', s.headerImage?'Custom image':((s.headerText&&s.headerText!=='Pub')?s.headerText:'Default logo'), "openSetPage('header')")+
-    menuRow('Appearance','Text size '+Math.round(s.fontScale*100)+'% \u00B7 '+s.cols+' cards per row', "openSetPage('look')")+
-    menuRow('Bar day','Ends at '+pad2(s.dayEnd)+':00', "openSetPage('day')")+
+    menuRow(t('m_header'), s.headerImage?t('m_header_img'):((s.headerText&&s.headerText!=='Pub')?s.headerText:t('m_header_logo')), "openSetPage('header')")+
+    menuRow(t('m_appearance'),t('m_textsize')+' '+Math.round(s.fontScale*100)+'% \u00B7 '+s.cols+' '+t('m_cards_per_row'), "openSetPage('look')")+
+    menuRow(t('m_barday'),t('m_ends_at')+' '+pad2(s.dayEnd)+':00', "openSetPage('day')")+
     menuRow(t('currency_and_language'), s.currency+' \u00B7 '+(function(){var n='English';LANGS.forEach(function(L){if(L[0]===s.lang)n=L[1];});return n;})(), "openSetPage('region')")+
-    menuRow('Categories &amp; products', st.products.length+' product'+(st.products.length===1?'':'s'), 'openCategories()')+
-    menuRow(esc(groupsLabel(st)), getGroups(st).length+' group'+(getGroups(st).length===1?'':'s'), 'openTablesManage()')+
-    menuRow('Customers','Rename or remove', 'openCustomersManage()')+
-    menuRow('Cash flow','Expenses and other income', "openSetPage('cash')")+
-    menuRow('Updates','Version '+APP_VERSION, "openSetPage('upd')")+
-    menuRow('Data','Backup and storage', "openSetPage('data')");
+    menuRow(t('m_cats_products'), st.products.length+' '+(st.products.length===1?t('m_product'):t('m_products')), 'openCategories()')+
+    menuRow(esc(groupsLabel(st)), getGroups(st).length+' '+(getGroups(st).length===1?t('m_group'):t('m_groups')), 'openTablesManage()')+
+    menuRow(t('customers'),t('m_customers_row'), 'openCustomersManage()')+
+    menuRow(t('m_cashflow'),t('m_cashflow_sub'), "openSetPage('cash')")+
+    menuRow(t('m_updates'),t('m_version')+' '+APP_VERSION, "openSetPage('upd')")+
+    menuRow(t('m_data'),t('m_data_sub'), "openSetPage('data')");
 }
 var setPage=null;
 function openSetPage(k){ setPage=k; renderSetPage(); show('s-setpage'); }

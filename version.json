@@ -1,5 +1,5 @@
 {
-  "version": "2.06.01",
-  "cache": "se7env2-v58",
-  "notes": "Translations batch 2: customer tab, cart, walk-in, settle and balance actions now follow the selected language."
+  "version": "2.06.02",
+  "cache": "se7env2-v59",
+  "notes": "Translations batch 3-4: report and product screen titles/tabs, all modal dialogs (settle, payment, split, product editor, amount, edit transaction), and the whole Settings menu now follow the selected language."
 }
